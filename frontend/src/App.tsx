@@ -2,10 +2,19 @@ import { useState } from 'react'
 import heroImg from './assets/hero.png'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
+import { ResultPage } from './pages/reports/ResultPage'
 import './App.css'
+
+/** 结果页路由：/reports/{测评ID}。整体路由方案由 Issue #7 统一收敛，此处只处理结果页入口。 */
+const REPORT_PATH = /^\/reports\/([^/]+)\/?$/
 
 function App() {
   const [count, setCount] = useState(0)
+
+  const reportMatch = REPORT_PATH.exec(window.location.pathname)
+  if (reportMatch) {
+    return <ResultPage attemptId={decodeURIComponent(reportMatch[1])} />
+  }
 
   return (
     <>
