@@ -1,3 +1,5 @@
+import type { Answers, Assessment_result, Attempt } from './pages/assessment/types'
+
 export type User = {
   id: string
   email: string
@@ -113,6 +115,95 @@ export async function getCatalog(signal?: AbortSignal) {
   const data = await apiRequest<Catalog>('/catalog', { signal })
   if (!Array.isArray(data.roles) || !Array.isArray(data.dimensions)) {
     throw new ApiError(200, '服务器返回的岗位信息不完整，请稍后重试')
+  }
+  return data
+}
+
+function has_text(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0
+}
+
+function check_attempt(data: Attempt, id?: string) {
+  const message = '服务器返回的测评数据不完整或格式不正确，请稍后重试'
+  if (!data || !has_text(data.id) || (id !== undefined && data.id !== id)
+    || !has_text(data.roleId) || !has_text(data.roleName)
+    || !['in_progress', 'submitted'].includes(data.status)
+    || !Array.isArray(data.questions) || !data.answers
+    || typeof data.answers !== 'object' || Array.isArray(data.answers)) {
+    throw new ApiError(200, message)
+  }
+
+  const valid_questions = data.questions.every((question) => (
+    question && has_text(question.id) && has_text(question.dimension) && has_text(question.stem)
+    && ['single', 'multiple'].includes(question.type)
+    && Array.isArray(question.options) && question.options.length > 0
+    && question.options.every((option) => option && has_text(option.id) && has_text(option.text))
+    && new Set(question.options.map((option) => option.id)).size === question.options.length
+  ))
+  if (!valid_questions || new Set(data.questions.map((question) => question.id)).size !== data.questions.length) {
+    throw new ApiError(200, message)
+  }
+
+  const valid_answers = Object.entries(data.answers).every(([question_id, choices]) => {
+    const question = data.questions.find((item) => item.id === question_id)
+    return question && Array.isArray(choices)
+      && (question.type !== 'single' || choices.length <= 1)
+      && choices.every((choice) => typeof choice === 'string' && question.options.some((option) => option.id === choice))
+      && new Set(choices).size === choices.length
+  })
+  if (!valid_answers || data.questionCount !== data.questions.length
+    || data.answeredCount !== Object.values(data.answers).filter((choices) => choices.length > 0).length) {
+    throw new ApiError(200, message)
+  }
+  return {
+    ...data,
+    answers: Object.fromEntries(data.questions.map((question) => [
+      question.id, Object.hasOwn(data.answers, question.id) ? data.answers[question.id] : [],
+    ])),
+  }
+}
+
+export async function create_attempt(role_id: string, signal?: AbortSignal) {
+  const data = check_attempt(await apiRequest<Attempt>('/attempts', {
+    method: 'POST',
+    authenticated: true,
+    body: JSON.stringify({ roleId: role_id }),
+    signal,
+  }))
+  if (data.roleId !== role_id) throw new ApiError(200, '服务器返回的测评岗位不一致，请重试')
+  return data
+}
+
+export async function get_attempt(id: string, signal?: AbortSignal) {
+  return check_attempt(await apiRequest<Attempt>(`/attempts/${encodeURIComponent(id)}`, {
+    authenticated: true,
+    signal,
+  }), id)
+}
+
+export async function save_answers(id: string, answers: Answers, signal?: AbortSignal) {
+  return check_attempt(await apiRequest<Attempt>(`/attempts/${encodeURIComponent(id)}/answers`, {
+    method: 'PUT',
+    authenticated: true,
+    body: JSON.stringify({ answers }),
+    signal,
+  }), id)
+}
+
+export async function submit_attempt(id: string, signal?: AbortSignal) {
+  const data = await apiRequest<Assessment_result>(`/attempts/${encodeURIComponent(id)}/submit`, {
+    method: 'POST',
+    authenticated: true,
+    signal,
+  })
+  const dimensions = ['programming', 'algorithms', 'database', 'network', 'os', 'software']
+  if (!data || data.id !== id || !has_text(data.roleId) || !has_text(data.roleName)
+    || !has_text(data.submittedAt) || Number.isNaN(Date.parse(data.submittedAt))
+    || !Array.isArray(data.dimensions) || data.dimensions.length !== dimensions.length
+    || !data.dimensions.every((item) => item && dimensions.includes(item.id) && has_text(item.name)
+      && typeof item.score === 'number' && Number.isFinite(item.score) && item.score >= 0 && item.score <= 100)
+    || new Set(data.dimensions.map((item) => item.id)).size !== dimensions.length) {
+    throw new ApiError(200, '服务器返回的提交结果格式不正确，请重试确认测评状态')
   }
   return data
 }
