@@ -79,9 +79,49 @@
 
   ### 3. 常嶅阳
 
-  
+  #### 之前已完成的工作
 
-  
+  - 认领结果展示方向的 Issue
+    [#11 实现能力画像与薄弱项结果页](https://github.com/daybreakju9/SkillProof/issues/11) 与
+    [#17 实现历史记录、复测入口与结果对比](https://github.com/daybreakju9/SkillProof/issues/17)，
+    确认前端负责能力画像、图表、薄弱项与历史记录页面。
+  - 阅读 `docs/design/api.md`，梳理结果页需要的数据，整理出待确认的字段清单：
+    综合分、维度答对题数、岗位权重、薄弱项优先级值，以及并列排序规则。
+  - 完成结果页初版：六维雷达图与条形图（内联 SVG，未引入第三方图表库）、
+    薄弱项排序与并列标注、维度得分明细表，以及加载中、未登录、结果不存在、
+    请求失败四种状态；页面在桌面、390px 手机宽度和深色模式下完成显示检查。
+  - 本地 `npm run lint`、`npm run build`、`git diff --check` 均通过；
+    真实后端接口尚未联调，联调结果待补。
+  - 对应 Issue：[#11 实现能力画像与薄弱项结果页](https://github.com/daybreakju9/SkillProof/issues/11)
+
+  #### 计划完成的工作
+
+  - 与评分接口负责人确认综合分算法、显示精度、薄弱项排序与并列规则，
+    并同步更新 `docs/design/api.md`。
+  - 接入真实 `/api/reports/{id}` 完成联调，补充异常与边界验证记录后转为可评审 PR。
+  - 推进 [#17 历史记录与结果对比](https://github.com/daybreakju9/SkillProof/issues/17)，
+    该任务依赖 [#16 历史测评与复测数据支持](https://github.com/daybreakju9/SkillProof/issues/16)。
+  - 对应 Issue：
+    [#11](https://github.com/daybreakju9/SkillProof/issues/11)、
+    [#17](https://github.com/daybreakju9/SkillProof/issues/17)
+
+  #### 工作中遇到的困难
+
+  - 当前契约中 `GET /api/reports/{id}` 只返回 `dimensions[].score`，
+    没有综合分与岗位权重，前端无法自行加权计算，需要后端补充字段后才能满足结果页验收标准。
+  - 仓库还没有统一路由，结果页目前按 `/reports/{id}` 做最小路径判断，
+    与 [#7 注册登录与岗位选择流程](https://github.com/daybreakju9/SkillProof/issues/7)
+    的路由方案合并时需要协调。
+  - 历史对比依赖的 [#16](https://github.com/daybreakju9/SkillProof/issues/16) 尚未有人认领，
+    P1 部分可能延后。
+  - 处理情况：按契约已约定的字段开发，扩展字段缺失时页面显示「待接口返回」，
+    不使用示例数据冒充真实结果。
+
+  #### 代码 / 文档签入记录
+
+  | Commit | 签入内容 | 对应 Issue |
+  | ------ | -------- | ---------- |
+  | [fd59abe](https://github.com/daybreakju9/SkillProof/commit/fd59abe) | 新增结果页、六维雷达图与条形图、薄弱项排序及四类状态处理 | [#11](https://github.com/daybreakju9/SkillProof/issues/11) |
 
   ### 4. 冯皙丹
 
