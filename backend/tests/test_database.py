@@ -11,6 +11,9 @@ from uuid import uuid4
 BACKEND = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND))
 
+from pydantic import ValidationError
+
+from app.models import QuestionInput
 from app.catalog import ROLE_MAP
 from app.config import Settings
 from app.db import connect, dump, initialize, now_iso, transaction
@@ -67,6 +70,18 @@ class DatabaseTests(unittest.TestCase):
             self.assertEqual(con.execute("PRAGMA foreign_keys").fetchone()[0], 1)
         finally:
             con.close()
+
+    def test_t03_drafts_preserve_internal_fields_in_both_tables(self):
+        seed = json.loads((self.settings.content_dir / "questions.json").read_text(encoding="utf-8"))
+        self.assertEqual(self.con.execute("SELECT COUNT(*) FROM questions").fetchone()[0], len(seed))
+        for question in seed:
+            with self.subTest(question=question["id"]):
+                current = self.con.execute("SELECT status,content_json FROM questions WHERE id=?", (question["id"],)).fetchone()
+                version = self.con.execute("SELECT content_json FROM question_versions WHERE question_id=? AND version=?",
+                                           (question["id"], question["version"])).fetchone()
+                self.assertEqual(current["status"], "draft")
+                self.assertEqual(json.loads(current["content_json"]), question)
+                self.assertEqual(json.loads(version["content_json"]), question)
 
     def test_seed_and_migrations_are_idempotent(self):
         def rows():
@@ -166,6 +181,29 @@ class DatabaseTests(unittest.TestCase):
                 self.user("rollback@example.invalid")
                 self.user("rollback@example.invalid")
         self.assertEqual(self.con.execute("SELECT COUNT(*) FROM users WHERE email=?", ("rollback@example.invalid",)).fetchone()[0], 0)
+
+
+class QuestionValidationTests(unittest.TestCase):
+    def setUp(self):
+        self.question = json.loads((BACKEND / "app/content/questions.json").read_text(encoding="utf-8"))[0]
+
+    def test_draft_accepts_empty_sources_and_retains_topic_id(self):
+        parsed = QuestionInput.model_validate(self.question)
+        self.assertEqual(parsed.model_dump()["topicId"], self.question["topicId"])
+        self.assertEqual(parsed.sources, [])
+        self.assertEqual(parsed.status, "draft")
+
+    def test_published_question_requires_sources(self):
+        self.question["status"] = "published"
+        with self.assertRaises(ValidationError):
+            QuestionInput.model_validate(self.question)
+        self.question["sources"] = [{"title": "Test fixture source", "url": "https://example.com/reference"}]
+        self.assertEqual(QuestionInput.model_validate(self.question).status, "published")
+
+    def test_unknown_fields_and_blank_topic_id_are_rejected(self):
+        for extra in ({"unexpected": True}, {"topicId": " "}):
+            with self.subTest(extra=extra), self.assertRaises(ValidationError):
+                QuestionInput.model_validate({**self.question, **extra})
 
 
 if __name__ == "__main__":

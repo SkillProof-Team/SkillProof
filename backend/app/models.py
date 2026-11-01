@@ -147,6 +147,8 @@ class Source(InputModel):
 class QuestionInput(InputModel):
     id: str | None = Field(default=None, min_length=1, max_length=128, pattern=r"^[A-Za-z0-9_-]+$")
     dimension: str
+    # Optional for older records; retained in server-side T03 snapshots.
+    topicId: str | None = Field(default=None, min_length=1, max_length=128, pattern=r"^[A-Za-z0-9_-]+\.[A-Za-z0-9_.-]+$")
     topic: str = Field(min_length=1, max_length=100)
     type: Literal["single", "multiple"]
     difficulty: Literal["easy", "medium", "hard"]
@@ -154,7 +156,7 @@ class QuestionInput(InputModel):
     options: list[Option] = Field(min_length=4, max_length=4)
     correct: list[Literal["A", "B", "C", "D"]] = Field(min_length=1, max_length=4)
     explanation: str = Field(min_length=5, max_length=8000)
-    sources: list[Source] = Field(min_length=1, max_length=10)
+    sources: list[Source] = Field(max_length=10)
     version: int | None = Field(default=None, ge=1)
     status: Literal["published", "draft", "archived"] = "draft"
 
@@ -167,6 +169,8 @@ class QuestionInput(InputModel):
 
     @model_validator(mode="after")
     def exact_options(self):
+        if self.status == "published" and not self.sources:
+            raise ValueError("已发布题目必须提供来源")
         if {o.id for o in self.options} != {"A", "B", "C", "D"}:
             raise ValueError("选项ID必须恰为A、B、C、D")
         if len(set(self.correct)) != len(self.correct):
