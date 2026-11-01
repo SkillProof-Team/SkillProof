@@ -41,9 +41,41 @@
 
   ### 2. 李宛霖
 
-  
+  #### 之前已完成的工作
 
-  
+  - 完成登录、注册及岗位选择页面的初步开发，拆分页面与公共组件，并调整页面布局和样式。
+  - 添加登录、注册表单的必填项及邮箱格式校验，实现页面互相跳转，并处理浏览器前进、后退及刷新。
+  - 移除岗位选择页面中的示例数据，在功能接入前暂时禁用测评入口。
+  - 完成页面基本交互检查及多种屏幕宽度下的显示检查，`npm run lint`、`npm run build` 和 `git diff --check` 均通过。
+  - 已提交 Draft PR #19，当前尚未合并。
+  - 对应 Issue：
+    [#7 注册登录与岗位选择流程](https://github.com/daybreakju9/SkillProof/issues/7)
+  - 对应 PR：
+    [#19 注册登录与岗位选择页面初版（Draft）](https://github.com/daybreakju9/SkillProof/pull/19)
+
+  #### 计划完成的工作
+
+  - 接入注册、登录及岗位查询接口，完成退出登录、会话恢复和登录状态检查。
+  - 完善请求中的加载状态、错误提示及防重复提交，完成岗位选择与测评入口的衔接。
+  - 继续推进测评答题页面，实现题目展示、单选多选、切题和答案提交等基本交互。
+  - 对应 Issue：
+    [#7 注册登录与岗位选择流程](https://github.com/daybreakju9/SkillProof/issues/7)、
+    [#10 测评答题与提交流程](https://github.com/daybreakju9/SkillProof/issues/10)
+
+  #### 工作中遇到的困难
+
+  - 使用浏览器历史记录进行页面跳转时，需要处理前进、后退操作与当前页面状态的同步。
+  - 处理情况：在 `App.tsx` 中监听 `popstate` 事件，并在导航时同步更新页面状态，检查了页面跳转和刷新行为。
+
+  #### 代码 / 文档签入记录
+
+  | Commit | 签入内容 | 对应 Issue |
+  | ------ | -------- | ---------- |
+  | [bc4756d](https://github.com/daybreakju9/SkillProof/commit/bc4756d7665e22a5052c5123cf8418cf4d125f3e) | 新增登录页面，调整基础布局 | [#7](https://github.com/daybreakju9/SkillProof/issues/7) |
+  | [90bcb7a](https://github.com/daybreakju9/SkillProof/commit/90bcb7ab6fcb593376d3fb727e0530b4967f54aa) | 调整页面尺寸和显示效果 | [#7](https://github.com/daybreakju9/SkillProof/issues/7) |
+  | [d4893ed](https://github.com/daybreakju9/SkillProof/commit/d4893eda638cdb80a04bfa707a57f0a7bac5db12) | 拆分页面和组件，调整样式，新增注册及岗位选择页面 | [#7](https://github.com/daybreakju9/SkillProof/issues/7) |
+  | [6130926](https://github.com/daybreakju9/SkillProof/commit/61309265de495c513e5a512dabf83b702fa9344f) | 移除岗位选择页面中的示例数据 | [#7](https://github.com/daybreakju9/SkillProof/issues/7) |
+
 
   ### 3. 常嶅阳
 
@@ -97,7 +129,6 @@
   在这里插入根据上述真实数据生成的燃尽图。
   
   ## 四、例会照片
-  
   
   
   
