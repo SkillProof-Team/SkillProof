@@ -17,6 +17,9 @@
 | `06-not-submitted-409.png` | 测评尚未提交 |
 | `07-server-error-500.png` | 请求失败：提供「重新加载」重试 |
 | `08-missing-fields-fallback.png` | 只返回契约基础字段（无综合分/权重/优先级）时的降级显示 |
+| `09-pr19-route-integration.png` | 结果页在 #19 路由方案下可正常渲染（评审意见 1 的预演验证） |
+| `10-weak-tie-expanded.png` | 第 3、4 名 priority 相同时并列项一并展示，编号 1/2/2/2 |
+| `11-invalid-payload-rejected.png` | 响应只有五个维度时被严格校验拦下，提示数据格式不正确 |
 
 复现方式：
 

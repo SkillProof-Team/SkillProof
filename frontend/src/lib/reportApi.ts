@@ -44,10 +44,77 @@ function toError(kind: ReportErrorKind, status: number | null, detail: string | 
   return { kind, status, message: detail ?? DEFAULT_MESSAGE[kind] }
 }
 
+/** 契约第 6 节规定报告恰好包含六个固定维度，缺项时图表会静默少画一条轴，因此在此拦下。 */
+const REQUIRED_DIMENSIONS = ['programming', 'algorithms', 'database', 'network', 'os', 'software']
+
+function isScore(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100
+}
+
+function isOptionalCount(value: unknown): boolean {
+  return value === undefined || (typeof value === 'number' && Number.isInteger(value) && value >= 0)
+}
+
+function isDimension(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false
+  const item = value as Record<string, unknown>
+  if (typeof item.id !== 'string' || !item.id.trim()) return false
+  if (typeof item.name !== 'string' || !item.name.trim()) return false
+  if (!isScore(item.score)) return false
+  if (!isOptionalCount(item.correct) || !isOptionalCount(item.total)) return false
+  if (item.weight !== undefined && (typeof item.weight !== 'number' || !Number.isFinite(item.weight))) {
+    return false
+  }
+  if (item.priority !== undefined && (typeof item.priority !== 'number' || !Number.isFinite(item.priority))) {
+    return false
+  }
+  // 答对数不能超过该维度题数，避免「答对 5 / 3 题」这类矛盾数据进入页面。
+  if (typeof item.correct === 'number' && typeof item.total === 'number' && item.correct > item.total) {
+    return false
+  }
+  return true
+}
+
+/**
+ * 校验报告响应。
+ * 只接受契约必填字段与合法的可选取值；扩展字段缺失是允许的（页面按「待接口返回」降级），
+ * 但字段存在时类型和范围必须合法，否则整份报告按格式错误处理，不用残缺数据渲染图表。
+ */
 function isReport(value: unknown): value is Report {
   if (typeof value !== 'object' || value === null) return false
-  const candidate = value as Partial<Report>
-  return typeof candidate.id === 'string' && Array.isArray(candidate.dimensions)
+  const candidate = value as Record<string, unknown>
+
+  if (typeof candidate.id !== 'string' || !candidate.id.trim()) return false
+  if (typeof candidate.roleId !== 'string' || !candidate.roleId.trim()) return false
+  if (typeof candidate.roleName !== 'string' || !candidate.roleName.trim()) return false
+  if (typeof candidate.submittedAt !== 'string' || !candidate.submittedAt.trim()) return false
+  if (candidate.score !== undefined && !isScore(candidate.score)) return false
+  if (!isOptionalCount(candidate.correctCount) || !isOptionalCount(candidate.questionCount)) {
+    return false
+  }
+  if (
+    typeof candidate.correctCount === 'number' &&
+    typeof candidate.questionCount === 'number' &&
+    candidate.correctCount > candidate.questionCount
+  ) {
+    return false
+  }
+  if (candidate.limitations !== undefined) {
+    if (
+      !Array.isArray(candidate.limitations) ||
+      candidate.limitations.some((item) => typeof item !== 'string')
+    ) {
+      return false
+    }
+  }
+
+  const { dimensions } = candidate
+  if (!Array.isArray(dimensions) || dimensions.length !== REQUIRED_DIMENSIONS.length) return false
+  if (!dimensions.every(isDimension)) return false
+
+  const ids = dimensions.map((item) => (item as { id: string }).id)
+  if (new Set(ids).size !== ids.length) return false
+  return REQUIRED_DIMENSIONS.every((id) => ids.includes(id))
 }
 
 /**

@@ -93,3 +93,31 @@ export function deriveWeakDimensions(dimensions: ReportDimension[]): WeakDimensi
     return { dimension: item.dimension, rank: item.rank, fromPriority, tied }
   })
 }
+
+/**
+ * 取需要展示的薄弱项。
+ * 默认取前 limit 项；如果第 limit 项与紧随其后的项排序键相同（并列），
+ * 把并列项一并纳入，避免「页面上标了并列、却只显示到第三名」的矛盾。
+ * 全部六项都并列时最多返回六项，不会无限扩展。
+ */
+export function selectWeakDimensions(dimensions: ReportDimension[], limit = 3): WeakDimension[] {
+  const all = deriveWeakDimensions(dimensions)
+  if (all.length <= limit) return all
+
+  const cutoff = all[limit - 1].rank
+  let end = limit
+  while (end < all.length && all[end].rank === cutoff) {
+    end += 1
+  }
+  return all.slice(0, end)
+}
+
+/** 并列项显示同一个名次：用于列表编号，避免同分项被编成 3、4、5。 */
+export function rankLabels(items: WeakDimension[]): number[] {
+  return items.reduce<number[]>((acc, item, index) => {
+    const previous = items[index - 1]
+    const tiedWithPrevious = previous !== undefined && previous.rank === item.rank
+    acc.push(tiedWithPrevious ? acc[index - 1] : index + 1)
+    return acc
+  }, [])
+}

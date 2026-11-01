@@ -3,7 +3,7 @@ import { RadarChart } from '../../components/reports/RadarChart'
 import { DimensionBars } from '../../components/reports/DimensionBars'
 import { fetchReport } from '../../lib/reportApi'
 import type { ReportLoadError } from '../../lib/reportApi'
-import { dateText, deriveWeakDimensions, orderDimensions, scoreText } from '../../lib/reportUtils'
+import { dateText, orderDimensions, rankLabels, scoreText, selectWeakDimensions } from '../../lib/reportUtils'
 import type { Report } from '../../types/report'
 import '../../styles/report.css'
 
@@ -101,7 +101,8 @@ export function ResultPage({ attemptId }: ResultPageProps) {
     )
   }
 
-  const weakItems = deriveWeakDimensions(dimensions).slice(0, 3)
+  const weakItems = selectWeakDimensions(dimensions, 3)
+  const weakNumbers = rankLabels(weakItems)
   const hasPriority = weakItems.every((item) => item.fromPriority)
   const allFullScore = dimensions.every((item) => item.score >= 100)
   const hasVersion = Boolean(report.blueprintVersion || report.modelVersion)
@@ -173,7 +174,7 @@ export function ResultPage({ attemptId }: ResultPageProps) {
             {weakItems.map((item, index) => (
               <li className="result-weak__item" key={item.dimension.id}>
                 <span className="result-weak__rank" aria-hidden="true">
-                  {index + 1}
+                  {weakNumbers[index]}
                 </span>
                 <div className="result-weak__body">
                   <p className="result-weak__name">
@@ -193,8 +194,8 @@ export function ResultPage({ attemptId }: ResultPageProps) {
         )}
         <p className="result-hint">
           {hasPriority
-            ? '排序依据：岗位权重 ×（1 − 维度分 ÷ 100），数值越大越需要优先提升；并列时按固定维度顺序排列。该值只用于排序，不代表学习效果或所需时间。'
-            : '当前接口未返回岗位权重与优先级值，暂按维度分升序排列；待评分接口补充 priority 后改为按岗位权重计算。'}
+            ? '排序依据：岗位权重 ×（1 − 维度分 ÷ 100），数值越大越需要优先提升；并列时按固定维度顺序排列，并列项会一并列出，因此条目可能多于三项。该值只用于排序，不代表学习效果或所需时间。'
+            : '当前接口未返回岗位权重与优先级值，暂按维度分升序排列，并列项会一并列出；待评分接口补充 priority 后改为按岗位权重计算。'}
         </p>
       </section>
 
