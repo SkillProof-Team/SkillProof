@@ -177,6 +177,10 @@
   "roleId":"backend",
   "roleName":"后端开发",
   "submittedAt":"2026-10-31T08:00:00Z",
+  "score":50,
+  "correctCount":9,
+  "questionCount":18,
+  "modelVersion":"alpha-difficulty-1-2-5-v1",
   "dimensions":[
     {"id":"programming","name":"程序设计","score":100},
     {"id":"algorithms","name":"算法基础","score":0},
@@ -184,13 +188,18 @@
     {"id":"network","name":"计算机网络","score":0},
     {"id":"os","name":"操作系统","score":100},
     {"id":"software","name":"软件工程","score":0}
+  ],
+  "weakDimensions":[
+    {"id":"algorithms","name":"算法基础","score":0,"correct":0,"total":3},
+    {"id":"network","name":"计算机网络","score":0,"correct":0,"total":3},
+    {"id":"software","name":"软件工程","score":0,"correct":0,"total":3}
   ]
 }
 ```
 
 `dimensions` 恰好包含六个固定维度，前端按ID对应展示，不依赖数组位置；`score` 是0–100的数值，用于六维图和分数展示。尚未提交的测评查询结果返回409。
 
-该结构不预先约定综合分、薄弱项排序或学习建议。分数仅用于知识自查，不代表岗位胜任或就业预测。
+Issue #9 新增综合分 `score`（答对题目权重之和 / 全部题目权重之和 × 100）、答对数、总题数和 `weakDimensions`。简单、中等、困难题权重分别为 1、2、5，难度读取服务端测评快照。此规则按任务发起人的新要求替代 Issue 原有的“每题等分”，需同步 Issue/PR。维度分仍为该维度答对题数 / 该维度实际题数 × 100；维度对象还返回 `correct`、`total`。分数按四舍五入保留两位小数；薄弱项包括所有未满分维度，按未舍入维度分升序，并列按本示例六维顺序。全对时薄弱项为空数组。示例按正式蓝图每维各一道简单、中等、困难题计算。此扩展**待结果页前端负责人确认**；详细输入输出与接入说明见 [scoring.md](scoring.md)。历史报告按保存的版本与快照读取。分数仅用于知识自查，不代表岗位胜任或就业预测。
 
 ## 7. 基本错误表达
 
