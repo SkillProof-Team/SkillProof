@@ -1,0 +1,220 @@
+{
+  "schemaVersion": "1.0",
+  "role": {
+    "id": "backend",
+    "name": "后端开发",
+    "description": "关注数据库、服务端程序与可靠接口"
+  },
+  "dimensions": [
+    {
+      "id": "programming",
+      "name": "程序设计",
+      "description": "程序语义、数据结构基础与代码理解",
+      "topics": [
+        {
+          "id": "programming.queue",
+          "name": "队列与先进先出"
+        },
+        {
+          "id": "programming.input-validation",
+          "name": "输入校验与边界"
+        },
+        {
+          "id": "programming.aliasing",
+          "name": "引用与可变对象"
+        },
+        {
+          "id": "programming.resource-cleanup",
+          "name": "异常与资源释放"
+        },
+        {
+          "id": "programming.money-representation",
+          "name": "金额表示与数值精度"
+        },
+        {
+          "id": "programming.hash-key",
+          "name": "哈希键与相等关系"
+        },
+        {
+          "id": "programming.copy-isolation",
+          "name": "嵌套数据的隔离"
+        }
+      ]
+    },
+    {
+      "id": "algorithms",
+      "name": "算法基础",
+      "description": "复杂度、搜索排序与算法策略",
+      "topics": [
+        {
+          "id": "algorithms.binary-search",
+          "name": "二分查找的前提"
+        },
+        {
+          "id": "algorithms.complexity",
+          "name": "时间复杂度分析"
+        },
+        {
+          "id": "algorithms.deduplication",
+          "name": "哈希集合与去重"
+        },
+        {
+          "id": "algorithms.bfs",
+          "name": "无权图最短路径"
+        },
+        {
+          "id": "algorithms.merge",
+          "name": "有序序列合并"
+        },
+        {
+          "id": "algorithms.top-k",
+          "name": "流式 Top-K"
+        },
+        {
+          "id": "algorithms.directed-cycle",
+          "name": "有向图环检测"
+        }
+      ]
+    },
+    {
+      "id": "database",
+      "name": "数据库",
+      "description": "关系建模、SQL、事务与索引",
+      "topics": [
+        {
+          "id": "database.sql-filter",
+          "name": "SQL 查询与过滤"
+        },
+        {
+          "id": "database.constraints",
+          "name": "主键与外键约束"
+        },
+        {
+          "id": "database.transaction-atomicity",
+          "name": "事务原子性"
+        },
+        {
+          "id": "database.left-join",
+          "name": "LEFT JOIN 与过滤位置"
+        },
+        {
+          "id": "database.index-tradeoff",
+          "name": "索引与执行计划"
+        },
+        {
+          "id": "database.optimistic-concurrency",
+          "name": "乐观并发控制"
+        },
+        {
+          "id": "database.transactional-outbox",
+          "name": "事务 Outbox 与重复投递"
+        }
+      ]
+    },
+    {
+      "id": "network",
+      "name": "计算机网络",
+      "description": "协议、HTTP、可靠传输与网络基础",
+      "topics": [
+        {
+          "id": "network.http-content-type",
+          "name": "HTTP 内容类型"
+        },
+        {
+          "id": "network.tcp-stream",
+          "name": "TCP 字节流与消息边界"
+        },
+        {
+          "id": "network.http-created",
+          "name": "HTTP 创建资源响应"
+        },
+        {
+          "id": "network.conditional-cache",
+          "name": "HTTP 条件请求与 ETag"
+        },
+        {
+          "id": "network.safe-retry",
+          "name": "超时与安全重试"
+        },
+        {
+          "id": "network.proxy-trust",
+          "name": "反向代理与转发头信任"
+        },
+        {
+          "id": "network.session-request-security",
+          "name": "Cookie 会话、CSRF 与对象授权"
+        }
+      ]
+    },
+    {
+      "id": "os",
+      "name": "操作系统",
+      "description": "进程、并发、内存与文件管理",
+      "topics": [
+        {
+          "id": "os.process-isolation",
+          "name": "进程地址空间"
+        },
+        {
+          "id": "os.thread-resources",
+          "name": "线程共享与私有资源"
+        },
+        {
+          "id": "os.mutual-exclusion",
+          "name": "共享计数器与临界区"
+        },
+        {
+          "id": "os.blocking-io",
+          "name": "阻塞 I/O 与事件循环"
+        },
+        {
+          "id": "os.deadlock-prevention",
+          "name": "多锁与死锁风险"
+        },
+        {
+          "id": "os.condition-variable",
+          "name": "条件变量与谓词重检"
+        },
+        {
+          "id": "os.bounded-buffer",
+          "name": "有界缓冲区与信号量"
+        }
+      ]
+    },
+    {
+      "id": "software",
+      "name": "软件工程",
+      "description": "需求、测试、版本控制与工程实践",
+      "topics": [
+        {
+          "id": "software.unit-testing",
+          "name": "单元测试与外部依赖"
+        },
+        {
+          "id": "software.safe-logging",
+          "name": "日志与敏感信息"
+        },
+        {
+          "id": "software.idempotency-test",
+          "name": "幂等请求的验收测试"
+        },
+        {
+          "id": "software.merge-review",
+          "name": "版本控制与冲突处理"
+        },
+        {
+          "id": "software.ci-delivery",
+          "name": "持续集成与依赖锁定"
+        },
+        {
+          "id": "software.schema-migration",
+          "name": "兼容性数据库迁移"
+        },
+        {
+          "id": "software.message-idempotency",
+          "name": "至少一次投递与消费幂等"
+        }
+      ]
+    }
+  ]
+}

@@ -1,1578 +1,816 @@
 [
   {
-    "id": "PRG-001",
+    "id": "SP5-PRG-001",
     "dimension": "programming",
-    "topic": "可变对象与引用",
+    "topicId": "programming.queue",
+    "topic": "队列与先进先出",
     "type": "single",
     "difficulty": "easy",
-    "stem": "在 Python 3.13 中执行以下代码，最后一行输出什么？\na = [4]\nb = a\nb.append(9)\nprint(a)",
+    "stem": "一个后台任务容器要求最先加入的任务最先被取出。不考虑任务优先级，应采用哪种基本数据结构？",
     "options": [
       {
         "id": "A",
-        "text": "[9]"
+        "text": "栈：只从栈顶加入和移除"
       },
       {
         "id": "B",
-        "text": "[4, 9]"
+        "text": "队列：从队尾加入、从队首取出"
       },
       {
         "id": "C",
-        "text": "抛出 TypeError"
+        "text": "集合：只保证元素不重复"
       },
       {
         "id": "D",
-        "text": "[4]"
+        "text": "无序映射：按键查找任务"
       }
     ],
     "correct": [
       "B"
     ],
-    "explanation": "b = a 让两个名字引用同一列表；append 原地修改这个列表。因此 a 也能看到新元素 9。赋值本身不会复制列表。",
-    "sources": [
-      {
-        "title": "Python 3.13 教程 §9.1 名字与对象；§9.2 作用域",
-        "url": "https://docs.python.org/3.13/tutorial/classes.html#python-scopes-and-namespaces"
-      }
-    ],
+    "explanation": "队列的先进先出规则直接符合到达顺序要求；栈通常后进先出。集合解决去重，映射解决按键查找，它们本身不定义题目要求的出队规则。这里不讨论带优先级的任务调度。",
+    "sources": [],
     "version": 1,
-    "status": "published"
+    "status": "draft"
   },
   {
-    "id": "PRG-002",
+    "id": "SP5-PRG-002",
     "dimension": "programming",
-    "topic": "循环与区间",
-    "type": "single",
-    "difficulty": "easy",
-    "stem": "在 Python 3.13 中，list(range(1, 7, 2)) 的值是什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "[1, 3, 5]"
-      },
-      {
-        "id": "B",
-        "text": "[1, 2, 3, 4, 5, 6, 7]"
-      },
-      {
-        "id": "C",
-        "text": "[2, 4, 6]"
-      },
-      {
-        "id": "D",
-        "text": "[1, 3, 5, 7]"
-      }
-    ],
-    "correct": [
-      "A"
-    ],
-    "explanation": "range 从 1 开始，每次增加 2，在到达上界 7 前停止；右端点不包含在序列中。",
-    "sources": [
-      {
-        "title": "Python 3.13 教程 §4.3 range 函数",
-        "url": "https://docs.python.org/3.13/tutorial/controlflow.html#the-range-function"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "PRG-003",
-    "dimension": "programming",
-    "topic": "布尔逻辑与短路",
-    "type": "single",
-    "difficulty": "easy",
-    "stem": "在 Python 3.13 中计算 False and (1 / 0) 会发生什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "结果为 None"
-      },
-      {
-        "id": "B",
-        "text": "抛出 ZeroDivisionError"
-      },
-      {
-        "id": "C",
-        "text": "结果为 False，右侧不求值"
-      },
-      {
-        "id": "D",
-        "text": "结果为 True"
-      }
-    ],
-    "correct": [
-      "C"
-    ],
-    "explanation": "and 在左侧为假时直接返回左侧，不再计算右侧。因此不会执行除零操作。",
-    "sources": [
-      {
-        "title": "Python 3.13 内置类型：布尔操作",
-        "url": "https://docs.python.org/3.13/library/stdtypes.html#boolean-operations-and-or-not"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "PRG-004",
-    "dimension": "programming",
-    "topic": "可变对象与引用",
+    "topicId": "programming.input-validation",
+    "topic": "输入校验与边界",
     "type": "multiple",
     "difficulty": "easy",
-    "stem": "以下哪些 Python 3.13 内置容器类型允许原地增加、删除或替换其内容？",
+    "stem": "后端接口接收用户提交的分页参数 page 和 pageSize。以下哪些做法属于有效的服务端输入校验？",
     "options": [
       {
         "id": "A",
-        "text": "tuple"
+        "text": "检查参数是整数且处于允许范围"
       },
       {
         "id": "B",
-        "text": "str"
+        "text": "只要前端已校验，服务端即可信任参数"
       },
       {
         "id": "C",
-        "text": "list"
+        "text": "限制 pageSize 的上限以控制单次查询规模"
       },
       {
         "id": "D",
-        "text": "dict"
-      }
-    ],
-    "correct": [
-      "C",
-      "D"
-    ],
-    "explanation": "list 和 dict 是可变容器。str 和 tuple 本身不可变；tuple 可以引用可变对象，但这不等于可以替换 tuple 的元素。",
-    "sources": [
-      {
-        "title": "Python 3.13 内置类型：序列类型与映射类型",
-        "url": "https://docs.python.org/3.13/library/stdtypes.html#sequence-types-list-tuple-range"
-      },
-      {
-        "title": "Python 3.13 Built-in Types: Mapping Types — dict",
-        "url": "https://docs.python.org/3.13/library/stdtypes.html#mapping-types-dict"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "PRG-005",
-    "dimension": "programming",
-    "topic": "函数与参数",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "在 Python 3.13 中执行以下代码，输出是什么？\ndef collect(x, items=[]):\n    items.append(x)\n    return len(items)\nprint(collect(4), collect(7))",
-    "options": [
-      {
-        "id": "A",
-        "text": "1 2"
-      },
-      {
-        "id": "B",
-        "text": "2 2"
-      },
-      {
-        "id": "C",
-        "text": "0 1"
-      },
-      {
-        "id": "D",
-        "text": "1 1"
-      }
-    ],
-    "correct": [
-      "A"
-    ],
-    "explanation": "默认参数在函数定义时求值一次。两次省略 items 的调用使用同一列表，长度依次为 1、2。需要独立列表时可用 None 作默认值并在函数内创建列表。",
-    "sources": [
-      {
-        "title": "Python 3.13 教程 §4.9.1 默认参数值",
-        "url": "https://docs.python.org/3.13/tutorial/controlflow.html#default-argument-values"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "PRG-006",
-    "dimension": "programming",
-    "topic": "复制与嵌套对象",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "在 Python 3.13 中执行以下代码，最后输出什么？\nx = [[2], [8]]\ny = x.copy()\ny[0].append(5)\nprint(x[0])",
-    "options": [
-      {
-        "id": "A",
-        "text": "[5]"
-      },
-      {
-        "id": "B",
-        "text": "[2]"
-      },
-      {
-        "id": "C",
-        "text": "抛出 IndexError"
-      },
-      {
-        "id": "D",
-        "text": "[2, 5]"
-      }
-    ],
-    "correct": [
-      "D"
-    ],
-    "explanation": "list.copy 创建外层列表的浅复制，里面的子列表仍被共享。y[0] 与 x[0] 是同一子列表，因此其内容变为 [2, 5]。",
-    "sources": [
-      {
-        "title": "Python 3.13 copy：浅复制与深复制",
-        "url": "https://docs.python.org/3.13/library/copy.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "PRG-007",
-    "dimension": "programming",
-    "topic": "映射与键",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "在 Python 3.13 中执行 d = {'a': 2}; d['a'] = 7 后，(len(d), d['a']) 是什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "(1, 7)"
-      },
-      {
-        "id": "B",
-        "text": "(2, 7)"
-      },
-      {
-        "id": "C",
-        "text": "(2, [2, 7])"
-      },
-      {
-        "id": "D",
-        "text": "(1, 2)"
-      }
-    ],
-    "correct": [
-      "A"
-    ],
-    "explanation": "字典中的键唯一。给已有键再次赋值会替换其值，不会增加第二个同名键，所以长度仍为 1。",
-    "sources": [
-      {
-        "title": "Python 3.13 教程 §5.5 字典",
-        "url": "https://docs.python.org/3.13/tutorial/datastructures.html#dictionaries"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "PRG-008",
-    "dimension": "programming",
-    "topic": "异常处理",
-    "type": "multiple",
-    "difficulty": "medium",
-    "stem": "在 Python 3.13 中执行以下代码后，哪些说法正确？\ntry:\n    value = int('x')\nexcept ValueError:\n    value = 0\nfinally:\n    flag = True",
-    "options": [
-      {
-        "id": "A",
-        "text": "flag 等于 True"
-      },
-      {
-        "id": "B",
-        "text": "ValueError 会继续传播到这段代码之外"
-      },
-      {
-        "id": "C",
-        "text": "flag 未被赋值"
-      },
-      {
-        "id": "D",
-        "text": "value 等于 0"
+        "text": "把任意非法值转换为 0，并继续执行查询"
       }
     ],
     "correct": [
       "A",
-      "D"
-    ],
-    "explanation": "int('x') 引发 ValueError，该异常被匹配的 except 捕获并把 value 设为 0；随后 finally 执行，把 flag 设为 True。此处没有重新抛出异常。",
-    "sources": [
-      {
-        "title": "Python 3.13 教程 §8.7 定义清理操作",
-        "url": "https://docs.python.org/3.13/tutorial/errors.html#defining-clean-up-actions"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "PRG-009",
-    "dimension": "programming",
-    "topic": "闭包与名称绑定",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "在 Python 3.13 中执行以下代码，输出什么？\nfuncs = [lambda: i for i in range(3)]\nprint([f() for f in funcs])",
-    "options": [
-      {
-        "id": "A",
-        "text": "[0, 0, 0]"
-      },
-      {
-        "id": "B",
-        "text": "[0, 1, 2]"
-      },
-      {
-        "id": "C",
-        "text": "[2, 2, 2]"
-      },
-      {
-        "id": "D",
-        "text": "抛出 NameError"
-      }
-    ],
-    "correct": [
       "C"
     ],
-    "explanation": "这些函数在调用时读取同一个闭包变量 i。循环结束后 i 为 2，因此三个函数都返回 2。若用 lambda i=i: i，则每次创建函数时可保存当时的值。",
-    "sources": [
-      {
-        "title": "Python 3.13 FAQ：循环中的 lambda 与名称绑定",
-        "url": "https://docs.python.org/3.13/faq/programming.html#why-do-lambdas-defined-in-a-loop-with-different-values-all-return-the-same-result"
-      }
-    ],
+    "explanation": "服务端需要自行检查类型与范围，并限制单次请求规模，因为调用者可以绕过前端。把所有非法值静默改为 0 会掩盖输入错误，也可能违反分页约束；应按接口约定拒绝或明确处理非法输入。",
+    "sources": [],
     "version": 1,
-    "status": "published"
+    "status": "draft"
   },
   {
-    "id": "PRG-010",
+    "id": "SP5-PRG-003",
     "dimension": "programming",
-    "topic": "迭代器与生成器",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "在 Python 3.13 中执行以下代码，输出是什么？\nvalues = (x for x in range(3))\nprint(sum(values), sum(values))",
-    "options": [
-      {
-        "id": "A",
-        "text": "抛出 TypeError"
-      },
-      {
-        "id": "B",
-        "text": "0 3"
-      },
-      {
-        "id": "C",
-        "text": "3 0"
-      },
-      {
-        "id": "D",
-        "text": "3 3"
-      }
-    ],
-    "correct": [
-      "C"
-    ],
-    "explanation": "第一次 sum 消耗生成器中的 0、1、2，结果为 3。生成器随后耗尽；第二次 sum 没有元素可读，默认结果为 0。",
-    "sources": [
-      {
-        "title": "Python 3.13 教程 §9.9 生成器",
-        "url": "https://docs.python.org/3.13/tutorial/classes.html#generators"
-      },
-      {
-        "title": "Python 3.13 Built-in Functions: sum",
-        "url": "https://docs.python.org/3.13/library/functions.html#sum"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "PRG-011",
-    "dimension": "programming",
-    "topic": "局部作用域",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "在 Python 3.13 中执行以下代码，调用 f() 时会发生什么？\nx = 10\ndef f():\n    print(x)\n    x = 20\nf()",
-    "options": [
-      {
-        "id": "A",
-        "text": "先输出 10，再将全局 x 改为 20"
-      },
-      {
-        "id": "B",
-        "text": "输出 None"
-      },
-      {
-        "id": "C",
-        "text": "输出 20"
-      },
-      {
-        "id": "D",
-        "text": "抛出 UnboundLocalError"
-      }
-    ],
-    "correct": [
-      "D"
-    ],
-    "explanation": "函数体内存在 x 的赋值，且没有 global 或 nonlocal 声明，所以函数中的 x 被视为局部变量。print 读取发生在局部 x 赋值之前，因此抛出 UnboundLocalError。",
-    "sources": [
-      {
-        "title": "Python 3.13 语言参考 §4.2.2 名称解析",
-        "url": "https://docs.python.org/3.13/reference/executionmodel.html#resolution-of-names"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "PRG-012",
-    "dimension": "programming",
-    "topic": "类与实例状态",
-    "type": "multiple",
-    "difficulty": "hard",
-    "stem": "在 Python 3.13 中执行以下代码后，哪些说法正确？\nclass Box:\n    items = []\n    def __init__(self):\n        self.count = 0\nx, y = Box(), Box()\nx.items.append(1)\nx.count += 1",
-    "options": [
-      {
-        "id": "A",
-        "text": "x.count 等于 0"
-      },
-      {
-        "id": "B",
-        "text": "y.items 等于 [1]"
-      },
-      {
-        "id": "C",
-        "text": "y.count 等于 1"
-      },
-      {
-        "id": "D",
-        "text": "x.items is y.items 为 True"
-      }
-    ],
-    "correct": [
-      "B",
-      "D"
-    ],
-    "explanation": "items 是可变的类属性，两实例尚未创建同名实例属性，因此共享同一列表；count 在 __init__ 中分别创建，是各实例独立的属性。结果为共享列表 [1]、x.count 为 1、y.count 为 0。",
-    "sources": [
-      {
-        "title": "Python 3.13 教程 §9.3.5 类变量与实例变量",
-        "url": "https://docs.python.org/3.13/tutorial/classes.html#class-and-instance-variables"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "ALG-001",
-    "dimension": "algorithms",
-    "topic": "栈与队列",
+    "topicId": "programming.aliasing",
+    "topic": "引用与可变对象",
     "type": "single",
     "difficulty": "easy",
-    "stem": "一个初始为空的栈依次执行 push(10)、push(20)、pop()、push(30)、pop()。最后一次 pop() 返回什么？",
+    "stem": "在 Python 3 中执行以下代码，最后输出什么？\na = [1, 2]\nb = a\nb.append(3)\nprint(len(a))",
     "options": [
       {
         "id": "A",
-        "text": "10"
-      },
-      {
-        "id": "B",
-        "text": "栈为空，无法返回"
-      },
-      {
-        "id": "C",
-        "text": "20"
-      },
-      {
-        "id": "D",
-        "text": "30"
-      }
-    ],
-    "correct": [
-      "D"
-    ],
-    "explanation": "栈遵循后进先出。第一次 pop 弹出 20；压入 30 后，栈顶为 30，所以最后返回 30。",
-    "sources": [
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e：Stack API",
-        "url": "https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/Stack.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "ALG-002",
-    "dimension": "algorithms",
-    "topic": "查找与前置条件",
-    "type": "single",
-    "difficulty": "easy",
-    "stem": "对数组直接使用普通二分查找，以下哪项是保证正确性的关键前提？",
-    "options": [
-      {
-        "id": "A",
-        "text": "数组长度必须为 2 的幂"
-      },
-      {
-        "id": "B",
-        "text": "数组必须没有负数"
-      },
-      {
-        "id": "C",
-        "text": "数组已按相同的比较规则排序"
-      },
-      {
-        "id": "D",
-        "text": "数组必须存放连续整数"
-      }
-    ],
-    "correct": [
-      "C"
-    ],
-    "explanation": "二分查找根据中间元素的比较结果排除一半区间，依赖有序性。允许负数、任意长度和不连续取值；是否重复需要由接口约定处理。",
-    "sources": [
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e：BinarySearch API",
-        "url": "https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/BinarySearch.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "ALG-003",
-    "dimension": "algorithms",
-    "topic": "复杂度分析",
-    "type": "single",
-    "difficulty": "easy",
-    "stem": "设 n 为正整数。一个循环恰好执行 n 次，每次执行固定数量的常数时间操作。忽略固定初始化，其时间复杂度的紧确界是什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "Θ(n²)"
-      },
-      {
-        "id": "B",
-        "text": "Θ(1)"
-      },
-      {
-        "id": "C",
-        "text": "Θ(log n)"
-      },
-      {
-        "id": "D",
-        "text": "Θ(n)"
-      }
-    ],
-    "correct": [
-      "D"
-    ],
-    "explanation": "总操作数与 n 成正比，因此紧确界为 Θ(n)。这里没有内层循环，也没有每次减半的搜索过程。",
-    "sources": [
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e §1.4 算法分析",
-        "url": "https://algs4.cs.princeton.edu/14analysis/"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "ALG-004",
-    "dimension": "algorithms",
-    "topic": "图遍历",
-    "type": "multiple",
-    "difficulty": "easy",
-    "stem": "关于常见的图遍历实现，哪些说法正确？",
-    "options": [
-      {
-        "id": "A",
-        "text": "广度优先搜索通常使用队列管理待处理顶点"
-      },
-      {
-        "id": "B",
-        "text": "深度优先搜索可以用显式栈或递归调用栈实现"
-      },
-      {
-        "id": "C",
-        "text": "只要使用队列，就能保证任意带权图的最短路径"
-      },
-      {
-        "id": "D",
-        "text": "广度优先搜索必须先递归到底再回退"
-      }
-    ],
-    "correct": [
-      "A",
-      "B"
-    ],
-    "explanation": "BFS 按发现层次扩展，通常使用先进先出的队列；DFS 沿分支深入，可使用栈。普通 BFS 的最少边数保证不能直接推广到任意带权图。",
-    "sources": [
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e §4.1 无向图",
-        "url": "https://algs4.cs.princeton.edu/41graph/"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "ALG-005",
-    "dimension": "algorithms",
-    "topic": "无权最短路径",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "在无权无向图中，希望找到从起点 s 到每个可达顶点经过边数最少的路径，最合适的基础算法是什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "仅将所有边按端点编号排序"
-      },
-      {
-        "id": "B",
-        "text": "广度优先搜索 BFS"
-      },
-      {
-        "id": "C",
-        "text": "对顶点编号进行二分查找"
-      },
-      {
-        "id": "D",
-        "text": "任意顺序的深度优先搜索 DFS"
-      }
-    ],
-    "correct": [
-      "B"
-    ],
-    "explanation": "BFS 逐层探索距离起点 0、1、2……条边的顶点，首次到达时得到最少边数。DFS 可以找到路径，但一般不保证边数最少。",
-    "sources": [
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e：BreadthFirstPaths API",
-        "url": "https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/BreadthFirstPaths.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "ALG-006",
-    "dimension": "algorithms",
-    "topic": "哈希表与最坏情况",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "在使用链地址法的哈希表中，若 n 个不同键全部落入同一桶，且桶用无序链表保存，查找不存在键的最坏时间复杂度是什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "Θ(n log n)"
-      },
-      {
-        "id": "B",
-        "text": "Θ(1)"
-      },
-      {
-        "id": "C",
-        "text": "Θ(n)"
-      },
-      {
-        "id": "D",
-        "text": "Θ(log n)"
-      }
-    ],
-    "correct": [
-      "C"
-    ],
-    "explanation": "该桶内要逐个比较最多 n 个键，因此为 Θ(n)。哈希表常见的期望常数时间依赖散列分布和负载等条件，不是这个极端情况的保证。",
-    "sources": [
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e §3.4 哈希表",
-        "url": "https://algs4.cs.princeton.edu/34hash/"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "ALG-007",
-    "dimension": "algorithms",
-    "topic": "堆与优先队列",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "一个含 n 个元素的二叉最小堆，用数组实现；单次键比较为常数时间，且不计底层数组调整容量的成本。查看最小值与删除最小值的最坏时间复杂度分别是什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "Θ(log n)、Θ(1)"
-      },
-      {
-        "id": "B",
-        "text": "Θ(1)、Θ(1)"
-      },
-      {
-        "id": "C",
-        "text": "Θ(n)、Θ(n)"
-      },
-      {
-        "id": "D",
-        "text": "Θ(1)、Θ(log n)"
-      }
-    ],
-    "correct": [
-      "D"
-    ],
-    "explanation": "最小值保存在堆顶，查看无需遍历。删除堆顶后需要让替代元素向下调整，最多经过与树高成正比的层数，即 Θ(log n)。",
-    "sources": [
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e §2.4 优先队列",
-        "url": "https://algs4.cs.princeton.edu/24pq/"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "ALG-008",
-    "dimension": "algorithms",
-    "topic": "归并排序",
-    "type": "multiple",
-    "difficulty": "medium",
-    "stem": "对于使用长度为 n 的辅助数组、合并时相等键优先取左侧的标准自顶向下归并排序，哪些说法正确？",
-    "options": [
-      {
-        "id": "A",
-        "text": "分割为子问题后再合并有序结果"
-      },
-      {
-        "id": "B",
-        "text": "可以保持相等键的原相对顺序"
-      },
-      {
-        "id": "C",
-        "text": "辅助存储空间为 Θ(1)"
-      },
-      {
-        "id": "D",
-        "text": "最坏时间复杂度为 Θ(n log n)"
-      }
-    ],
-    "correct": [
-      "A",
-      "B",
-      "D"
-    ],
-    "explanation": "递归分割产生对数层，每层合并线性数量的元素。题设的相等键处理保证稳定性；辅助数组需要 Θ(n) 空间，因此不是常数辅助空间。",
-    "sources": [
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e §2.2 归并排序",
-        "url": "https://algs4.cs.princeton.edu/22mergesort/"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "ALG-009",
-    "dimension": "algorithms",
-    "topic": "带权最短路径",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "有向图只有以下边：s→a 权重 2，s→b 权重 5，b→a 权重 -4，a→t 权重 2。s 到 t 的最短路径总权重是多少？",
-    "options": [
-      {
-        "id": "A",
-        "text": "-4"
-      },
-      {
-        "id": "B",
-        "text": "4"
-      },
-      {
-        "id": "C",
         "text": "3"
       },
       {
-        "id": "D",
-        "text": "7"
-      }
-    ],
-    "correct": [
-      "C"
-    ],
-    "explanation": "两条可行路线分别是 s→a→t，总权重 4；s→b→a→t，总权重 5-4+2=3。图无环，因此没有负环问题。存在负边时，不能套用要求非负边权的标准 Dijkstra 正确性保证。",
-    "sources": [
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e：BellmanFordSP API",
-        "url": "https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/BellmanFordSP.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "ALG-010",
-    "dimension": "algorithms",
-    "topic": "有向无环图与拓扑排序",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "有向图包含边 A→B、A→C、B→D、C→D、C→E，且没有其他边。以下哪个序列是合法的拓扑序？",
-    "options": [
-      {
-        "id": "A",
-        "text": "B, A, C, D, E"
-      },
-      {
         "id": "B",
-        "text": "A, C, D, B, E"
+        "text": "1"
       },
       {
         "id": "C",
-        "text": "A, C, E, B, D"
+        "text": "2"
       },
       {
         "id": "D",
-        "text": "A, B, D, C, E"
-      }
-    ],
-    "correct": [
-      "C"
-    ],
-    "explanation": "拓扑序要求每条边的起点出现在终点之前。A,C,E,B,D 满足五条约束。其他序列都至少违反一条先后约束。拓扑序可以不唯一。",
-    "sources": [
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e：Topological API",
-        "url": "https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/Topological.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "ALG-011",
-    "dimension": "algorithms",
-    "topic": "摊还与求和分析",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "设 n 是 2 的幂。算法分多轮执行操作，各轮次数依次为 n、n/2、n/4，直到 1。总操作次数的紧确界是什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "Θ(log n)"
-      },
-      {
-        "id": "B",
-        "text": "Θ(n)"
-      },
-      {
-        "id": "C",
-        "text": "Θ(n²)"
-      },
-      {
-        "id": "D",
-        "text": "Θ(n log n)"
-      }
-    ],
-    "correct": [
-      "B"
-    ],
-    "explanation": "操作总数为 n+n/2+…+1=2n-1，故为 Θ(n)。虽然有 Θ(log n) 轮，但每轮成本不同，不能直接把每轮都按 n 计算为紧确界。",
-    "sources": [
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e §1.4 算法分析",
-        "url": "https://algs4.cs.princeton.edu/14analysis/"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "ALG-012",
-    "dimension": "algorithms",
-    "topic": "最短路径算法条件",
-    "type": "multiple",
-    "difficulty": "hard",
-    "stem": "以下关于最短路径算法适用条件的说法，哪些正确？",
-    "options": [
-      {
-        "id": "A",
-        "text": "标准 Dijkstra 的正确性保证适用于所有边权非负的图"
-      },
-      {
-        "id": "B",
-        "text": "只要图中出现负边，就一定不存在有限的最短路径"
-      },
-      {
-        "id": "C",
-        "text": "普通 BFS 无需处理边权差异，就能求任意带权图的最小总权重路径"
-      },
-      {
-        "id": "D",
-        "text": "Bellman-Ford 可以处理有负边但没有从起点可达负环的图"
-      }
-    ],
-    "correct": [
-      "A",
-      "D"
-    ],
-    "explanation": "负边本身不意味着无解。标准 Dijkstra 使用非负边权前提；Bellman-Ford 可在没有可达负环时处理负边。普通 BFS 优化边数，不直接优化任意权重之和。",
-    "sources": [
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e：DijkstraSP 与 BellmanFordSP",
-        "url": "https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/DijkstraSP.html"
-      },
-      {
-        "title": "Sedgewick 与 Wayne，Algorithms 4e：BellmanFordSP API",
-        "url": "https://algs4.cs.princeton.edu/code/javadoc/edu/princeton/cs/algs4/BellmanFordSP.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "DB-001",
-    "dimension": "database",
-    "topic": "约束与主键",
-    "type": "single",
-    "difficulty": "easy",
-    "stem": "在 PostgreSQL 16 中，给一列声明 PRIMARY KEY，直接保证该列具有哪一组约束？",
-    "options": [
-      {
-        "id": "A",
-        "text": "只能保存正整数"
-      },
-      {
-        "id": "B",
-        "text": "禁止重复，允许多个 NULL"
-      },
-      {
-        "id": "C",
-        "text": "允许重复，禁止 NULL"
-      },
-      {
-        "id": "D",
-        "text": "唯一且不允许 NULL"
-      }
-    ],
-    "correct": [
-      "D"
-    ],
-    "explanation": "主键要求值唯一并且非空。主键类型不局限于正整数，也可以由多列组成。",
-    "sources": [
-      {
-        "title": "PostgreSQL 16 §5.4.4 主键",
-        "url": "https://www.postgresql.org/docs/16/ddl-constraints.html#DDL-CONSTRAINTS-PRIMARY-KEYS"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "DB-002",
-    "dimension": "database",
-    "topic": "NULL 与三值逻辑",
-    "type": "single",
-    "difficulty": "easy",
-    "stem": "在 PostgreSQL 16 中，希望选出 email 列为 NULL 的行，应在 WHERE 中使用哪个条件？",
-    "options": [
-      {
-        "id": "A",
-        "text": "email IS NULL"
-      },
-      {
-        "id": "B",
-        "text": "email == NULL"
-      },
-      {
-        "id": "C",
-        "text": "email IN (NULL)"
-      },
-      {
-        "id": "D",
-        "text": "email = NULL"
+        "text": "抛出异常"
       }
     ],
     "correct": [
       "A"
     ],
-    "explanation": "NULL 表示未知或缺失。与 NULL 的普通相等比较不会得到 True；IS NULL 专门检测空值。",
-    "sources": [
-      {
-        "title": "PostgreSQL 16 §9.2 比较函数与操作符",
-        "url": "https://www.postgresql.org/docs/16/functions-comparison.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "赋值 b = a 让两个名字引用同一个列表，没有复制列表。append 原地增加一个元素，因此 a 和 b 看到的列表长度都变为 3。若需要独立的浅层列表，必须显式复制；嵌套对象还需另行考虑。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
   },
   {
-    "id": "DB-003",
-    "dimension": "database",
-    "topic": "查询与排序",
+    "id": "SP5-PRG-004",
+    "dimension": "programming",
+    "topicId": "programming.resource-cleanup",
+    "topic": "异常与资源释放",
     "type": "single",
     "difficulty": "easy",
-    "stem": "在 PostgreSQL 16 中，要求查询结果按非空数值列 score 从高到低排列，应使用哪项子句？",
+    "stem": "某函数成功打开一个文件后开始解析，解析可能抛出异常；调用方需要接收该异常。以下哪种结构最能保证离开该代码块时关闭文件，并保留解析异常的传播？假设关闭文件本身成功。",
     "options": [
       {
         "id": "A",
-        "text": "GROUP BY score DESC"
+        "text": "只在解析正常结束后调用 close"
       },
       {
         "id": "B",
-        "text": "WHERE score DESC"
+        "text": "捕获所有异常并直接忽略"
       },
       {
         "id": "C",
-        "text": "ORDER BY score DESC"
+        "text": "只在异常分支关闭文件，正常分支不关闭"
       },
       {
         "id": "D",
-        "text": "ORDER BY score ASC"
-      }
-    ],
-    "correct": [
-      "C"
-    ],
-    "explanation": "ORDER BY 控制结果顺序，DESC 为降序。若多行 score 相同，本子句没有规定它们之间的先后；需要稳定分页时应再加入唯一排序键。",
-    "sources": [
-      {
-        "title": "PostgreSQL 16 §7.5 排序",
-        "url": "https://www.postgresql.org/docs/16/queries-order.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "DB-004",
-    "dimension": "database",
-    "topic": "查询与过滤",
-    "type": "multiple",
-    "difficulty": "easy",
-    "stem": "关于 PostgreSQL 16 的 SELECT 查询，以下哪些说法正确？",
-    "options": [
-      {
-        "id": "A",
-        "text": "WHERE 会保留条件结果为 NULL 的行"
-      },
-      {
-        "id": "B",
-        "text": "SELECT DISTINCT 可以去除所选列组合完全相同的重复结果行"
-      },
-      {
-        "id": "C",
-        "text": "WHERE 可以按条件筛选输入行"
-      },
-      {
-        "id": "D",
-        "text": "不写 ORDER BY 时，返回顺序仍由 SQL 保证为插入顺序"
-      }
-    ],
-    "correct": [
-      "B",
-      "C"
-    ],
-    "explanation": "WHERE 只保留条件为 True 的行；False 或未知值均不保留。DISTINCT 对投影后的结果去重。结果排序需要显式 ORDER BY。",
-    "sources": [
-      {
-        "title": "PostgreSQL 16 §7.3.3 DISTINCT",
-        "url": "https://www.postgresql.org/docs/16/queries-select-lists.html#QUERIES-DISTINCT"
-      },
-      {
-        "title": "PostgreSQL 16 §7.2.2 WHERE",
-        "url": "https://www.postgresql.org/docs/16/queries-table-expressions.html#QUERIES-WHERE"
-      },
-      {
-        "title": "PostgreSQL 16: Sorting Rows",
-        "url": "https://www.postgresql.org/docs/16/queries-order.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "DB-005",
-    "dimension": "database",
-    "topic": "聚合与空值",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "PostgreSQL 16 表 measurements 只有三行，value 分别为 8、NULL、10。SELECT COUNT(*), COUNT(value) FROM measurements; 返回什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "3, 3"
-      },
-      {
-        "id": "B",
-        "text": "2, 2"
-      },
-      {
-        "id": "C",
-        "text": "2, 3"
-      },
-      {
-        "id": "D",
-        "text": "3, 2"
+        "text": "使用 with 上下文管理文件，在块中解析且不吞掉异常"
       }
     ],
     "correct": [
       "D"
     ],
-    "explanation": "COUNT(*) 统计所有输入行，所以为 3；COUNT(value) 只统计 value 非空的行，所以为 2。",
-    "sources": [
-      {
-        "title": "PostgreSQL 16 §9.21 聚合函数",
-        "url": "https://www.postgresql.org/docs/16/functions-aggregate.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "文件上下文管理器在正常离开和异常离开时都会关闭文件；不捕获或不吞掉解析异常，调用方仍能获知失败。只在成功路径释放会在异常路径泄漏资源；忽略异常则破坏了题目要求的错误传播。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
   },
   {
-    "id": "DB-006",
-    "dimension": "database",
-    "topic": "外连接",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "PostgreSQL 16 中，users 只有 id=1 和 id=2 两行；orders 只有 user_id=1、id=9 一行。执行 SELECT u.id, o.id FROM users u LEFT JOIN orders o ON u.id=o.user_id ORDER BY u.id; 得到什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "(1, 9) 与 (2, NULL)"
-      },
-      {
-        "id": "B",
-        "text": "(1, 9) 与 (2, 9)"
-      },
-      {
-        "id": "C",
-        "text": "只有 (2, NULL)"
-      },
-      {
-        "id": "D",
-        "text": "只有 (1, 9)"
-      }
-    ],
-    "correct": [
-      "A"
-    ],
-    "explanation": "LEFT JOIN 保留左表所有行。id=1 找到匹配订单；id=2 没有匹配时，右表的输出列补为 NULL。",
-    "sources": [
-      {
-        "title": "PostgreSQL 16 §7.2.1.1 连接表",
-        "url": "https://www.postgresql.org/docs/16/queries-table-expressions.html#QUERIES-JOIN"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "DB-007",
-    "dimension": "database",
-    "topic": "事务隔离",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "在 PostgreSQL 16 的默认 Read Committed 隔离级别下，普通 SELECT 能读到其他事务尚未提交的修改吗？",
-    "options": [
-      {
-        "id": "A",
-        "text": "不能"
-      },
-      {
-        "id": "B",
-        "text": "仅在两事务使用同一张表时可以"
-      },
-      {
-        "id": "C",
-        "text": "只要没有显式 LOCK 就可以"
-      },
-      {
-        "id": "D",
-        "text": "总是可以"
-      }
-    ],
-    "correct": [
-      "A"
-    ],
-    "explanation": "Read Committed 禁止脏读。普通 SELECT 看到语句开始时已提交的数据，以及本事务之前的修改；不同语句的快照仍可能不同。",
-    "sources": [
-      {
-        "title": "PostgreSQL 16 §13.2.1 Read Committed",
-        "url": "https://www.postgresql.org/docs/16/transaction-iso.html#XACT-READ-COMMITTED"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "DB-008",
-    "dimension": "database",
-    "topic": "索引与代价",
+    "id": "SP5-PRG-005",
+    "dimension": "programming",
+    "topicId": "programming.money-representation",
+    "topic": "金额表示与数值精度",
     "type": "multiple",
     "difficulty": "medium",
-    "stem": "在 PostgreSQL 16 中增加一个普通索引，以下哪些说法正确？",
+    "stem": "一个账务接口只允许非负且最多两位小数的金额，需要精确累计到分。以下哪些设计可以避免直接用二进制浮点数累计小数金额带来的表示误差？",
     "options": [
       {
         "id": "A",
-        "text": "所有查询都会因此变快"
+        "text": "使用二进制浮点数后，假定所有十进制小数都能被精确表示"
       },
       {
         "id": "B",
-        "text": "影响索引内容的写操作通常也需要维护索引"
+        "text": "校验小数位后，将金额转换为整数分再累计，并检查整数溢出边界"
       },
       {
         "id": "C",
-        "text": "查询规划器必须使用这个索引"
+        "text": "把金额都转换为字符串，按字符串拼接完成加法"
       },
       {
         "id": "D",
-        "text": "索引需要额外存储空间"
+        "text": "使用从十进制输入构造的十进制定点/Decimal 类型，并明确精度与舍入规则"
       }
     ],
     "correct": [
       "B",
       "D"
     ],
-    "explanation": "索引是额外的数据结构，需要存储和维护。它可能加速合适的查询，但规划器可以选择顺序扫描，也不能保证每条查询都更快。",
-    "sources": [
-      {
-        "title": "PostgreSQL 16 §11.1 索引介绍",
-        "url": "https://www.postgresql.org/docs/16/indexes-intro.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "整数分将两位小数金额映射为整数运算，但仍需检查合法范围；十进制数类型可以按设定精度执行十进制运算，输入应直接来自十进制字符串等准确形式。二进制浮点并不能精确表示所有十进制小数；字符串拼接不是金额加法。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
   },
   {
-    "id": "DB-009",
-    "dimension": "database",
-    "topic": "NULL 与子查询",
+    "id": "SP5-PRG-006",
+    "dimension": "programming",
+    "topicId": "programming.hash-key",
+    "topic": "哈希键与相等关系",
     "type": "single",
-    "difficulty": "hard",
-    "stem": "在 PostgreSQL 16 中，执行 SELECT 1 WHERE 2 NOT IN (1, NULL); 会返回什么？",
+    "difficulty": "easy",
+    "stem": "某哈希映射要求键在存入期间，其哈希值及用于判等的字段保持不变。以下哪种缓存键设计符合这一约束？",
     "options": [
       {
         "id": "A",
-        "text": "一行，值为 1"
+        "text": "使用可修改的对象，并允许修改参与哈希的字段"
       },
       {
         "id": "B",
-        "text": "一行，值为 0"
+        "text": "每次查找时随机生成同一键的哈希值"
       },
       {
         "id": "C",
-        "text": "一定抛出语法错误"
+        "text": "使用不可变的用户 ID 字符串作为键"
       },
       {
         "id": "D",
-        "text": "零行"
+        "text": "只要两个键不同，就强制要求它们的哈希值一定不同"
       }
     ],
     "correct": [
-      "D"
+      "C"
     ],
-    "explanation": "2 与 1 不等，但与 NULL 的比较为未知；NOT IN 的结果因此为未知，而不是 True。WHERE 不保留未知条件对应的行。",
-    "sources": [
-      {
-        "title": "PostgreSQL 16 §9.23.3 NOT IN",
-        "url": "https://www.postgresql.org/docs/16/functions-subquery.html#FUNCTIONS-SUBQUERY-NOTIN"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "不可变用户 ID 可以维持键的哈希值和相等语义。修改参与哈希或判等的字段可能使已有条目难以找到；随机哈希同样破坏一致性。哈希碰撞是允许存在的，不能要求所有不同键都拥有不同哈希值。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
   },
   {
-    "id": "DB-010",
-    "dimension": "database",
-    "topic": "事务快照",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "PostgreSQL 16 中，事务 T1 使用 Read Committed。T1 第一次 SELECT 后，T2 插入符合条件的新行并提交；T1 随后执行同一条 SELECT。哪项说法正确？",
-    "options": [
-      {
-        "id": "A",
-        "text": "T1 会自动升级为 Serializable"
-      },
-      {
-        "id": "B",
-        "text": "T1 的所有 SELECT 必须使用第一次查询的快照"
-      },
-      {
-        "id": "C",
-        "text": "T2 只能等 T1 提交之后才能插入"
-      },
-      {
-        "id": "D",
-        "text": "第二条 SELECT 可以看到 T2 新提交的行"
-      }
-    ],
-    "correct": [
-      "D"
-    ],
-    "explanation": "Read Committed 为每条语句使用新的已提交数据快照，因此重复查询可能看到新行。若改为 PostgreSQL 的 Repeatable Read，正常查询使用事务级快照；题目没有采用该隔离级别。",
-    "sources": [
-      {
-        "title": "PostgreSQL 16 §13.2.1 Read Committed",
-        "url": "https://www.postgresql.org/docs/16/transaction-iso.html#XACT-READ-COMMITTED"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "DB-011",
-    "dimension": "database",
-    "topic": "唯一约束与空值",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "在 PostgreSQL 16 中，表 t 的 email 列仅声明 UNIQUE，未声明 NOT NULL，也未使用 NULLS NOT DISTINCT。向该列插入两行 NULL，唯一约束会怎样处理？",
-    "options": [
-      {
-        "id": "A",
-        "text": "第二行必然违反唯一约束"
-      },
-      {
-        "id": "B",
-        "text": "默认允许这两行 NULL"
-      },
-      {
-        "id": "C",
-        "text": "第一行就违反唯一约束"
-      },
-      {
-        "id": "D",
-        "text": "两行会合并为一行"
-      }
-    ],
-    "correct": [
-      "B"
-    ],
-    "explanation": "PostgreSQL 的普通唯一约束默认把 NULL 视为彼此不同，因此可出现多个 NULL。NOT NULL 或 NULLS NOT DISTINCT 会改变相应约束行为，题目明确排除了它们。",
-    "sources": [
-      {
-        "title": "PostgreSQL 16 §5.4.3 唯一约束",
-        "url": "https://www.postgresql.org/docs/16/ddl-constraints.html#DDL-CONSTRAINTS-UNIQUE-CONSTRAINTS"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "DB-012",
-    "dimension": "database",
-    "topic": "执行计划与验证",
+    "id": "SP5-PRG-007",
+    "dimension": "programming",
+    "topicId": "programming.copy-isolation",
+    "topic": "嵌套数据的隔离",
     "type": "multiple",
-    "difficulty": "hard",
-    "stem": "关于 PostgreSQL 16 的 EXPLAIN 与 EXPLAIN ANALYZE，哪些说法正确？",
+    "difficulty": "medium",
+    "stem": "缓存保存一个字典，其中 values 字段是列表。接口需返回独立数据，调用方修改返回数据时不能改变缓存。假设复制期间没有其他线程修改缓存，下列哪些方式满足要求？",
     "options": [
       {
         "id": "A",
-        "text": "EXPLAIN ANALYZE 会实际执行被分析的语句"
+        "text": "对题设中的字典及其嵌套列表执行深复制，再返回复制结果"
       },
       {
         "id": "B",
-        "text": "普通 EXPLAIN 中的 cost 数值单位必定是毫秒"
+        "text": "将字典和嵌套列表完整序列化后重新反序列化，得到独立对象；假设这些值均可被该格式无损表示"
       },
       {
         "id": "C",
-        "text": "评估写语句时可用事务包围 EXPLAIN ANALYZE，再 ROLLBACK 撤销可回滚的数据修改"
+        "text": "只浅复制最外层字典，并直接共享原 values 列表"
       },
       {
         "id": "D",
-        "text": "只要加了 ANALYZE，UPDATE 就不会真正修改数据"
+        "text": "把原字典换一个变量名后返回"
       }
     ],
     "correct": [
       "A",
+      "B"
+    ],
+    "explanation": "深复制以及在题设可无损表示条件下的序列化重建，都会为嵌套列表建立独立对象。浅复制只复制最外层，列表仍共享；变量改名也不创建副本。题目明确排除了复制期间并发修改的问题，不应把深复制当成通用并发控制。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-ALG-001",
+    "dimension": "algorithms",
+    "topicId": "algorithms.binary-search",
+    "topic": "二分查找的前提",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "后端在一个支持常数时间下标访问的数组上按元素值执行标准二分查找。除了可比较元素外，通常还需要满足哪个前提？",
+    "options": [
+      {
+        "id": "A",
+        "text": "数组长度必须是偶数"
+      },
+      {
+        "id": "B",
+        "text": "所有元素必须互不相同"
+      },
+      {
+        "id": "C",
+        "text": "数组已按查找使用的比较规则有序"
+      },
+      {
+        "id": "D",
+        "text": "数组必须先转换为链表"
+      }
+    ],
+    "correct": [
       "C"
     ],
-    "explanation": "ANALYZE 会实际运行语句并收集执行信息；普通 cost 是规划器的相对成本估计，不是毫秒。回滚适用于事务可回滚的数据修改，不能泛化为撤销序列消耗或所有外部副作用。",
-    "sources": [
-      {
-        "title": "PostgreSQL 16 §14.1.2 EXPLAIN ANALYZE",
-        "url": "https://www.postgresql.org/docs/16/using-explain.html#USING-EXPLAIN-ANALYZE"
-      }
-    ],
+    "explanation": "标准二分查找依靠有序关系确定目标不可能位于哪一半区间。数组可以包含重复值，长度也无需为偶数；重复值影响查找哪个匹配位置的约定，不会取消有序这一基本前提。链表也不是题设要求的数据结构。",
+    "sources": [],
     "version": 1,
-    "status": "published"
+    "status": "draft"
   },
   {
-    "id": "NET-001",
-    "dimension": "network",
-    "topic": "DNS",
-    "type": "single",
-    "difficulty": "easy",
-    "stem": "DNS 中，A 资源记录主要用于保存什么信息？",
-    "options": [
-      {
-        "id": "A",
-        "text": "域名对应的网页 HTML 源代码"
-      },
-      {
-        "id": "B",
-        "text": "域名对应的 IPv4 地址"
-      },
-      {
-        "id": "C",
-        "text": "域名对应的 TCP 重传次数"
-      },
-      {
-        "id": "D",
-        "text": "域名对应的邮件正文"
-      }
-    ],
-    "correct": [
-      "B"
-    ],
-    "explanation": "A 记录承载 IPv4 地址；IPv6 地址使用 AAAA 记录。DNS 查询结果可以服务于后续连接，但不会直接返回网页正文。",
-    "sources": [
-      {
-        "title": "RFC 1035 §3.4.1 A 资源记录",
-        "url": "https://www.rfc-editor.org/rfc/rfc1035.html#section-3.4.1"
-      },
-      {
-        "title": "RFC 3596 §2 AAAA 资源记录",
-        "url": "https://www.rfc-editor.org/rfc/rfc3596.html#section-2"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "NET-002",
-    "dimension": "network",
-    "topic": "TCP 语义",
-    "type": "single",
-    "difficulty": "easy",
-    "stem": "正常建立的 TCP 连接向应用提供的核心抽象是什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "每次 send 都对应对端一次 recv 的独立消息"
-      },
-      {
-        "id": "B",
-        "text": "可靠、有序的字节流"
-      },
-      {
-        "id": "C",
-        "text": "保证任何网络故障下数据都能最终到达"
-      },
-      {
-        "id": "D",
-        "text": "无需连接的独立 IP 数据报"
-      }
-    ],
-    "correct": [
-      "B"
-    ],
-    "explanation": "TCP 向应用提供可靠、有序的字节流，不保留应用调用 send 的消息边界；严重故障仍可能使连接失败，不能承诺绝对送达。",
-    "sources": [
-      {
-        "title": "RFC 9293 §2.2 TCP 服务模型",
-        "url": "https://www.rfc-editor.org/rfc/rfc9293.html#section-2.2"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "NET-003",
-    "dimension": "network",
-    "topic": "UDP 语义",
-    "type": "single",
-    "difficulty": "easy",
-    "stem": "以下哪项是 UDP 本身不提供的保证？",
-    "options": [
-      {
-        "id": "A",
-        "text": "可靠、有序且不重复地交付所有数据"
-      },
-      {
-        "id": "B",
-        "text": "端口号用于区分通信端点"
-      },
-      {
-        "id": "C",
-        "text": "数据报包含长度字段"
-      },
-      {
-        "id": "D",
-        "text": "以数据报为单位交付数据"
-      }
-    ],
-    "correct": [
-      "A"
-    ],
-    "explanation": "UDP 提供简单的数据报服务。它本身不保证交付、去重或顺序；应用若需要这些能力，可以在 UDP 之上自行构建协议。",
-    "sources": [
-      {
-        "title": "RFC 768：User Datagram Protocol",
-        "url": "https://www.rfc-editor.org/rfc/rfc768.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "NET-004",
-    "dimension": "network",
-    "topic": "HTTP 方法",
+    "id": "SP5-ALG-002",
+    "dimension": "algorithms",
+    "topicId": "algorithms.complexity",
+    "topic": "时间复杂度分析",
     "type": "multiple",
     "difficulty": "easy",
-    "stem": "按 HTTP 标准语义，以下哪些方法被定义为安全方法，即客户端没有请求改变服务器资源状态？",
+    "stem": "以下操作的单步成本均为 O(1)，n 为输入规模。哪些渐近时间复杂度描述正确？",
     "options": [
       {
         "id": "A",
-        "text": "DELETE"
+        "text": "两个独立的嵌套循环各执行 n 次，整体对应 O(n)"
       },
       {
         "id": "B",
-        "text": "POST"
+        "text": "先执行一次 n 次循环，再执行一次 n 次循环，整体对应 O(n²)"
       },
       {
         "id": "C",
-        "text": "GET"
+        "text": "单个循环从 0 到 n-1，对应 O(n)"
       },
       {
         "id": "D",
-        "text": "HEAD"
+        "text": "每轮把正整数搜索区间规模约减半，直到为 1，对应 O(log n)"
       }
     ],
     "correct": [
       "C",
       "D"
     ],
-    "explanation": "GET 和 HEAD 是安全方法。安全指请求的预期语义，不表示服务器完全不能写日志等附带信息，也不表示站点不存在漏洞。POST 和 DELETE 不属于安全方法。",
-    "sources": [
-      {
-        "title": "RFC 9110 §9.2.1 安全方法",
-        "url": "https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.1"
-      }
-    ],
+    "explanation": "顺序执行两次线性循环的总成本为 2n，仍为 O(n)；两个完整嵌套循环则为 n² 次操作。规模每轮约减半时，轮数随 log n 增长。这里分析渐近数量级，省略常数因子。",
+    "sources": [],
     "version": 1,
-    "status": "published"
+    "status": "draft"
   },
   {
-    "id": "NET-005",
-    "dimension": "network",
-    "topic": "HTTP 条件请求",
+    "id": "SP5-ALG-003",
+    "dimension": "algorithms",
+    "topicId": "algorithms.deduplication",
+    "topic": "哈希集合与去重",
     "type": "single",
-    "difficulty": "medium",
-    "stem": "浏览器发出带 If-None-Match 的条件 GET，服务器确认缓存表示仍有效，通常应返回哪个状态码以表示无需重传表示内容？",
+    "difficulty": "easy",
+    "stem": "需要判断含 n 个用户 ID 的数组是否有重复项。使用哈希集合依次检查并插入；假设哈希查找和插入的期望时间均为 O(1)。最坏需要扫描全部数组时，期望总时间和额外空间上界分别是什么？",
     "options": [
       {
         "id": "A",
-        "text": "500 Internal Server Error"
+        "text": "O(n²) 时间、O(1) 空间"
       },
       {
         "id": "B",
-        "text": "304 Not Modified"
+        "text": "O(n) 时间、O(n) 空间"
       },
       {
         "id": "C",
-        "text": "302 Found"
+        "text": "O(log n) 时间、O(n) 空间"
+      },
+      {
+        "id": "D",
+        "text": "O(n) 时间、O(1) 空间"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "每个 ID 最多执行常数次期望 O(1) 的集合操作，扫描 n 个元素的期望总时间为 O(n)。若所有 ID 不重复，集合会保存 n 个 ID，因此额外空间上界是 O(n)。题目已经给出了哈希操作的期望成本假设。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-ALG-004",
+    "dimension": "algorithms",
+    "topicId": "algorithms.bfs",
+    "topic": "无权图最短路径",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "服务依赖关系构成一个有限无权图，每条边都代表一次等成本跳转。需要从给定服务找到到其他服务的最少跳数，并在首次入队时标记已访问。应优先采用哪种算法？",
+    "options": [
+      {
+        "id": "A",
+        "text": "广度优先搜索 BFS"
+      },
+      {
+        "id": "B",
+        "text": "只沿第一条边不断深入且不回溯"
+      },
+      {
+        "id": "C",
+        "text": "按服务名称排序后顺序访问"
+      },
+      {
+        "id": "D",
+        "text": "任意深度优先搜索的首次到达深度一定最小"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "BFS 按距离起点的层数逐层扩展，在等权边条件下首次发现一个顶点时即可得到最少跳数。首次入队时标记可避免重复入队。普通 DFS 的首次到达顺序不保证最短，按名称排序与路径长度没有必然关系。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-ALG-005",
+    "dimension": "algorithms",
+    "topicId": "algorithms.merge",
+    "topic": "有序序列合并",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "两个非降序数组长度分别为 n 和 m，需要把它们合并为保留全部重复元素的非降序数组。关于标准双指针合并，哪些说法正确？",
+    "options": [
+      {
+        "id": "A",
+        "text": "比较两个当前元素，将较小者写入结果并前移对应指针，可以得到有序结果"
+      },
+      {
+        "id": "B",
+        "text": "为了处理相同元素，必须先删除两个数组中的全部重复值"
+      },
+      {
+        "id": "C",
+        "text": "即使两个输入已排序，合并也必须执行 O((n+m)²) 次比较"
+      },
+      {
+        "id": "D",
+        "text": "写出完整结果需要 O(n+m) 次写入，标准合并的时间复杂度为 O(n+m)"
+      }
+    ],
+    "correct": [
+      "A",
+      "D"
+    ],
+    "explanation": "双指针只从两个未处理后缀的首元素中选择较小者；每步至少前移一个指针，直到写出 n+m 个元素。遇到相同值时仍需保留双方出现次数，不能删除重复值。输入有序使得线性合并成为可能。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-ALG-006",
+    "dimension": "algorithms",
+    "topicId": "algorithms.top-k",
+    "topic": "流式 Top-K",
+    "type": "single",
+    "difficulty": "medium",
+    "stem": "要从 n 个整数中保留最大的 k 个数，1 < k < n，结果暂不要求排序。维护一个至多包含 k 个元素的最小堆，逐个处理输入。该方法的时间复杂度与额外空间上界是什么？",
+    "options": [
+      {
+        "id": "A",
+        "text": "O(n²) 时间、O(n) 空间"
+      },
+      {
+        "id": "B",
+        "text": "O(n) 时间、O(1) 空间"
+      },
+      {
+        "id": "C",
+        "text": "O(log n) 时间、O(k) 空间"
+      },
+      {
+        "id": "D",
+        "text": "O(n log k) 时间、O(k) 空间"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "最小堆的堆顶是当前保留的 k 个数中最小的一个。新数更大时替换堆顶并调整堆，单次调整 O(log k)，最多处理 n 次；堆最多保存 k 个元素。若最后要求有序输出，还需另计对这 k 个数排序的成本。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-ALG-007",
+    "dimension": "algorithms",
+    "topicId": "algorithms.directed-cycle",
+    "topic": "有向图环检测",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "对有限有向图检查是否有环，算法遍历所有顶点。以下哪些判断成立？",
+    "options": [
+      {
+        "id": "A",
+        "text": "DFS 中只要遇到任何曾访问过的顶点，就一定存在有向环"
+      },
+      {
+        "id": "B",
+        "text": "DFS 中遇到指向当前递归路径上顶点的边，可以判定存在有向环"
+      },
+      {
+        "id": "C",
+        "text": "使用 Kahn 拓扑排序，最终移除的顶点数少于总顶点数，可以判定存在环"
+      },
+      {
+        "id": "D",
+        "text": "图中只要某个顶点有两条出边，就一定有环"
+      }
+    ],
+    "correct": [
+      "B",
+      "C"
+    ],
+    "explanation": "DFS 需要区分当前仍在递归路径上的顶点与已经处理完成的顶点；指向前者的回边构成环，指向后者未必构成环。Kahn 算法不断移除入度为零的顶点，若仍剩顶点而无法继续，则剩余部分存在有向环。出边数量本身不是判环依据。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-001",
+    "dimension": "database",
+    "topicId": "database.sql-filter",
+    "topic": "SQL 查询与过滤",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "表 users(id, active) 中 active 为整数，1 表示启用。哪条 SQL 用于查询全部启用用户的 id？",
+    "options": [
+      {
+        "id": "A",
+        "text": "DELETE FROM users WHERE active = 1"
+      },
+      {
+        "id": "B",
+        "text": "UPDATE users SET active = 1"
+      },
+      {
+        "id": "C",
+        "text": "INSERT INTO users(id, active) VALUES (1, 1)"
+      },
+      {
+        "id": "D",
+        "text": "SELECT id FROM users WHERE active = 1"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "SELECT 查询记录，WHERE active = 1 限定启用用户，并且只投影 id 列。DELETE 删除记录，UPDATE 修改记录，INSERT 插入记录，这些语句都不满足题目的只读查询要求。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-002",
+    "dimension": "database",
+    "topicId": "database.constraints",
+    "topic": "主键与外键约束",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "某关系数据库启用了主键和外键约束，外键列明确允许 NULL。以下哪些描述正确？",
+    "options": [
+      {
+        "id": "A",
+        "text": "主键用于唯一标识一行，主键列不能为 NULL"
+      },
+      {
+        "id": "B",
+        "text": "任意两行只要名字不同，就可以使用相同主键"
+      },
+      {
+        "id": "C",
+        "text": "非 NULL 外键值必须满足已声明的参照约束，允许 NULL 并不等于允许任意不存在的非 NULL 值"
+      },
+      {
+        "id": "D",
+        "text": "为一列建立普通非唯一索引，就自动获得外键约束"
+      }
+    ],
+    "correct": [
+      "A",
+      "C"
+    ],
+    "explanation": "主键提供唯一且非空的行标识；其他列不同不能抵消主键冲突。允许 NULL 的外键与普通非空外键值的参照检查是两回事。普通索引是一种访问结构，不会自动声明或替代外键约束。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-003",
+    "dimension": "database",
+    "topicId": "database.transaction-atomicity",
+    "topic": "事务原子性",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "转账需要在同一数据库内执行扣款和入账，两步被包含在同一个支持回滚的事务中。若入账失败而事务回滚，哪项事务特性要求已执行的扣款也被撤销？",
+    "options": [
+      {
+        "id": "A",
+        "text": "索引有序性"
+      },
+      {
+        "id": "B",
+        "text": "字段可空性"
+      },
+      {
+        "id": "C",
+        "text": "原子性"
+      },
+      {
+        "id": "D",
+        "text": "查询分页性"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "原子性要求事务内的操作作为一个整体提交或回滚，因此入账失败导致事务回滚时，扣款也不能留下部分成功的结果。它不等同于跨任意外部系统的自动补偿；本题明确把两步限制在同一数据库事务内。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-004",
+    "dimension": "database",
+    "topicId": "database.left-join",
+    "topic": "LEFT JOIN 与过滤位置",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "要查询每个用户及其状态为 paid 的订单，同时保留没有 paid 订单的用户。表为 users u 和 orders o，关联条件为 o.user_id = u.id。以下哪种查询结构符合要求？",
+    "options": [
+      {
+        "id": "A",
+        "text": "使用 INNER JOIN，再过滤 o.status = 'paid'"
+      },
+      {
+        "id": "B",
+        "text": "使用 LEFT JOIN，并把 o.status = 'paid' 放在 ON 关联条件中"
+      },
+      {
+        "id": "C",
+        "text": "先 LEFT JOIN，再在 WHERE 中要求 o.status = 'paid'"
+      },
+      {
+        "id": "D",
+        "text": "只查询 orders 中的 paid 订单，不关联 users"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "LEFT JOIN 的 ON 条件只决定右表的匹配记录，无匹配时仍保留左表用户并以 NULL 补右侧字段。把 o.status = 'paid' 放到 WHERE 中会排除右侧为 NULL 的行，从而失去题目要求保留的用户。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-005",
+    "dimension": "database",
+    "topicId": "database.index-tradeoff",
+    "topic": "索引与执行计划",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "对一般关系数据库中的 B-tree 索引，下列哪些说法合理？不假定优化器必须选择某一条具体访问路径。",
+    "options": [
+      {
+        "id": "A",
+        "text": "建立索引后，所有查询和写入都一定更快"
+      },
+      {
+        "id": "B",
+        "text": "索引占用额外存储，相关数据写入时通常需要维护索引"
+      },
+      {
+        "id": "C",
+        "text": "复合索引 (a,b) 和 (b,a) 对所有查询都完全等价"
+      },
+      {
+        "id": "D",
+        "text": "优化器会结合选择性、统计信息和成本评估，建立了索引也可能选择扫描表"
+      }
+    ],
+    "correct": [
+      "B",
+      "D"
+    ],
+    "explanation": "索引是读写成本之间的权衡，需要存储并随数据变动维护。优化器通常根据估计成本选择访问路径，低选择性查询等情况可能更适合表扫描。复合索引的键顺序影响可利用的访问方式，不能视为任意查询下等价。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-006",
+    "dimension": "database",
+    "topicId": "database.optimistic-concurrency",
+    "topic": "乐观并发控制",
+    "type": "single",
+    "difficulty": "medium",
+    "stem": "两个请求均读到文档 version=7。每次更新都执行 UPDATE documents SET body=?, version=version+1 WHERE id=? AND version=7，并检查受影响行数；不允许其他路径重置 version。第一个请求已成功提交，第二个请求应如何处理受影响行数为 0 的结果？",
+    "options": [
+      {
+        "id": "A",
+        "text": "识别为版本冲突，重新读取后由调用方决定重试或合并"
+      },
+      {
+        "id": "B",
+        "text": "仍返回更新成功，因为曾读到 version=7"
+      },
+      {
+        "id": "C",
+        "text": "不带版本条件强制覆盖，以保证两个请求都成功"
+      },
+      {
+        "id": "D",
+        "text": "把 version 重新改回 7 后再次执行原更新"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "第一个请求提交后版本变为 8，第二个请求的 version=7 条件不再匹配。受影响行数为 0 表示这次条件更新没有生效，应按冲突处理，而不是宣称成功或悄悄取消版本保护。重新读取能让调用方基于最新内容作出决定。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-007",
+    "dimension": "database",
+    "topicId": "database.transactional-outbox",
+    "topic": "事务 Outbox 与重复投递",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "服务更新订单后需要向消息系统发送事件，希望避免数据库已提交但应用在发送前崩溃导致事件永久丢失。采用同库事务 Outbox 时，哪些设计正确？",
+    "options": [
+      {
+        "id": "A",
+        "text": "把订单变更和待发送事件写入同一个数据库事务"
+      },
+      {
+        "id": "B",
+        "text": "发布者可能重发事件，消费者应根据事件 ID 等实现幂等处理"
+      },
+      {
+        "id": "C",
+        "text": "先提交订单，再仅在进程内存中记录待发送事件"
+      },
+      {
+        "id": "D",
+        "text": "只要使用 Outbox，就能保证消息绝不重复投递"
+      }
+    ],
+    "correct": [
+      "A",
+      "B"
+    ],
+    "explanation": "订单变更和 Outbox 记录同事务提交，使已提交业务对应的待发送事件能够被持久化发现。发布者发送成功后可能在标记完成前崩溃，恢复后会重发，所以 Outbox 不自动提供全链路恰好一次。消费者仍需可靠去重和幂等处理。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-NET-001",
+    "dimension": "network",
+    "topicId": "network.http-content-type",
+    "topic": "HTTP 内容类型",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "HTTP 客户端收到一个成功响应，需要知道响应体应按 JSON 还是其他格式解析。按 HTTP 语义，通常应读取哪个响应头？",
+    "options": [
+      {
+        "id": "A",
+        "text": "Content-Type"
+      },
+      {
+        "id": "B",
+        "text": "Host"
+      },
+      {
+        "id": "C",
+        "text": "Authorization"
+      },
+      {
+        "id": "D",
+        "text": "Retry-After"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Content-Type 描述响应表示的媒体类型，例如 application/json。Host 用于标识请求目标主机，Authorization 携带认证信息，Retry-After 描述何时适合重试；它们不能替代响应体的媒体类型声明。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-NET-002",
+    "dimension": "network",
+    "topicId": "network.tcp-stream",
+    "topic": "TCP 字节流与消息边界",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "应用使用 TCP 连接传送多条 JSON 消息，连接上的字节没有额外的应用层分帧。以下哪些描述正确？",
+    "options": [
+      {
+        "id": "A",
+        "text": "发送端调用一次 send，接收端就一定只需一次 recv 且恰好得到这一整条消息"
+      },
+      {
+        "id": "B",
+        "text": "只要使用 TCP，就不需要处理连接中断或读写超时"
+      },
+      {
+        "id": "C",
+        "text": "TCP 提供有序字节流，应用仍需自行规定如何识别一条消息结束"
+      },
+      {
+        "id": "D",
+        "text": "可以约定长度前缀，接收端按协议累计字节后再解析完整消息"
+      }
+    ],
+    "correct": [
+      "C",
+      "D"
+    ],
+    "explanation": "TCP 不保留应用的 send 调用边界，接收一次可能只拿到部分消息，也可能包含多条消息的字节。应用可采用长度前缀或其他可靠分帧规则，并累计到完整消息后解析。可靠传输语义不表示连接永不失败，也不替应用设置超时。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-NET-003",
+    "dimension": "network",
+    "topicId": "network.http-created",
+    "topic": "HTTP 创建资源响应",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "POST /orders 已成功创建一个新订单，希望返回表达“资源已经创建”的标准 HTTP 状态码。以下哪一个最符合这一语义？",
+    "options": [
+      {
+        "id": "A",
+        "text": "204 No Content，专门表示资源尚未创建"
+      },
+      {
+        "id": "B",
+        "text": "409 Conflict，表示任何成功写入"
+      },
+      {
+        "id": "C",
+        "text": "304 Not Modified，表示创建成功"
       },
       {
         "id": "D",
@@ -1580,1214 +818,631 @@
       }
     ],
     "correct": [
-      "B"
-    ],
-    "explanation": "在条件 GET 的缓存验证场景下，304 表示相应表示未修改，客户端可以继续使用已有副本。它不是重定向，也不是新建资源。",
-    "sources": [
-      {
-        "title": "RFC 9110 §15.4.5 304 Not Modified",
-        "url": "https://www.rfc-editor.org/rfc/rfc9110.html#section-15.4.5"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "NET-006",
-    "dimension": "network",
-    "topic": "TCP 序号与确认",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "一个 TCP 接收端此前没有缺失字节，现在连续收到序号 1001 开始的 8 个数据字节。忽略序号回绕，且此段不含 SYN 或 FIN。下一次累计 ACK 的确认号应为多少？",
-    "options": [
-      {
-        "id": "A",
-        "text": "1009"
-      },
-      {
-        "id": "B",
-        "text": "1001"
-      },
-      {
-        "id": "C",
-        "text": "1008"
-      },
-      {
-        "id": "D",
-        "text": "8"
-      }
-    ],
-    "correct": [
-      "A"
-    ],
-    "explanation": "这 8 个字节的序号是 1001 至 1008。TCP 累计确认号表示下一期待的字节序号，所以为 1009。题目排除了 SYN、FIN 占用序号的情况。",
-    "sources": [
-      {
-        "title": "RFC 9293 §3.3 序号",
-        "url": "https://www.rfc-editor.org/rfc/rfc9293.html#section-3.3"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "NET-007",
-    "dimension": "network",
-    "topic": "IPv4 子网",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "一个常规 IPv4 /26 子网共有多少个地址？若排除网络地址与定向广播地址，传统可分配主机地址数又是多少？",
-    "options": [
-      {
-        "id": "A",
-        "text": "32 个；30 个"
-      },
-      {
-        "id": "B",
-        "text": "256 个；254 个"
-      },
-      {
-        "id": "C",
-        "text": "64 个；62 个"
-      },
-      {
-        "id": "D",
-        "text": "128 个；126 个"
-      }
-    ],
-    "correct": [
-      "C"
-    ],
-    "explanation": "IPv4 地址共 32 位，/26 留下 6 位主机位，共 2^6=64 个地址。按题设的传统子网约定，扣除网络与广播地址后为 62；该计算不套用于 /31 点到点链路的特殊规则。",
-    "sources": [
-      {
-        "title": "RFC 1878 §2 IPv4 子网表",
-        "url": "https://www.rfc-editor.org/rfc/rfc1878.html#section-2"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "NET-008",
-    "dimension": "network",
-    "topic": "TLS 与 HTTPS",
-    "type": "multiple",
-    "difficulty": "medium",
-    "stem": "在正确验证证书、主机名并使用合适 TLS 配置的 HTTPS 连接中，以下哪些说法正确？",
-    "options": [
-      {
-        "id": "A",
-        "text": "证书验证参与确认所连接服务器的身份"
-      },
-      {
-        "id": "B",
-        "text": "TLS 可以保护传输中应用数据的机密性与完整性"
-      },
-      {
-        "id": "C",
-        "text": "TLS 会隐藏网络上所有 IP 地址与流量大小信息"
-      },
-      {
-        "id": "D",
-        "text": "TLS 保证服务端业务代码没有漏洞"
-      }
-    ],
-    "correct": [
-      "A",
-      "B"
-    ],
-    "explanation": "TLS 保护通道并提供对端身份验证机制，但不能替代应用漏洞修复。加密内容也不代表隐藏全部网络元数据。",
-    "sources": [
-      {
-        "title": "RFC 8446 §1 TLS 1.3 简介",
-        "url": "https://www.rfc-editor.org/rfc/rfc8446.html#section-1"
-      },
-      {
-        "title": "RFC 9110 §4.3.4: https Certificate Verification",
-        "url": "https://www.rfc-editor.org/rfc/rfc9110.html#section-4.3.4"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "NET-009",
-    "dimension": "network",
-    "topic": "QUIC 多路复用",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "一条 QUIC 连接中，流 A 的数据有缺口，流 B 的相关数据已完整到达。以下哪项表述最准确？",
-    "options": [
-      {
-        "id": "A",
-        "text": "QUIC 从不重传丢失的信息"
-      },
-      {
-        "id": "B",
-        "text": "B 必须等待 A 的全部缺失数据补齐，才允许按序交付任何数据"
-      },
-      {
-        "id": "C",
-        "text": "流间独立交付可避免由 A 缺口直接造成的 B 阻塞，但仍可能共享拥塞影响"
-      },
-      {
-        "id": "D",
-        "text": "A 与 B 必须使用不同的 UDP 端口"
-      }
-    ],
-    "correct": [
-      "C"
-    ],
-    "explanation": "QUIC 为不同流提供独立的有序字节流交付。A 的缺口不直接要求 B 等待；同一连接仍共享网络和拥塞控制相关影响，不能推断丢包对 B 毫无影响。",
-    "sources": [
-      {
-        "title": "RFC 9000 §2 Streams",
-        "url": "https://www.rfc-editor.org/rfc/rfc9000.html#section-2"
-      },
-      {
-        "title": "RFC 9002 §7 QUIC Congestion Control",
-        "url": "https://www.rfc-editor.org/rfc/rfc9002.html#section-7"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "NET-010",
-    "dimension": "network",
-    "topic": "HTTP 幂等性",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "客户端重复发送同一个 DELETE 请求。按 HTTP 的幂等语义，以下哪项正确？",
-    "options": [
-      {
-        "id": "A",
-        "text": "DELETE 与 GET 一样属于安全方法"
-      },
-      {
-        "id": "B",
-        "text": "预期资源状态效果相同，但各次响应状态码可以不同"
-      },
-      {
-        "id": "C",
-        "text": "每次响应正文和状态码必须逐字相同"
-      },
-      {
-        "id": "D",
-        "text": "服务器必须禁止第二次请求"
-      }
-    ],
-    "correct": [
-      "B"
-    ],
-    "explanation": "幂等约束的是重复相同请求的预期服务器效果。第一次删除可能成功，之后资源已不存在，因此响应可以不同。DELETE 是幂等方法，但不是安全方法。",
-    "sources": [
-      {
-        "title": "RFC 9110 §9.2.2 幂等方法",
-        "url": "https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "NET-011",
-    "dimension": "network",
-    "topic": "IPv6 与分片",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "按 IPv6 基础规范，沿途路由器遇到超出下一跳 MTU 的 IPv6 包时，关于分片的哪项说法正确？",
-    "options": [
-      {
-        "id": "A",
-        "text": "所有 IPv6 包都禁止携带 Fragment 扩展头"
-      },
-      {
-        "id": "B",
-        "text": "路由器必须像 IPv4 一样直接分片并转发"
-      },
-      {
-        "id": "C",
-        "text": "MTU 与 IPv6 无关"
-      },
-      {
-        "id": "D",
-        "text": "IPv6 分片由源节点完成，沿途路由器不执行分片"
-      }
-    ],
-    "correct": [
       "D"
     ],
-    "explanation": "IPv6 将分片交给源节点。沿途路由器不能直接分片；过大的包需要相应的差错处理，源端据此调整或使用分片机制。",
-    "sources": [
-      {
-        "title": "RFC 8200 §5 Packet Size Issues",
-        "url": "https://www.rfc-editor.org/rfc/rfc8200.html#section-5"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "201 Created 明确表示请求已完成并产生了新资源；响应可用 Location 等信息定位资源。204 表示成功且没有响应内容，不能解释成尚未创建；409 表示冲突；304 则用于条件请求中复用已有缓存表示的情形。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
   },
   {
-    "id": "NET-012",
+    "id": "SP5-NET-004",
     "dimension": "network",
-    "topic": "HTTP 缓存控制",
-    "type": "multiple",
-    "difficulty": "hard",
-    "stem": "针对 HTTP 响应中的 Cache-Control 指令，以下哪些解释正确？",
+    "topicId": "network.conditional-cache",
+    "topic": "HTTP 条件请求与 ETag",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "客户端已缓存某资源及其 ETag，随后发送 GET 并携带 If-None-Match。服务器确认该条件请求匹配当前资源表示且无需发送新的表示体。通常返回哪个状态码？",
     "options": [
       {
         "id": "A",
-        "text": "未限定字段名的 private 要求共享缓存不得存储响应"
+        "text": "201 Created"
       },
       {
         "id": "B",
-        "text": "max-age 指定 TLS 证书的有效期"
+        "text": "401 Unauthorized"
       },
       {
         "id": "C",
-        "text": "no-cache 一律禁止存储响应"
+        "text": "304 Not Modified"
       },
       {
         "id": "D",
-        "text": "no-store 要求缓存不要存储该响应"
+        "text": "500 Internal Server Error"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "GET 条件请求的实体标签匹配当前表示时，304 表示客户端可以继续使用已缓存的表示，响应不再发送新的表示体。ETag 是验证器，不是登录凭据，也不表示发生了服务器异常或新资源创建。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-NET-005",
+    "dimension": "network",
+    "topicId": "network.safe-retry",
+    "topic": "超时与安全重试",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "客户端调用扣款接口后超时，无法确认服务端是否已经完成扣款。关于重试，以下哪些做法合理？",
+    "options": [
+      {
+        "id": "A",
+        "text": "使用持久化的幂等键，并由服务端将去重记录与扣款效果可靠关联"
+      },
+      {
+        "id": "B",
+        "text": "只要客户端超时，就能确定服务端没有执行扣款，可以无条件再次扣款"
+      },
+      {
+        "id": "C",
+        "text": "取消所有超时设置，任何调用都无限等待"
+      },
+      {
+        "id": "D",
+        "text": "在业务允许重试且幂等得到保障时，设置总重试上限并使用退避，避免故障时集中重试"
       }
     ],
     "correct": [
       "A",
       "D"
     ],
-    "explanation": "no-store 约束存储；未限定字段名的 no-cache 可以允许存储，但再次使用前必须成功验证。private 限制共享缓存，不等于禁止个人缓存；max-age 约束新鲜度，不控制证书。",
-    "sources": [
-      {
-        "title": "RFC 9111 §5.2.2 响应缓存指令",
-        "url": "https://www.rfc-editor.org/rfc/rfc9111.html#section-5.2.2"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "超时只表示客户端没有在期限内拿到结果，不能证明服务端未执行。幂等键必须由服务端可靠保存并与业务效果关联，才能抑制重复效果。即使允许重试，也应限制次数或总时长并退避；无限等待或无条件重试都不能解决结果未知问题。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
   },
   {
-    "id": "OS-001",
-    "dimension": "os",
-    "topic": "进程抽象",
+    "id": "SP5-NET-006",
+    "dimension": "network",
+    "topicId": "network.proxy-trust",
+    "topic": "反向代理与转发头信任",
     "type": "single",
-    "difficulty": "easy",
-    "stem": "在操作系统基础语境下，进程最合适的简要描述是什么？",
+    "difficulty": "medium",
+    "stem": "应用部署在受控反向代理后，并按客户端 IP 执行部分限流。攻击者可以自行设置请求头 X-Forwarded-For。以下哪种处理更合适？",
     "options": [
       {
         "id": "A",
-        "text": "正在执行的程序及其执行状态、所需资源"
+        "text": "直接信任所有请求中该头的第一个值"
       },
       {
         "id": "B",
-        "text": "只能同时运行一次的程序源码"
+        "text": "只信任明确配置的代理来源，并由受信代理清理或规范化客户端可伪造的转发头，再按约定解析"
       },
       {
         "id": "C",
-        "text": "CPU 中的一条机器指令"
+        "text": "把该头当成已认证用户 ID 使用"
       },
       {
         "id": "D",
-        "text": "磁盘上的任意静态文本文件"
+        "text": "只要头名大小写正确，就认为它不可伪造"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "转发头本身不是可信身份凭据，直接接受客户端提交的值会让攻击者伪造限流依据。需要先建立受信代理边界，确保外部请求不能任意影响应用采用的客户端地址。具体地址选择还取决于代理链配置，不能只靠头名判断可信性。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-NET-007",
+    "dimension": "network",
+    "topicId": "network.session-request-security",
+    "topic": "Cookie 会话、CSRF 与对象授权",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "一个浏览器应用使用 Cookie 会话访问私有测评。以下哪些服务端措施分别有助于防止跨站伪造写请求或访问其他用户的测评？",
+    "options": [
+      {
+        "id": "A",
+        "text": "只设置 HttpOnly，就认为所有 CSRF 风险都已消失"
+      },
+      {
+        "id": "B",
+        "text": "按会话验证写请求的 CSRF Token，并结合来源检查"
+      },
+      {
+        "id": "C",
+        "text": "每次读取或修改测评时检查测评所属用户与当前用户是否一致"
+      },
+      {
+        "id": "D",
+        "text": "只配置 CORS，不再对私有对象检查所属用户"
+      }
+    ],
+    "correct": [
+      "B",
+      "C"
+    ],
+    "explanation": "CSRF 防护面向浏览器自动携带 Cookie 所带来的伪造请求风险，Token 与来源检查是相应的服务端措施。对象所属关系检查解决的是越权访问，两者不能互相替代。HttpOnly 限制脚本读取 Cookie；CORS 控制跨源脚本访问，都不能据此取消这些检查。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-OS-001",
+    "dimension": "os",
+    "topicId": "os.process-isolation",
+    "topic": "进程地址空间",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "同一操作系统上的两个普通用户态进程，没有显式共享内存等机制。关于它们的内存访问，以下哪项描述最准确？",
+    "options": [
+      {
+        "id": "A",
+        "text": "只要两个变量地址数值相同，进程就一定共享同一对象"
+      },
+      {
+        "id": "B",
+        "text": "各自通常拥有独立虚拟地址空间，不能把一个进程内的普通指针直接交给另一个进程解引用"
+      },
+      {
+        "id": "C",
+        "text": "所有进程自动共享同一个调用栈"
+      },
+      {
+        "id": "D",
+        "text": "只要进程属于同一用户，所有堆对象就自动共享"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "普通指针只在所属进程的地址空间内具有对应含义，相同的虚拟地址数值不代表两个进程访问同一对象。跨进程传递数据需要 IPC、显式共享内存等机制。相同用户身份也不会自动共享堆和调用栈。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-OS-002",
+    "dimension": "os",
+    "topicId": "os.thread-resources",
+    "topic": "线程共享与私有资源",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "在常见的同一进程多线程模型中，以下哪些描述正确？不考虑语言运行时额外施加的访问限制。",
+    "options": [
+      {
+        "id": "A",
+        "text": "线程通常共享进程的堆和全局数据，因此共享可变状态可能需要同步"
+      },
+      {
+        "id": "B",
+        "text": "每个线程的任意全局变量都天然是独立副本"
+      },
+      {
+        "id": "C",
+        "text": "每个线程通常有自己的调用栈和执行上下文"
+      },
+      {
+        "id": "D",
+        "text": "创建线程后会自动得到完全独立于进程的虚拟地址空间"
+      }
+    ],
+    "correct": [
+      "A",
+      "C"
+    ],
+    "explanation": "线程共享进程地址空间，堆和普通全局数据并非自动隔离；并发修改共享状态时可能需要同步。调用栈和寄存器等执行上下文则属于各线程自身。线程局部存储是额外机制，不能把所有全局变量都当成线程私有。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-OS-003",
+    "dimension": "os",
+    "topicId": "os.mutual-exclusion",
+    "topic": "共享计数器与临界区",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "共享计数器初始为 0。两个线程分别执行一次“读取、加 1、写回”，该复合操作不是原子的。要保证最终结果为 2，应采用哪种方法？",
+    "options": [
+      {
+        "id": "A",
+        "text": "把完整的读改写操作放入同一互斥锁保护的临界区，所有写入路径都遵守该锁"
+      },
+      {
+        "id": "B",
+        "text": "两个线程都先读取计数器，然后随机等待"
+      },
+      {
+        "id": "C",
+        "text": "仅把计数器变量名改得更长"
+      },
+      {
+        "id": "D",
+        "text": "只对读取加锁，写回时立即释放保护且不再同步"
       }
     ],
     "correct": [
       "A"
     ],
-    "explanation": "程序是静态描述；进程是其执行中的实例，包含地址空间、寄存器状态及相关资源。一个程序可以对应多个进程。",
-    "sources": [
-      {
-        "title": "Arpaci-Dusseau 与 Arpaci-Dusseau，OSTEP 第4章 Processes",
-        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-intro.pdf"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "读、改、写必须作为受保护的完整操作，否则两个线程可能都读到 0，随后分别写回 1，造成丢失更新。同一互斥锁能让遵守该锁的复合操作串行完成。只保护读取不足以保护整个更新过程，等待也不构成同步保证。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
   },
   {
-    "id": "OS-002",
+    "id": "SP5-OS-004",
     "dimension": "os",
-    "topic": "线程与共享",
+    "topicId": "os.blocking-io",
+    "topic": "阻塞 I/O 与事件循环",
     "type": "single",
     "difficulty": "easy",
-    "stem": "同一进程内的普通线程，通常共享以下哪项？",
+    "stem": "一个服务的单线程事件循环需要及时处理多个连接，但某请求执行数秒的阻塞文件读取。以下哪种处理最符合保持事件循环响应性的目标？",
     "options": [
       {
         "id": "A",
-        "text": "同一份当前函数调用栈"
+        "text": "在事件循环中不断空转，等待文件读取结束"
       },
       {
         "id": "B",
-        "text": "同一组正在执行的 CPU 寄存器值"
+        "text": "只增加 HTTP 请求头数量"
       },
       {
         "id": "C",
-        "text": "进程的虚拟地址空间"
+        "text": "认为函数写成 async 就会自动把内部阻塞读取变成非阻塞"
       },
       {
         "id": "D",
-        "text": "同一个程序计数器的实时值"
-      }
-    ],
-    "correct": [
-      "C"
-    ],
-    "explanation": "线程共享进程地址空间，可以访问共同的代码与堆对象；各线程有自己的执行位置、寄存器上下文和调用栈。",
-    "sources": [
-      {
-        "title": "OSTEP 第26章 Concurrency An Introduction",
-        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/threads-intro.pdf"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "OS-003",
-    "dimension": "os",
-    "topic": "进程状态",
-    "type": "single",
-    "difficulty": "easy",
-    "stem": "一个进程正在等待尚未完成的磁盘 I/O，且此时不能继续执行。它最接近哪种状态？",
-    "options": [
-      {
-        "id": "A",
-        "text": "就绪态"
-      },
-      {
-        "id": "B",
-        "text": "已终止态"
-      },
-      {
-        "id": "C",
-        "text": "运行态"
-      },
-      {
-        "id": "D",
-        "text": "阻塞态"
+        "text": "采用真正异步 I/O，或将阻塞操作交给受控的工作线程/执行器，并等待其结果"
       }
     ],
     "correct": [
       "D"
     ],
-    "explanation": "阻塞态表示等待某个事件后才能继续。就绪态表示已经能运行，只是在等 CPU；这与等待 I/O 完成不同。",
-    "sources": [
-      {
-        "title": "OSTEP 第4章 §4.4 Process States",
-        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-intro.pdf"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "事件循环所在的线程一旦被阻塞，其他连接的调度也会延迟。真正异步 I/O 或受控执行器能让等待不占住事件循环线程。async 关键字本身不会改写内部同步阻塞函数的执行方式；工作线程还需容量和超时控制。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
   },
   {
-    "id": "OS-004",
+    "id": "SP5-OS-005",
     "dimension": "os",
-    "topic": "线程执行状态",
+    "topicId": "os.deadlock-prevention",
+    "topic": "多锁与死锁风险",
     "type": "multiple",
     "difficulty": "easy",
-    "stem": "在同一进程的常见多线程模型中，以下哪些说法正确？",
+    "stem": "两个线程可能同时需要互斥锁 L1 和 L2。以下哪些做法可以降低或避免题设中的循环等待风险？",
     "options": [
       {
         "id": "A",
-        "text": "不同线程分别使用自己的调用栈"
+        "text": "线程甲先拿 L1 再拿 L2，线程乙必须反过来，才能保证公平"
       },
       {
         "id": "B",
-        "text": "不同线程分别保存自己的寄存器执行上下文"
+        "text": "所有相关代码统一按 L1 后 L2 的顺序获取这两把锁"
       },
       {
         "id": "C",
-        "text": "共享内存访问天然不会发生竞争"
+        "text": "给两个线程设置相同名称，就能避免死锁"
       },
       {
         "id": "D",
-        "text": "每个线程必然拥有彼此隔离的完整进程地址空间"
+        "text": "使用尝试获取/超时协议，获取第二把锁失败时释放已持有的锁后再按策略重试"
+      }
+    ],
+    "correct": [
+      "B",
+      "D"
+    ],
+    "explanation": "统一锁顺序能破坏这两把锁之间的循环等待条件。尝试获取失败后释放已有锁，也能避免一直持有一把锁等待另一把；这种方案仍需防范反复竞争和活锁。相反顺序获取正是典型死锁风险，线程名称不提供同步保证。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-OS-006",
+    "dimension": "os",
+    "topicId": "os.condition-variable",
+    "topic": "条件变量与谓词重检",
+    "type": "single",
+    "difficulty": "medium",
+    "stem": "消费者在互斥锁保护下检查队列是否为空，若为空则通过条件变量等待。生产者在同一锁保护下加入元素。消费者被唤醒并重新持锁后，为何通常应在 while 循环中再次检查队列非空，而不是只检查一次？",
+    "options": [
+      {
+        "id": "A",
+        "text": "因为被唤醒就一定有无限多个元素"
+      },
+      {
+        "id": "B",
+        "text": "因为通知本身会替消费者自动取走元素"
+      },
+      {
+        "id": "C",
+        "text": "因为唤醒不等于谓词必然成立，可能有虚假唤醒，或元素已被其他消费者取走"
+      },
+      {
+        "id": "D",
+        "text": "因为 while 能替代互斥锁，不再需要持锁检查队列"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "条件变量的通知只表示状态可能发生变化，不等于把资源保留给特定等待者。等待返回并重新获得锁时，队列可能仍为空，必须重新检查谓词；while 正是为了把等待和条件检查关联起来。循环不能替代对共享状态的互斥保护。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-OS-007",
+    "dimension": "os",
+    "topicId": "os.bounded-buffer",
+    "topic": "有界缓冲区与信号量",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "容量为 N 的共享队列初始为空，empty 信号量初值 N，full 初值 0，另有互斥锁保护队列操作。正常运行时，以下哪些操作顺序正确？只讨论操作均成功且没有取消或异常的情况。",
+    "options": [
+      {
+        "id": "A",
+        "text": "生产者先等待 empty，再持互斥锁入队；释放锁后增加 full"
+      },
+      {
+        "id": "B",
+        "text": "消费者先等待 full，再持互斥锁出队；释放锁后增加 empty"
+      },
+      {
+        "id": "C",
+        "text": "生产者先持互斥锁，再在队列满时一直等待 empty，消费者也必须持该锁才能出队"
+      },
+      {
+        "id": "D",
+        "text": "消费者无需检查 full，直接出队，队列为空时读取未初始化数据"
       }
     ],
     "correct": [
       "A",
       "B"
     ],
-    "explanation": "线程需要独立的寄存器上下文和栈，才能从各自位置继续执行。共享地址空间带来通信便利，也需要同步机制保护并发访问。",
-    "sources": [
-      {
-        "title": "OSTEP 第26章 线程状态与共享地址空间",
-        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/threads-intro.pdf"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "empty 表示可用槽位，full 表示已放入的元素数量；生产者和消费者先获得对应配额，再短暂持锁改变队列，最后释放对方配额。若生产者持队列锁等待空位，消费者可能无法获得锁来释放空位。题目排除了异常路径；实际实现还需处理取消后的配额恢复。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
   },
   {
-    "id": "OS-005",
-    "dimension": "os",
-    "topic": "CPU 调度",
+    "id": "SP5-SWE-001",
+    "dimension": "software",
+    "topicId": "software.unit-testing",
+    "topic": "单元测试与外部依赖",
     "type": "single",
-    "difficulty": "medium",
-    "stem": "在轮转调度中，其他条件相同且忽略极端情况，过度缩短时间片最直接的代价是什么？",
+    "difficulty": "easy",
+    "stem": "一个函数按规则计算订单折扣，并调用外部 HTTP 服务查询会员等级。要让折扣规则的单元测试稳定且不依赖真实网络，哪种方式更合适？",
     "options": [
       {
         "id": "A",
-        "text": "更频繁的上下文切换可能增加开销"
+        "text": "每次都调用生产服务，失败时重新运行直到成功"
       },
       {
         "id": "B",
-        "text": "磁盘容量必然下降"
+        "text": "在测试中忽略全部断言"
       },
       {
         "id": "C",
-        "text": "所有进程从此无法被抢占"
+        "text": "注入可替换的会员查询依赖，测试时使用返回已知等级的替身"
       },
       {
         "id": "D",
-        "text": "系统不再需要调度器"
-      }
-    ],
-    "correct": [
-      "A"
-    ],
-    "explanation": "较短时间片通常有利于交互响应，但切换次数增多会消耗时间。时间片选择需要在响应性与切换开销之间权衡，不能认为越短越好。",
-    "sources": [
-      {
-        "title": "OSTEP 第7章 §7.6 Round Robin",
-        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched.pdf"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "OS-006",
-    "dimension": "os",
-    "topic": "分页与地址拆分",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "一个按字节寻址的系统使用 20 位虚拟地址、4 KiB 固定大小页面。页内偏移和虚拟页号各占多少位？",
-    "options": [
-      {
-        "id": "A",
-        "text": "16 位与 4 位"
-      },
-      {
-        "id": "B",
-        "text": "8 位与 12 位"
-      },
-      {
-        "id": "C",
-        "text": "12 位与 8 位"
-      },
-      {
-        "id": "D",
-        "text": "10 位与 10 位"
+        "text": "把生产会员访问令牌硬编码在测试源码中"
       }
     ],
     "correct": [
       "C"
     ],
-    "explanation": "4 KiB = 4096 字节 = 2^12 字节，所以页内偏移需要 12 位；虚拟地址剩余的 20-12=8 位表示虚拟页号。",
-    "sources": [
-      {
-        "title": "OSTEP 第18章 Paging Introduction",
-        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/vm-paging.pdf"
-      }
-    ],
+    "explanation": "依赖注入使测试能提供确定的会员等级，从而专注验证折扣规则并避免网络波动。真实集成行为应另做集成测试；重复运行直到成功会掩盖不稳定性，忽略断言没有验证作用，生产凭据也不应进入测试源码。",
+    "sources": [],
     "version": 1,
-    "status": "published"
+    "status": "draft"
   },
   {
-    "id": "OS-007",
-    "dimension": "os",
-    "topic": "地址转换缓存",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "TLB 的主要作用是什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "让所有进程使用同一张页表"
-      },
-      {
-        "id": "B",
-        "text": "缓存近期使用的虚拟地址到物理地址的转换信息"
-      },
-      {
-        "id": "C",
-        "text": "替代磁盘保存掉电后的数据"
-      },
-      {
-        "id": "D",
-        "text": "缓存所有文件的完整内容"
-      }
-    ],
-    "correct": [
-      "B"
-    ],
-    "explanation": "TLB 是地址转换缓存，可减少重复查询页表的成本。TLB 未命中不等于一定发生缺页；页表中仍可能已有有效映射。",
-    "sources": [
-      {
-        "title": "OSTEP 第19章 Translation Lookaside Buffers",
-        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/vm-tlbs.pdf"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "OS-008",
-    "dimension": "os",
-    "topic": "互斥与临界区",
+    "id": "SP5-SWE-002",
+    "dimension": "software",
+    "topicId": "software.safe-logging",
+    "topic": "日志与敏感信息",
     "type": "multiple",
-    "difficulty": "medium",
-    "stem": "两个线程都对同一共享计数器执行由读取、加一、写回组成的非原子更新。以下哪些做法或判断正确？",
+    "difficulty": "easy",
+    "stem": "服务需要排查跨多个组件的请求失败，同时保护用户凭据。以下哪些日志做法合理？",
     "options": [
       {
         "id": "A",
-        "text": "只把计数器声明为 volatile，就必然使整段更新原子化"
+        "text": "把用户完整密码和会话 Cookie 原样写入每一条日志"
       },
       {
         "id": "B",
-        "text": "只给其中一个线程加锁，就能约束另一个不加锁线程"
+        "text": "为了减少日志量，把所有错误都记录为成功"
       },
       {
         "id": "C",
-        "text": "让两个线程使用同一把互斥锁保护完整更新，可避免这两个更新相互覆盖"
+        "text": "记录请求关联 ID、操作名和必要的错误类别，便于串联事件"
       },
       {
         "id": "D",
-        "text": "同步必须覆盖读取到写回的完整临界区"
+        "text": "对令牌等敏感字段脱敏或不记录，并限制日志访问权限"
       }
     ],
     "correct": [
       "C",
       "D"
     ],
-    "explanation": "保护读改写操作需要共同遵守同一同步协议，并覆盖整个临界区。只锁一个线程或只给普通变量加 volatile，不能普遍保证复合操作的原子性。",
-    "sources": [
-      {
-        "title": "OSTEP 第28章 Locks",
-        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/threads-locks.pdf"
-      }
-    ],
+    "explanation": "关联 ID 和错误类别有助于定位失败，同时应遵守最小必要记录原则，不把密码、令牌和会话凭据写入日志。脱敏和访问限制降低敏感信息暴露风险。将失败伪装成成功会破坏可观测性，无法帮助故障排查。",
+    "sources": [],
     "version": 1,
-    "status": "published"
+    "status": "draft"
   },
   {
-    "id": "OS-009",
-    "dimension": "os",
-    "topic": "条件变量",
+    "id": "SP5-SWE-003",
+    "dimension": "software",
+    "topicId": "software.idempotency-test",
+    "topic": "幂等请求的验收测试",
     "type": "single",
-    "difficulty": "hard",
-    "stem": "消费者使用条件变量等待队列非空。获得互斥锁后，为什么通常应写 while queue_is_empty(): wait(...)，而不是只检查一次 if？",
+    "difficulty": "easy",
+    "stem": "创建订单接口约定：同一用户使用同一幂等键和相同请求体重复调用，应返回同一订单且只产生一次扣库存效果。哪项测试最直接验证这一约定？",
     "options": [
       {
         "id": "A",
-        "text": "if 只能检查数值，不能检查队列"
+        "text": "只确认两次响应都是合法 JSON"
       },
       {
         "id": "B",
-        "text": "条件变量只允许在循环内调用，否则语法错误"
+        "text": "先后提交两次相同键和相同请求体，检查订单 ID 一致、订单数量只增加 1、库存只减少一次"
       },
       {
         "id": "C",
-        "text": "while 会让等待线程永久独占锁"
+        "text": "两次请求使用不同幂等键，只检查日志没有异常"
       },
       {
         "id": "D",
-        "text": "被唤醒并重新获得锁后，条件可能已经不成立，需要再次检查"
-      }
-    ],
-    "correct": [
-      "D"
-    ],
-    "explanation": "唤醒与重新获得锁之间，其他线程可能先消费元素；某些实现还允许伪唤醒。wait 返回不等于条件始终成立，所以应在持锁时循环检查共享条件。",
-    "sources": [
-      {
-        "title": "OSTEP 第30章 Condition Variables",
-        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/threads-cv.pdf"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "OS-010",
-    "dimension": "os",
-    "topic": "死锁与锁顺序",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "线程 T1 先锁 A 再锁 B，线程 T2 先锁 B 再锁 A，可能互相等待。若只考虑这两把互斥锁，哪种设计可消除该锁顺序造成的环路？",
-    "options": [
-      {
-        "id": "A",
-        "text": "只增加 CPU 核心数"
-      },
-      {
-        "id": "B",
-        "text": "规定所有线程都先获取 A，再获取 B"
-      },
-      {
-        "id": "C",
-        "text": "把 A 和 B 的名字交换，其他代码不变"
-      },
-      {
-        "id": "D",
-        "text": "让线程反复更快地尝试获取第二把锁"
+        "text": "只检查按钮颜色没有变化"
       }
     ],
     "correct": [
       "B"
     ],
-    "explanation": "统一锁获取顺序可以破坏循环等待条件。交换名字、忙等或增加核心数不会改变相反获取顺序形成的环路；此结论只针对题设的锁依赖。",
-    "sources": [
-      {
-        "title": "OSTEP 第32章 §32.3 Deadlock Bugs",
-        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/threads-bugs.pdf"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "验收需要同时检查返回对象一致性和持久化业务效果：只返回同一状态码或合法 JSON 不能证明没有重复创建或重复扣库存。使用不同键也无法直接覆盖题目规定的同键重放行为；并发重放等情况可另补测试。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
   },
   {
-    "id": "OS-011",
-    "dimension": "os",
-    "topic": "页面置换",
+    "id": "SP5-SWE-004",
+    "dimension": "software",
+    "topicId": "software.merge-review",
+    "topic": "版本控制与冲突处理",
     "type": "single",
-    "difficulty": "hard",
-    "stem": "内存有 3 个初始为空的页框，采用精确 LRU 置换。依次访问页 1、2、3、1、4，在访问页 4 时应淘汰哪页？",
+    "difficulty": "easy",
+    "stem": "合并分支时，两个提交修改了同一接口的校验逻辑并产生冲突。哪种处理最合理？",
     "options": [
       {
         "id": "A",
-        "text": "页 1"
+        "text": "结合接口约定理解双方修改，解决语义冲突后运行相关测试并检查最终差异"
       },
       {
         "id": "B",
-        "text": "页 3"
+        "text": "总是选择当前分支全部内容，不必理解另一分支"
       },
       {
         "id": "C",
-        "text": "页 2"
+        "text": "直接删除有冲突的整个函数，让版本控制工具不再报冲突"
       },
       {
         "id": "D",
-        "text": "页 4"
+        "text": "只要冲突标记消失，就能证明业务行为正确"
       }
     ],
     "correct": [
-      "C"
+      "A"
     ],
-    "explanation": "装入 1、2、3 后，再访问 1 使其成为最近使用；此时从最久到最近为 2、3、1。访问新页 4 时淘汰最久未用的页 2。",
-    "sources": [
-      {
-        "title": "OSTEP 第22章 Beyond Physical Memory Policies",
-        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys-policy.pdf"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "文本冲突解决不代表语义正确，需要理解两个修改的意图并对照接口约定组合结果，再验证相关行为。机械选择一方或删掉函数可能丢失必要逻辑。检查最终差异还能发现意外删除或残留冲突标记。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
   },
   {
-    "id": "OS-012",
-    "dimension": "os",
-    "topic": "崩溃一致性与日志",
+    "id": "SP5-SWE-005",
+    "dimension": "software",
+    "topicId": "software.ci-delivery",
+    "topic": "持续集成与依赖锁定",
     "type": "multiple",
-    "difficulty": "hard",
-    "stem": "关于采用预写日志思想的文件系统日志机制，以下哪些说法正确？",
+    "difficulty": "easy",
+    "stem": "团队希望每次提交都能重复检查后端项目质量，并在校验失败时阻止自动部署。以下哪些流水线设计符合这一目标？",
     "options": [
       {
         "id": "A",
-        "text": "只记录元数据的日志，天然包含所有用户文件数据的最新内容"
+        "text": "按锁定的依赖版本安装，再执行约定的测试和静态检查"
       },
       {
         "id": "B",
-        "text": "崩溃恢复可根据已提交的日志事务恢复一致性"
+        "text": "每次随机选取依赖版本，以便自动验证所有组合"
       },
       {
         "id": "C",
-        "text": "只要启用了日志，任意刚返回的 write 都必然在断电后保留"
+        "text": "将所有校验失败都转换为退出码 0"
       },
       {
         "id": "D",
-        "text": "恢复所需日志应先持久化，再把相应更新写入其最终位置"
+        "text": "部署阶段依赖校验阶段成功，不把失败当成可部署结果"
       }
     ],
     "correct": [
-      "B",
+      "A",
       "D"
     ],
-    "explanation": "日志通过先记录可恢复的事务信息来支持崩溃恢复。记录范围可能仅为元数据；是否已保证文件数据持久化还取决于同步调用和文件系统约定，不能由“启用日志”直接推出。",
-    "sources": [
-      {
-        "title": "OSTEP 第42章 Crash Consistency FSCK and Journaling",
-        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/file-journaling.pdf"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "锁定依赖有助于重复构建，测试和静态检查提供可核对的质量信号；部署阶段应以这些检查成功为前提。随机依赖版本不能提供稳定基线，把失败改成成功会让门禁失效。依赖升级可以另走受控验证流程。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
   },
   {
-    "id": "SE-001",
+    "id": "SP5-SWE-006",
     "dimension": "software",
-    "topic": "测试层次",
+    "topicId": "software.schema-migration",
+    "topic": "兼容性数据库迁移",
     "type": "single",
-    "difficulty": "easy",
-    "stem": "下面哪种测试最适合作为组件（单元）测试的例子？",
+    "difficulty": "medium",
+    "stem": "服务滚动发布期间，新旧实例会短时间并存。准备把数据库字段 old_name 迁移为 new_name。哪种方案更能降低旧实例立即失效的风险？",
     "options": [
       {
         "id": "A",
-        "text": "独立调用一个纯函数，比较返回值和已知期望值"
+        "text": "先删除 old_name，再慢慢升级应用"
       },
       {
         "id": "B",
-        "text": "同时连接支付、邮件和物流服务验证完整系统"
+        "text": "只升级一台实例后，假定所有实例已同时使用新字段"
       },
       {
         "id": "C",
-        "text": "邀请用户判断整个平台是否满足业务目标"
+        "text": "直接修改所有历史备份中的字段名，作为唯一迁移措施"
       },
       {
         "id": "D",
-        "text": "在真实浏览器中完成注册、付款、发货全流程"
+        "text": "先扩展兼容结构并完成过渡读写/回填，再确认旧实例退出后收缩旧结构"
       }
     ],
     "correct": [
-      "A"
+      "D"
     ],
-    "explanation": "组件测试聚焦独立组件的行为。题中的纯函数例子不需要跨服务协作；其他选项涉及系统流程、集成或用户验收。",
-    "sources": [
-      {
-        "title": "ISTQB CTFL 4.0.1 §2.2 测试级别与类型",
-        "url": "https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf#page=29"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "扩展—迁移—收缩让新旧实例在过渡期有兼容的数据结构可用。回填和过渡读写需按实际一致性要求设计，确认旧版本不再依赖旧字段后才能移除。先删字段会使仍运行的旧代码失败，修改备份也不能替代在线迁移。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
   },
   {
-    "id": "SE-002",
+    "id": "SP5-SWE-007",
     "dimension": "software",
-    "topic": "验收标准",
-    "type": "single",
-    "difficulty": "easy",
-    "stem": "对“用户可以下载自己的测评报告”这一需求，以下哪项是可直接验证的验收标准？",
-    "options": [
-      {
-        "id": "A",
-        "text": "页面应该让所有人都非常满意"
-      },
-      {
-        "id": "B",
-        "text": "已登录用户点击下载后，得到仅包含本人已提交测评的文件"
-      },
-      {
-        "id": "C",
-        "text": "下载功能要采用最流行的技术"
-      },
-      {
-        "id": "D",
-        "text": "报告功能要足够先进"
-      }
-    ],
-    "correct": [
-      "B"
-    ],
-    "explanation": "验收标准需要明确前置条件、动作和可观察结果。“已登录用户下载本人已提交测评”可以设计具体测试，也明确了数据归属；其他说法缺少可检验条件。",
-    "sources": [
-      {
-        "title": "ISTQB CTFL 4.0.1 §4.5.2 验收标准",
-        "url": "https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf#page=45"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "SE-003",
-    "dimension": "software",
-    "topic": "Git 暂存区",
-    "type": "single",
-    "difficulty": "easy",
-    "stem": "在 Git 中，执行 git add report.txt 后又修改了 report.txt，随后直接 git commit。默认提交哪个版本的 report.txt？",
-    "options": [
-      {
-        "id": "A",
-        "text": "执行 git add 时暂存的版本"
-      },
-      {
-        "id": "B",
-        "text": "Git 会禁止任何提交"
-      },
-      {
-        "id": "C",
-        "text": "上一次提交中的旧版本"
-      },
-      {
-        "id": "D",
-        "text": "所有最新工作区修改，无论是否暂存"
-      }
-    ],
-    "correct": [
-      "A"
-    ],
-    "explanation": "git add 把当时的文件内容放入暂存区。之后的工作区修改要再次 add 才进入这次提交；普通 git commit 提交暂存区快照。",
-    "sources": [
-      {
-        "title": "Pro Git 第2章 Recording Changes to the Repository",
-        "url": "https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "SE-004",
-    "dimension": "software",
-    "topic": "测试结论与静态评审",
+    "topicId": "software.message-idempotency",
+    "topic": "至少一次投递与消费幂等",
     "type": "multiple",
-    "difficulty": "easy",
-    "stem": "以下关于软件验证的说法，哪些正确？",
+    "difficulty": "medium",
+    "stem": "消息系统承诺至少一次投递，因此同一消息可能被多次消费。服务需要避免重复增加用户积分。以下哪些做法合理？",
     "options": [
       {
         "id": "A",
-        "text": "自动化测试数量越多，就必然越准确地覆盖用户需求"
+        "text": "先永久标记消费成功，再执行积分修改，失败时不补偿也不重试"
       },
       {
         "id": "B",
-        "text": "需求评审可以在执行程序之前发现歧义和遗漏"
+        "text": "以消息唯一 ID 建立去重记录，并把去重判断/写入与积分修改放在同一可靠事务边界内"
       },
       {
         "id": "C",
-        "text": "有限的一组测试全部通过，不能据此断言所有输入与环境都没有缺陷"
+        "text": "增加重复消息和并发重复消费测试，检查最终积分只增加一次"
       },
       {
         "id": "D",
-        "text": "测试一旦通过，就不再需要需求确认"
+        "text": "多实例消费者只在各自进程内存里记录已消费 ID，即可保证重启和跨实例的全局去重"
       }
     ],
     "correct": [
       "B",
       "C"
     ],
-    "explanation": "测试结果只支持已检验的行为和条件，不能自动证明所有情况正确。静态评审可发现需求问题；测试价值还取决于断言、覆盖范围和与需求的一致性。",
-    "sources": [
-      {
-        "title": "ISTQB CTFL 4.0.1 §1.3 测试原则与第3章静态测试",
-        "url": "https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf#page=17"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "SE-005",
-    "dimension": "software",
-    "topic": "边界值测试",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "某字段仅接受整数 1 至 100（含两端）。希望检查合法区间两端及紧邻其外的非法值，哪组输入最直接？",
-    "options": [
-      {
-        "id": "A",
-        "text": "20、40、60、80"
-      },
-      {
-        "id": "B",
-        "text": "0、1、100、101"
-      },
-      {
-        "id": "C",
-        "text": "2、3、98、99"
-      },
-      {
-        "id": "D",
-        "text": "1、25、50、75"
-      }
-    ],
-    "correct": [
-      "B"
-    ],
-    "explanation": "0 和 101 紧邻合法范围之外，1 和 100 是两端合法值，可检查边界是否被错误包含或排除。该组用例不代表覆盖了所有业务规则。",
-    "sources": [
-      {
-        "title": "ISTQB CTFL 4.0.1 §4.2.2 边界值分析",
-        "url": "https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf#page=40"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "SE-006",
-    "dimension": "software",
-    "topic": "数据库集成测试",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "一个注册接口需要写入用户表，并依赖数据库唯一约束阻止重复邮箱。哪种测试最能直接验证接口与真实约束的协作？",
-    "options": [
-      {
-        "id": "A",
-        "text": "连接独立测试数据库，重复注册同一邮箱并检查失败响应和记录数量"
-      },
-      {
-        "id": "B",
-        "text": "只检查按钮颜色"
-      },
-      {
-        "id": "C",
-        "text": "用 mock 强制数据库每次都返回成功"
-      },
-      {
-        "id": "D",
-        "text": "只确认函数名包含 register"
-      }
-    ],
-    "correct": [
-      "A"
-    ],
-    "explanation": "这里的风险在接口与数据库约束之间。使用独立测试库可以实际触发约束，并验证错误处理及最终数据；把数据库始终 mock 成成功会绕开这个风险。",
-    "sources": [
-      {
-        "title": "pytest 官方文档：fixtures 与测试资源隔离",
-        "url": "https://docs.pytest.org/en/stable/how-to/fixtures.html"
-      },
-      {
-        "title": "ISTQB CTFL 4.0.1 §2.2.1 Test Levels",
-        "url": "https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf#page=29"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "SE-007",
-    "dimension": "software",
-    "topic": "Git 合并冲突",
-    "type": "single",
-    "difficulty": "medium",
-    "stem": "Git 合并发生内容冲突后，正确的常规处理流程是什么？",
-    "options": [
-      {
-        "id": "A",
-        "text": "检查并编辑冲突内容，确认正确结果，git add 标记已解决，再完成提交"
-      },
-      {
-        "id": "B",
-        "text": "重复执行 git status 直到 Git 自动选择一方"
-      },
-      {
-        "id": "C",
-        "text": "删除 .git 目录后重新提交"
-      },
-      {
-        "id": "D",
-        "text": "只把冲突标记隐藏在编辑器中"
-      }
-    ],
-    "correct": [
-      "A"
-    ],
-    "explanation": "内容冲突需要根据两侧修改的意图确定最终内容。暂存已解决文件后才可完成合并提交；删除仓库元数据或只隐藏标记并不会解决冲突。",
-    "sources": [
-      {
-        "title": "Pro Git 第3章 Basic Branching and Merging",
-        "url": "https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "SE-008",
-    "dimension": "software",
-    "topic": "持续集成",
-    "type": "multiple",
-    "difficulty": "medium",
-    "stem": "关于持续集成（CI），以下哪些说法正确？",
-    "options": [
-      {
-        "id": "A",
-        "text": "可以在提交或拉取请求事件后自动执行构建与测试"
-      },
-      {
-        "id": "B",
-        "text": "CI 的唯一职责是替代需求分析"
-      },
-      {
-        "id": "C",
-        "text": "失败日志可以帮助定位哪些检查未通过"
-      },
-      {
-        "id": "D",
-        "text": "CI 测试通过就能证明生产环境永不故障"
-      }
-    ],
-    "correct": [
-      "A",
-      "C"
-    ],
-    "explanation": "CI 自动执行约定的检查并展示结果，有助于及时发现回归。它不替代需求分析，也不覆盖所有生产环境、数据和运行条件。",
-    "sources": [
-      {
-        "title": "GitHub Docs：Understanding GitHub Actions",
-        "url": "https://docs.github.com/en/actions/get-started/understanding-github-actions"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "SE-009",
-    "dimension": "software",
-    "topic": "分支覆盖与路径",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "函数先独立判断 if x > 0，再独立判断 if y > 0，两处 if 都没有 else。测试输入只有 (1,1) 和 (-1,-1)。对这两个布尔判断的 True/False 结果，哪项正确？",
-    "options": [
-      {
-        "id": "A",
-        "text": "已覆盖四种 True/False 组合"
-      },
-      {
-        "id": "B",
-        "text": "分支覆盖和所有路径覆盖在任何程序中都相同"
-      },
-      {
-        "id": "C",
-        "text": "仍未覆盖任何 False 分支"
-      },
-      {
-        "id": "D",
-        "text": "各判断的 True、False 都已覆盖，但未覆盖两种混合组合"
-      }
-    ],
-    "correct": [
-      "D"
-    ],
-    "explanation": "两次测试覆盖了每个判断的真、假结果，却只走了“真真”和“假假”，没有“真假”“假真”。因此分支结果覆盖不能自动等同于全部组合或路径覆盖。",
-    "sources": [
-      {
-        "title": "coverage.py 官方文档：Branch coverage measurement",
-        "url": "https://coverage.readthedocs.io/en/latest/branch.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "SE-010",
-    "dimension": "software",
-    "topic": "测试清理与 fixture",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "一个 pytest 的 yield fixture 已成功执行到 yield，并把临时资源交给测试。测试随后因 AssertionError 失败。在正常 pytest 测试收尾流程中，yield 后的清理代码会怎样？",
-    "options": [
-      {
-        "id": "A",
-        "text": "自动被跳过，因为测试失败"
-      },
-      {
-        "id": "B",
-        "text": "仍会被执行，以便清理资源"
-      },
-      {
-        "id": "C",
-        "text": "只有测试成功时才执行"
-      },
-      {
-        "id": "D",
-        "text": "会在 yield 之前执行"
-      }
-    ],
-    "correct": [
-      "B"
-    ],
-    "explanation": "yield fixture 把初始化和收尾关联起来。只要初始化已成功到达 yield，正常收尾阶段会运行其后的代码；这与初始化在 yield 前失败、或进程被强制终止等情况不同。",
-    "sources": [
-      {
-        "title": "pytest 官方文档：Teardown and cleanup",
-        "url": "https://docs.pytest.org/en/stable/how-to/fixtures.html#teardown-cleanup-aka-fixture-finalization"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "SE-011",
-    "dimension": "software",
-    "topic": "对象级授权",
-    "type": "single",
-    "difficulty": "hard",
-    "stem": "学生 A 将请求路径中的报告 ID 换成学生 B 的报告 ID。哪项服务端控制直接防止 A 读取 B 的私有报告？",
-    "options": [
-      {
-        "id": "A",
-        "text": "只在前端隐藏其他用户的链接"
-      },
-      {
-        "id": "B",
-        "text": "每次请求都将已认证用户与目标报告的所有者或授权规则核对"
-      },
-      {
-        "id": "C",
-        "text": "报告 ID 足够长，所以无需检查权限"
-      },
-      {
-        "id": "D",
-        "text": "只检查用户是否已经登录"
-      }
-    ],
-    "correct": [
-      "B"
-    ],
-    "explanation": "登录只回答“是谁”，对象授权还要回答“能否访问这个报告”。服务端必须在目标对象层面验证访问权限；难猜 ID 和前端隐藏都不能替代该检查。",
-    "sources": [
-      {
-        "title": "OWASP API Security 2023：API1 Broken Object Level Authorization",
-        "url": "https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/"
-      }
-    ],
-    "version": 1,
-    "status": "published"
-  },
-  {
-    "id": "SE-012",
-    "dimension": "software",
-    "topic": "SQL 注入防护",
-    "type": "multiple",
-    "difficulty": "hard",
-    "stem": "构造 SQL 查询时，哪些做法或判断正确？",
-    "options": [
-      {
-        "id": "A",
-        "text": "必须动态选择列名时，可把选择限制为代码内定义的允许列表"
-      },
-      {
-        "id": "B",
-        "text": "只要过滤一个单引号字符，就能保证任何数据库与查询方式都安全"
-      },
-      {
-        "id": "C",
-        "text": "把用户提供的值通过参数绑定传给查询，而不是拼接进 SQL 文本"
-      },
-      {
-        "id": "D",
-        "text": "任何位置都能用值参数代替 SQL 标识符，例如表名"
-      }
-    ],
-    "correct": [
-      "A",
-      "C"
-    ],
-    "explanation": "参数化查询把值与 SQL 语法分开；表名、列名等通常不能作为普通值参数绑定，应从已知允许列表选择。简单字符过滤不能提供普遍的注入防护。",
-    "sources": [
-      {
-        "title": "OWASP SQL Injection Prevention Cheat Sheet",
-        "url": "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html"
-      }
-    ],
-    "version": 1,
-    "status": "published"
+    "explanation": "只有去重记录与业务效果可靠关联，才能防止两个消费者都通过检查后重复修改积分。先标记再修改若中间失败可能永久漏处理；各进程内存也无法覆盖重启与其他实例。重复及并发消费测试直接验证最终业务效果，而不是仅看消息处理次数。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
   }
 ]
