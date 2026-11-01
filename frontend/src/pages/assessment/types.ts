@@ -22,7 +22,7 @@ export type Attempt = {
   answers: Answers
 }
 
-export type Assessment_result = {
+export type AssessmentResult = {
   id: string
   roleId: string
   roleName: string

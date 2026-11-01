@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { create_attempt, get_attempt, save_answers, submit_attempt } from '../../api'
+import { createAttempt, getAttempt, saveAnswers, submitAttempt } from '../../api'
 import type { Answers, Attempt, Question } from './types'
 import './assessment.css'
 
-type Assessment_props = {
-  role_id?: string
-  attempt_id?: string
-  on_result?: (id: string) => void
+type AssessmentProps = {
+  roleId?: string
+  attemptId?: string
+  onResult?: (id: string) => void
 }
 
-function same_answers(questions: Question[], left: Answers, right: Answers) {
+function sameAnswers(questions: Question[], left: Answers, right: Answers) {
   return questions.every((question) => {
     const a = left[question.id] ?? []
     const b = right[question.id] ?? []
@@ -17,21 +17,22 @@ function same_answers(questions: Question[], left: Answers, right: Answers) {
   })
 }
 
-function Assessment(props: Assessment_props) {
-  return <Assessment_content key={`${props.attempt_id ?? ''}:${props.role_id ?? ''}`} {...props} />
+function Assessment(props: AssessmentProps) {
+  return <AssessmentContent key={`${props.attemptId ?? ''}:${props.roleId ?? ''}`} {...props} />
 }
 
-function Assessment_content({ role_id, attempt_id, on_result }: Assessment_props) {
-  const [current, set_current] = useState(0)
-  const [answers, set_answers] = useState<Answers>({})
-  const [attempt, set_attempt] = useState<Attempt | null>(null)
-  const [loading, set_loading] = useState(Boolean(role_id || attempt_id))
-  const [saving, set_saving] = useState(false)
-  const [submitting, set_submitting] = useState(false)
-  const [error, set_error] = useState('')
-  const [retry, set_retry] = useState(0)
+function AssessmentContent({ roleId, attemptId, onResult }: AssessmentProps) {
+  const [current, setCurrent] = useState(0)
+  const [answers, setAnswers] = useState<Answers>({})
+  const [attempt, setAttempt] = useState<Attempt | null>(null)
+  const [loading, setLoading] = useState(Boolean(roleId || attemptId))
+  const [saving, setSaving] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [retry, setRetry] = useState(0)
   const pending = useRef(false)
   const request = useRef<AbortController | null>(null)
+  const resultShown = useRef(false)
   const questions = attempt?.questions ?? []
   const total = questions.length
   const index = Math.max(0, Math.min(current, total - 1))
@@ -40,73 +41,89 @@ function Assessment_content({ role_id, attempt_id, on_result }: Assessment_props
   const answered = questions.filter((item) => (answers[item.id]?.length ?? 0) > 0).length
   const progress = total > 0 ? Math.round((answered / total) * 100) : 0
   const saved = questions.filter((item) => (attempt?.answers[item.id]?.length ?? 0) > 0).length
-  const changed = attempt ? !same_answers(questions, answers, attempt.answers) : false
+  const changed = attempt ? !sameAnswers(questions, answers, attempt.answers) : false
   const submitted = attempt?.status === 'submitted'
   const busy = saving || submitting
 
   useEffect(() => {
-    if (!attempt_id && !role_id) return
+    if (!attemptId && !roleId) return
     const controller = new AbortController()
     request.current = controller
-    const load = attempt_id
-      ? get_attempt(attempt_id, controller.signal)
-      : create_attempt(role_id!, controller.signal)
+    const load = attemptId
+      ? getAttempt(attemptId, controller.signal)
+      : createAttempt(roleId!, controller.signal)
 
     load.then((data) => {
       if (controller.signal.aborted) return
-      set_attempt(data)
-      set_answers(data.answers)
+      setAttempt(data)
+      setAnswers(data.answers)
     }).catch((error: unknown) => {
       if (!controller.signal.aborted) {
-        set_error(error instanceof Error ? error.message : '加载测评失败，请重试')
+        setError(error instanceof Error ? error.message : '加载测评失败，请重试')
       }
     }).finally(() => {
-      if (!controller.signal.aborted) set_loading(false)
+      if (!controller.signal.aborted) setLoading(false)
     })
     return () => controller.abort()
-  }, [attempt_id, role_id, retry])
+  }, [attemptId, roleId, retry])
+
+  useEffect(() => {
+    if (!changed || submitted) return
+    function warnBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', warnBeforeUnload)
+    return () => window.removeEventListener('beforeunload', warnBeforeUnload)
+  }, [changed, submitted])
+
+  useEffect(() => {
+    if (!submitted || !attempt || !onResult || resultShown.current) return
+    resultShown.current = true
+    onResult(attempt.id)
+  }, [submitted, attempt, onResult])
 
   function reload() {
-    set_loading(true)
-    set_error('')
-    set_retry((value) => value + 1)
+    setLoading(true)
+    setError('')
+    setRetry((value) => value + 1)
   }
 
-  function choose_option(option_id: string) {
+  function chooseOption(optionId: string) {
     if (!question || submitted || pending.current) return
-    set_error('')
+    setError('')
 
-    set_answers((prev) => {
+    setAnswers((prev) => {
       const old = prev[question.id] ?? []
       let next: string[]
 
       if (question.type === 'single') {
-        next = [option_id]
-      } else if (old.includes(option_id)) {
-        next = old.filter((id) => id !== option_id)
+        next = [optionId]
+      } else if (old.includes(optionId)) {
+        next = old.filter((id) => id !== optionId)
       } else {
-        next = [...old, option_id]
+        next = [...old, optionId]
       }
 
       return { ...prev, [question.id]: next }
     })
   }
 
-  async function store_answers(signal?: AbortSignal) {
+  async function storeAnswers(signal?: AbortSignal) {
     if (!attempt) return null
     // 空数组也要发送，服务器才会清除该题原来保存的答案。
     const choices = Object.fromEntries(questions.map((item) => [item.id, answers[item.id] ?? []]))
-    const data = await save_answers(attempt.id, choices, signal)
+    const data = await saveAnswers(attempt.id, choices, signal)
     if (signal?.aborted) return null
     if (data.roleId !== attempt.roleId || data.questions.length !== total
       || data.questions.some((item) => !questions.some((question) => question.id === item.id))) {
       throw new Error('服务器返回的题目与当前测评不一致，请重新进入测评')
     }
     if (data.status === 'submitted') throw new Error('测评已经提交，不能再保存答案')
-    if (!same_answers(questions, choices, data.answers)) {
+    if (!sameAnswers(questions, choices, data.answers)) {
       throw new Error('服务器尚未确认全部答案，请重新保存')
     }
-    set_attempt(data)
+    setAttempt(data)
     return data
   }
 
@@ -114,15 +131,15 @@ function Assessment_content({ role_id, attempt_id, on_result }: Assessment_props
     if (!question || submitted || pending.current) return
     const signal = request.current?.signal
     pending.current = true
-    set_saving(true)
-    set_error('')
+    setSaving(true)
+    setError('')
     try {
-      await store_answers(signal)
+      await storeAnswers(signal)
     } catch (error) {
-      if (!signal?.aborted) set_error(error instanceof Error ? error.message : '保存答案失败，请重试')
+      if (!signal?.aborted) setError(error instanceof Error ? error.message : '保存答案失败，请重试')
     } finally {
       pending.current = false
-      if (!signal?.aborted) set_saving(false)
+      if (!signal?.aborted) setSaving(false)
     }
   }
 
@@ -130,33 +147,33 @@ function Assessment_content({ role_id, attempt_id, on_result }: Assessment_props
     if (!attempt || !question || submitted || pending.current) return
     const missing = questions.findIndex((item) => !(answers[item.id]?.length))
     if (missing !== -1) {
-      set_current(missing)
-      set_error(`还有 ${total - answered} 题未作答，请先完成第 ${missing + 1} 题`)
+      setCurrent(missing)
+      setError(`还有 ${total - answered} 题未作答，请先完成第 ${missing + 1} 题`)
       return
     }
     const signal = request.current?.signal
     pending.current = true
-    set_submitting(true)
-    set_error('')
+    setSubmitting(true)
+    setError('')
     try {
-      const data = await store_answers(signal)
+      const data = await storeAnswers(signal)
       if (!data || signal?.aborted) return
-      await submit_attempt(data.id, signal)
-      if (!signal?.aborted) set_attempt({ ...data, status: 'submitted' })
+      await submitAttempt(data.id, signal)
+      if (!signal?.aborted) setAttempt({ ...data, status: 'submitted' })
     } catch (error) {
       if (signal?.aborted) return
       // 请求中断时服务器可能已经提交成功，再查询一次确认状态。
-      const latest = await get_attempt(attempt.id, signal).catch(() => null)
+      const latest = await getAttempt(attempt.id, signal).catch(() => null)
       if (signal?.aborted) return
       if (latest?.status === 'submitted') {
-        set_attempt(latest)
-        set_answers(latest.answers)
+        setAttempt(latest)
+        setAnswers(latest.answers)
         return
       }
-      if (!signal?.aborted) set_error(error instanceof Error ? error.message : '提交测评失败，请重试')
+      if (!signal?.aborted) setError(error instanceof Error ? error.message : '提交测评失败，请重试')
     } finally {
       pending.current = false
-      if (!signal?.aborted) set_submitting(false)
+      if (!signal?.aborted) setSubmitting(false)
     }
   }
 
@@ -176,7 +193,7 @@ function Assessment_content({ role_id, attempt_id, on_result }: Assessment_props
         <section className="assessment-panel assessment-empty" role="status">
           <h2>{error ? '测评加载失败' : attempt ? '暂无测评题目' : '尚未加载测评'}</h2>
           <p>{attempt ? '接口未返回题目，暂时无法作答或提交。' : '需要岗位 ID 创建测评，或测评 ID 恢复答题。'}</p>
-          {(role_id || attempt_id) && <button type="button" onClick={reload}>重新加载</button>}
+          {(roleId || attemptId) && <button type="button" onClick={reload}>重新加载</button>}
         </section>
       ) : (
         <>
@@ -210,7 +227,7 @@ function Assessment_content({ role_id, attempt_id, on_result }: Assessment_props
                       name={`question-${question.id}`}
                       value={option.id}
                       checked={selected.includes(option.id)}
-                      onChange={() => choose_option(option.id)}
+                      onChange={() => chooseOption(option.id)}
                     />
                     <span>{option.text}</span>
                   </label>
@@ -222,8 +239,8 @@ function Assessment_content({ role_id, attempt_id, on_result }: Assessment_props
                   disabled={busy || submitted || selected.length === 0}
                   onClick={() => {
                     if (pending.current) return
-                    set_answers((prev) => ({ ...prev, [question.id]: [] }))
-                    set_error('')
+                    setAnswers((prev) => ({ ...prev, [question.id]: [] }))
+                    setError('')
                   }}
                 >
                   清空本题
@@ -244,7 +261,7 @@ function Assessment_content({ role_id, attempt_id, on_result }: Assessment_props
                       className={`${done ? 'answered' : ''}${position === index ? ' current' : ''}`}
                       aria-label={`第 ${position + 1} 题，${done ? '已作答' : '未作答'}`}
                       aria-current={position === index ? 'step' : undefined}
-                      onClick={() => set_current(position)}
+                      onClick={() => setCurrent(position)}
                     >
                       {position + 1}
                     </button>
@@ -262,14 +279,14 @@ function Assessment_content({ role_id, attempt_id, on_result }: Assessment_props
         <button
           type="button"
           disabled={loading || !question || index === 0}
-          onClick={() => set_current(index - 1)}
+          onClick={() => setCurrent(index - 1)}
         >
           上一题
         </button>
         <button
           type="button"
           disabled={loading || !question || index === total - 1}
-          onClick={() => set_current(index + 1)}
+          onClick={() => setCurrent(index + 1)}
         >
           下一题
         </button>
@@ -286,7 +303,7 @@ function Assessment_content({ role_id, attempt_id, on_result }: Assessment_props
               : question ? `还有 ${total - answered} 题未作答。提交前会先保存全部答案。`
               : '题目加载完成后才可保存和提交。'}
           </p>
-          {submitted && !on_result && <p>结果页尚未接入。</p>}
+          {submitted && !onResult && <p>结果页尚未接入。</p>}
         </div>
         <div className="assessment-actions">
           <button type="button" disabled={loading || !question || busy || submitted || !changed} onClick={save} aria-describedby="assessment-submit-note">
@@ -295,9 +312,6 @@ function Assessment_content({ role_id, attempt_id, on_result }: Assessment_props
           <button type="button" disabled={loading || !question || busy || submitted} onClick={submit} aria-describedby="assessment-submit-note">
             {submitting ? '提交中…' : '提交测评'}
           </button>
-          {submitted && on_result && attempt && (
-            <button type="button" onClick={() => on_result(attempt.id)}>查看结果</button>
-          )}
         </div>
       </section>
     </main>
