@@ -8,7 +8,7 @@ type JobSelectionPageProps = {
   isLoggingOut: boolean
   accountError: string
   selectedRoleId: string | null
-  onSelectRole: (roleId: string) => void
+  onSelectRole: (roleId: string) => Promise<void>
 }
 
 export default function JobSelectionPage({
@@ -18,6 +18,7 @@ export default function JobSelectionPage({
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [retryCount, setRetryCount] = useState(0)
+  const [isSelecting, setIsSelecting] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -42,13 +43,23 @@ export default function JobSelectionPage({
     setRetryCount(retryCount + 1)
   }
 
+  async function selectRole(roleId: string) {
+    if (isSelecting || isLoggingOut) return
+    setIsSelecting(true)
+    try {
+      await onSelectRole(roleId)
+    } finally {
+      setIsSelecting(false)
+    }
+  }
+
   const selectedRole = catalog?.roles.find((role) => role.id === selectedRoleId && role.enabled === true)
 
   return (
     <main className="jobs-page">
       <div className="jobs-content">
         <p className="jobs-user">你好，{user.name}</p>
-        <button className="jobs-back" type="button" disabled={isLoggingOut} onClick={logout}>
+        <button className="jobs-back" type="button" disabled={isLoggingOut || isSelecting} onClick={logout}>
           {isLoggingOut ? '退出中…' : '退出登录'}
         </button>
         {accountError && <p role="alert">{accountError}</p>}
@@ -91,11 +102,11 @@ export default function JobSelectionPage({
                   </dl>
                   <button
                     type="button"
-                    disabled={role.enabled !== true || isLoggingOut}
+                    disabled={role.enabled !== true || isLoggingOut || isSelecting}
                     aria-pressed={role.id === selectedRole?.id}
-                    onClick={() => onSelectRole(role.id)}
+                    onClick={() => selectRole(role.id)}
                   >
-                    {role.enabled !== true ? '暂未开放' : role.id === selectedRole?.id ? '已选择' : '选择该岗位'}
+                    {role.enabled !== true ? '暂未开放' : isSelecting ? '正在验证登录状态…' : role.id === selectedRole?.id ? '已选择' : '选择该岗位'}
                   </button>
                 </article>
               ))}

@@ -102,7 +102,7 @@ export function loginUser(email: string, password: string) {
 }
 
 export function getCurrentUser(signal?: AbortSignal) {
-  return authRequest('/auth/me', { signal })
+  return authRequest('/auth/me', { signal, authenticated: true })
 }
 
 export function logoutUser() {
