@@ -117,4 +117,5 @@ Invoke-RestMethod http://127.0.0.1:8000/api/health
 ## 协作方式
 
 先建立 Issue，再创建对应分支开发。
-完成自测后提交 PR，经另一名成员 Review 后合并到 main。
+完成自测后提交 PR，至少经另一名成员批准（Approve），再由其他成员合并到 main。
+分支保护[配置](.github/branch-protection/main-review-only.json)需管理员在 GitHub 设置中另行启用，仅提交文件不会生效。
