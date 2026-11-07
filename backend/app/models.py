@@ -1,6 +1,7 @@
 """Strict API input validation; unknown fields are rejected."""
 
 import re
+import unicodedata
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -31,7 +32,11 @@ def valid_password(value: str) -> str:
 
 def valid_name(value: str) -> str:
     value = value.strip()
-    if not 1 <= len(value) <= 50 or any(ord(c) < 32 for c in value):
+    if (
+        not 1 <= len(value) <= 50
+        or not value.isprintable()
+        or not any(unicodedata.category(c)[0] in "LNPS" for c in value)
+    ):
         raise ValueError("姓名须为1–50个可显示字符")
     return value
 
