@@ -56,6 +56,18 @@ class AuthCatalogTests(unittest.TestCase):
             self.assertEqual(result.json(), {"detail": "邮箱或密码不正确"})
         self.assertEqual(self.client.post("/api/auth/login", json={"email": "demo@example.com", "password": PASSWORD}).status_code, 200)
 
+    def test_registration_requires_a_visible_name(self):
+        payload = {"email": "boundary@example.invalid", "password": PASSWORD}
+        for name in ("\u200b", " \u200b ", "\ufeff", "\u0301", "张\u200b三"):
+            with self.subTest(name=repr(name)):
+                response = self.client.post("/api/auth/register", json={**payload, "name": name})
+                self.assertEqual(response.status_code, 422)
+                self.assertNotIn("set-cookie", response.headers)
+        # The same email must still be available for a valid Unicode name.
+        response = self.client.post("/api/auth/register", json={**payload, "name": "张 Jose\u0301"})
+        self.assertEqual(response.status_code, 201, response.text)
+        self.assertEqual(response.json()["user"]["name"], "张 Jose\u0301")
+
     def test_invalid_input_is_safe_and_uniform(self):
         secret = "short-secret"
         result = self.client.post("/api/auth/register", json={"email": "invalid", "name": "测试", "password": secret})
@@ -96,7 +108,7 @@ class AuthCatalogTests(unittest.TestCase):
         result = self.client.get("/api/catalog")
         self.assertEqual(result.status_code, 200)
         data = result.json()
-        tree = json.loads((self.settings.content_dir / "ability-tree.json").read_text())
+        tree = json.loads((self.settings.content_dir / "ability-tree.json").read_text(encoding="utf-8"))
         self.assertEqual({r["id"] for r in data["roles"]}, {"backend", "frontend", "algorithm", "qa"})
         self.assertEqual([r["id"] for r in data["roles"] if r["enabled"]], ["backend"])
         backend = next(r for r in data["roles"] if r["id"] == "backend")
