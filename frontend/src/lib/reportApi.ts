@@ -8,7 +8,13 @@ import type { Report } from '../types/report'
 const rawBase: unknown = import.meta.env.VITE_API_BASE
 const API_BASE = typeof rawBase === 'string' ? rawBase.replace(/\/+$/, '') : ''
 
-export type ReportErrorKind = 'unauthorized' | 'notFound' | 'conflict' | 'server' | 'network'
+export type ReportErrorKind =
+  | 'unauthorized'
+  | 'forbidden'
+  | 'notFound'
+  | 'conflict'
+  | 'server'
+  | 'network'
 
 export interface ReportLoadError {
   kind: ReportErrorKind
@@ -22,6 +28,7 @@ export type ReportLoadResult =
 
 const DEFAULT_MESSAGE: Record<ReportErrorKind, string> = {
   unauthorized: '登录状态已失效，请重新登录后再查看测评报告。',
+  forbidden: '当前账号无权查看这份测评报告。',
   notFound: '没有找到这份测评报告，可能已被删除，或不属于当前账号。',
   conflict: '这次测评尚未提交，暂时没有可查看的结果。',
   server: '报告加载失败，请稍后重试。',
@@ -51,8 +58,8 @@ function isScore(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100
 }
 
-function isOptionalCount(value: unknown): boolean {
-  return value === undefined || (typeof value === 'number' && Number.isInteger(value) && value >= 0)
+function isCount(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0
 }
 
 function isDimension(value: unknown): boolean {
@@ -61,13 +68,7 @@ function isDimension(value: unknown): boolean {
   if (typeof item.id !== 'string' || !item.id.trim()) return false
   if (typeof item.name !== 'string' || !item.name.trim()) return false
   if (!isScore(item.score)) return false
-  if (!isOptionalCount(item.correct) || !isOptionalCount(item.total)) return false
-  if (item.weight !== undefined && (typeof item.weight !== 'number' || !Number.isFinite(item.weight))) {
-    return false
-  }
-  if (item.priority !== undefined && (typeof item.priority !== 'number' || !Number.isFinite(item.priority))) {
-    return false
-  }
+  if (!isCount(item.correct) || !isCount(item.total) || item.total === 0) return false
   // 答对数不能超过该维度题数，避免「答对 5 / 3 题」这类矛盾数据进入页面。
   if (typeof item.correct === 'number' && typeof item.total === 'number' && item.correct > item.total) {
     return false
@@ -77,8 +78,8 @@ function isDimension(value: unknown): boolean {
 
 /**
  * 校验报告响应。
- * 只接受契约必填字段与合法的可选取值；扩展字段缺失是允许的（页面按「待接口返回」降级），
- * 但字段存在时类型和范围必须合法，否则整份报告按格式错误处理，不用残缺数据渲染图表。
+ * 只接受 T07 报告快照的完整必填字段。字段缺失、维度不全或前后数据矛盾时，
+ * 整份报告按格式错误处理，不用残缺数据渲染图表。
  */
 function isReport(value: unknown): value is Report {
   if (typeof value !== 'object' || value === null) return false
@@ -87,26 +88,12 @@ function isReport(value: unknown): value is Report {
   if (typeof candidate.id !== 'string' || !candidate.id.trim()) return false
   if (typeof candidate.roleId !== 'string' || !candidate.roleId.trim()) return false
   if (typeof candidate.roleName !== 'string' || !candidate.roleName.trim()) return false
+  if (typeof candidate.createdAt !== 'string' || !candidate.createdAt.trim()) return false
   if (typeof candidate.submittedAt !== 'string' || !candidate.submittedAt.trim()) return false
-  if (candidate.score !== undefined && !isScore(candidate.score)) return false
-  if (!isOptionalCount(candidate.correctCount) || !isOptionalCount(candidate.questionCount)) {
-    return false
-  }
-  if (
-    typeof candidate.correctCount === 'number' &&
-    typeof candidate.questionCount === 'number' &&
-    candidate.correctCount > candidate.questionCount
-  ) {
-    return false
-  }
-  if (candidate.limitations !== undefined) {
-    if (
-      !Array.isArray(candidate.limitations) ||
-      candidate.limitations.some((item) => typeof item !== 'string')
-    ) {
-      return false
-    }
-  }
+  if (typeof candidate.modelVersion !== 'string' || !candidate.modelVersion.trim()) return false
+  if (!isScore(candidate.score)) return false
+  if (!isCount(candidate.correctCount) || !isCount(candidate.questionCount)) return false
+  if (candidate.questionCount === 0 || candidate.correctCount > candidate.questionCount) return false
 
   const { dimensions } = candidate
   if (!Array.isArray(dimensions) || dimensions.length !== REQUIRED_DIMENSIONS.length) return false
@@ -114,7 +101,53 @@ function isReport(value: unknown): value is Report {
 
   const ids = dimensions.map((item) => (item as { id: string }).id)
   if (new Set(ids).size !== ids.length) return false
-  return REQUIRED_DIMENSIONS.every((id) => ids.includes(id))
+  if (!REQUIRED_DIMENSIONS.every((id) => ids.includes(id))) return false
+
+  const dimensionTotal = dimensions.reduce(
+    (sum, item) => sum + (item as { total: number }).total,
+    0,
+  )
+  const dimensionCorrect = dimensions.reduce(
+    (sum, item) => sum + (item as { correct: number }).correct,
+    0,
+  )
+  if (dimensionTotal !== candidate.questionCount || dimensionCorrect !== candidate.correctCount) {
+    return false
+  }
+
+  const { weakDimensions } = candidate
+  if (!Array.isArray(weakDimensions) || !weakDimensions.every(isDimension)) return false
+  const weakIds = weakDimensions.map((item) => (item as { id: string }).id)
+  if (new Set(weakIds).size !== weakIds.length) return false
+
+  const expectedWeakIds = dimensions
+    .filter((item) => (item as { score: number }).score < 100)
+    .map((item) => (item as { id: string }).id)
+  if (weakIds.length !== expectedWeakIds.length) return false
+  if (!expectedWeakIds.every((id) => weakIds.includes(id))) return false
+
+  const valuesMatch = weakDimensions.every((weakItem) => {
+    const weak = weakItem as { id: string; score: number; correct: number; total: number }
+    const source = dimensions.find((item) => (item as { id: string }).id === weak.id) as
+      | { score: number; correct: number; total: number }
+      | undefined
+    return (
+      source !== undefined &&
+      source.score === weak.score &&
+      source.correct === weak.correct &&
+      source.total === weak.total
+    )
+  })
+  if (!valuesMatch) return false
+
+  return weakDimensions.every((item, index) => {
+    if (index === 0) return true
+    const previous = weakDimensions[index - 1] as { id: string; score: number }
+    const current = item as { id: string; score: number }
+    if (previous.score < current.score) return true
+    if (previous.score > current.score) return false
+    return REQUIRED_DIMENSIONS.indexOf(previous.id) < REQUIRED_DIMENSIONS.indexOf(current.id)
+  })
 }
 
 /**
@@ -144,8 +177,11 @@ export async function fetchReport(
   // 非 JSON 响应（例如网关错误页）按空处理，由状态码决定提示文案。
   const payload: unknown = await response.json().catch(() => null)
 
-  if (response.status === 401 || response.status === 403) {
-    return { ok: false, error: toError('unauthorized', response.status, readDetail(payload)) }
+  if (response.status === 401) {
+    return { ok: false, error: toError('unauthorized', 401, readDetail(payload)) }
+  }
+  if (response.status === 403) {
+    return { ok: false, error: toError('forbidden', 403, readDetail(payload)) }
   }
   if (response.status === 404) {
     return { ok: false, error: toError('notFound', 404, readDetail(payload)) }

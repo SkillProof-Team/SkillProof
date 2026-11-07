@@ -14,6 +14,7 @@ type PageState =
 
 const ERROR_TITLE: Record<ReportLoadError['kind'], string> = {
   unauthorized: '需要登录后查看',
+  forbidden: '无权查看这份报告',
   notFound: '没有找到这份报告',
   conflict: '这次测评还没有结果',
   server: '报告加载失败',
@@ -101,11 +102,9 @@ export function ResultPage({ attemptId }: ResultPageProps) {
     )
   }
 
-  const weakItems = selectWeakDimensions(dimensions, 3)
+  const weakItems = selectWeakDimensions(report.weakDimensions, 3)
   const weakNumbers = rankLabels(weakItems)
-  const hasPriority = weakItems.every((item) => item.fromPriority)
-  const allFullScore = dimensions.every((item) => item.score >= 100)
-  const hasVersion = Boolean(report.blueprintVersion || report.modelVersion)
+  const allFullScore = report.weakDimensions.length === 0
 
   return (
     <main className="result-page">
@@ -114,12 +113,7 @@ export function ResultPage({ attemptId }: ResultPageProps) {
         <h1 className="result-header__title">{report.roleName} · 能力画像</h1>
         <p className="result-header__meta">
           提交时间 {dateText(report.submittedAt)}
-          {hasVersion && (
-            <>
-              {' · '}蓝图 {report.blueprintVersion ?? '—'}
-              {' · '}权重模型 {report.modelVersion ?? '—'}
-            </>
-          )}
+          {' · '}评分模型 {report.modelVersion}
         </p>
       </header>
 
@@ -127,25 +121,19 @@ export function ResultPage({ attemptId }: ResultPageProps) {
         <div className="result-stat">
           <span className="result-stat__label">综合分</span>
           <strong className="result-stat__value">{scoreText(report.score)}</strong>
-          <span className="result-stat__note">
-            {report.score === undefined ? '综合分待接口返回' : '岗位加权分，0–100，不设及格线'}
-          </span>
+          <span className="result-stat__note">题目难度加权分，0–100，不设及格线</span>
         </div>
         <div className="result-stat">
           <span className="result-stat__label">正确题数</span>
           <strong className="result-stat__value">
-            {report.correctCount !== undefined && report.questionCount !== undefined
-              ? `${report.correctCount} / ${report.questionCount}`
-              : '—'}
+            {report.correctCount} / {report.questionCount}
           </strong>
           <span className="result-stat__note">多选题按正确选项集合完整计分</span>
         </div>
         <div className="result-stat">
-          <span className="result-stat__label">本次重复题</span>
-          <strong className="result-stat__value">
-            {report.reusedQuestionCount !== undefined ? `${report.reusedQuestionCount} 道` : '—'}
-          </strong>
-          <span className="result-stat__note">曾作答的题目可能带来记忆效应</span>
+          <span className="result-stat__label">测评题数</span>
+          <strong className="result-stat__value">{report.questionCount} 道</strong>
+          <span className="result-stat__note">六个知识维度均需有实际题目</span>
         </div>
       </section>
 
@@ -171,31 +159,35 @@ export function ResultPage({ attemptId }: ResultPageProps) {
           <p className="result-empty">六个维度均为满分，本次没有需要优先补强的维度。</p>
         ) : (
           <ol className="result-weak">
-            {weakItems.map((item, index) => (
-              <li className="result-weak__item" key={item.dimension.id}>
-                <span className="result-weak__rank" aria-hidden="true">
-                  {weakNumbers[index]}
-                </span>
-                <div className="result-weak__body">
-                  <p className="result-weak__name">
-                    {item.dimension.name}
-                    <span className="result-weak__score">维度分 {scoreText(item.dimension.score)}</span>
-                    {item.tied && <span className="result-weak__tie">并列</span>}
-                  </p>
-                  <p className="result-weak__detail">
-                    {item.dimension.correct !== undefined && item.dimension.total !== undefined
-                      ? `答对 ${item.dimension.correct} / ${item.dimension.total} 题，建议优先复习该维度的知识点与错题解析。`
-                      : '建议优先复习该维度的知识点与错题解析。'}
-                  </p>
-                </div>
-              </li>
-            ))}
+            {weakItems.map((item, index) => {
+              const previous = weakItems[index - 1]
+              const next = weakItems[index + 1]
+              const tied =
+                (previous !== undefined && previous.score === item.score) ||
+                (next !== undefined && next.score === item.score)
+              return (
+                <li className="result-weak__item" key={item.id}>
+                  <span className="result-weak__rank" aria-hidden="true">
+                    {weakNumbers[index]}
+                  </span>
+                  <div className="result-weak__body">
+                    <p className="result-weak__name">
+                      {item.name}
+                      <span className="result-weak__score">维度分 {scoreText(item.score)}</span>
+                      {tied && <span className="result-weak__tie">并列</span>}
+                    </p>
+                    <p className="result-weak__detail">
+                      答对 {item.correct} / {item.total}{' '}
+                      题，建议优先复习该维度的知识点与错题解析。
+                    </p>
+                  </div>
+                </li>
+              )
+            })}
           </ol>
         )}
         <p className="result-hint">
-          {hasPriority
-            ? '排序依据：岗位权重 ×（1 − 维度分 ÷ 100），数值越大越需要优先提升；并列时按固定维度顺序排列，并列项会一并列出，因此条目可能多于三项。该值只用于排序，不代表学习效果或所需时间。'
-            : '当前接口未返回岗位权重与优先级值，暂按维度分升序排列，并列项会一并列出；待评分接口补充 priority 后改为按岗位权重计算。'}
+          排序依据：后端按未舍入维度分从低到高排列，并列时按固定维度顺序；第 3 名后的同分项会一并列出，因此条目可能多于三项。排序只描述本次测评结果，不代表学习效果或所需时间。
         </p>
       </section>
 
@@ -205,14 +197,12 @@ export function ResultPage({ attemptId }: ResultPageProps) {
         </h2>
         <div className="result-table-wrap">
           <table className="result-table">
-            <caption className="result-visually-hidden">六个知识维度的答对数、维度分、岗位权重与学习优先级值</caption>
+            <caption className="result-visually-hidden">六个知识维度的答对数与维度分</caption>
             <thead>
               <tr>
                 <th scope="col">知识维度</th>
                 <th scope="col">答对 / 题数</th>
                 <th scope="col">维度分</th>
-                <th scope="col">岗位权重</th>
-                <th scope="col">学习优先级值</th>
               </tr>
             </thead>
             <tbody>
@@ -220,13 +210,9 @@ export function ResultPage({ attemptId }: ResultPageProps) {
                 <tr key={dimension.id}>
                   <th scope="row">{dimension.name}</th>
                   <td>
-                    {dimension.correct !== undefined && dimension.total !== undefined
-                      ? `${dimension.correct} / ${dimension.total}`
-                      : '—'}
+                    {dimension.correct} / {dimension.total}
                   </td>
                   <td>{scoreText(dimension.score)}</td>
-                  <td>{dimension.weight !== undefined ? `${dimension.weight}%` : '—'}</td>
-                  <td>{scoreText(dimension.priority)}</td>
                 </tr>
               ))}
             </tbody>
@@ -235,18 +221,6 @@ export function ResultPage({ attemptId }: ResultPageProps) {
         <p className="result-table-hint">表格可左右滑动查看完整列</p>
       </section>
 
-      {report.limitations && report.limitations.length > 0 && (
-        <section className="result-section" aria-labelledby="result-limitations-title">
-          <h2 className="result-section__title" id="result-limitations-title">
-            解释边界
-          </h2>
-          <ul className="result-limitations">
-            {report.limitations.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </section>
-      )}
     </main>
   )
 }

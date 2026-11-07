@@ -7,37 +7,28 @@ export type DimensionId =
   | 'os'
   | 'software'
 
-/**
- * 单个维度的得分。
- * correct / total / weight / priority 属于 T07 待确认的契约扩展字段，
- * 后端返回前一律视为可选，缺失时页面按「不可用」处理，不使用本地假数据补齐。
- */
+/** 单个维度的得分，字段与 T07 / PR #27 的报告快照契约一致。 */
 export interface ReportDimension {
   id: DimensionId | string
   name: string
   score: number
-  correct?: number
-  total?: number
-  weight?: number
-  priority?: number
+  correct: number
+  total: number
 }
 
-/**
- * 测评报告。必填字段以 docs/design/api.md 第 6 节为准，
- * 其余字段为 Issue #11 中提出、等待 T07 确认的扩展字段。
- */
+/** 测评报告，所有评分字段均由服务端快照提供，前端不重复计算。 */
 export interface Report {
   id: string
   roleId: string
   roleName: string
+  createdAt: string
   submittedAt: string
+  modelVersion: string
+  /** 按题目难度 1 / 2 / 5 加权后的综合分。 */
+  score: number
+  correctCount: number
+  questionCount: number
   dimensions: ReportDimension[]
-  /** 综合分：按岗位权重加权，保留一位小数显示。 */
-  score?: number
-  correctCount?: number
-  questionCount?: number
-  blueprintVersion?: string
-  modelVersion?: string
-  reusedQuestionCount?: number
-  limitations?: string[]
+  /** 后端按未舍入维度分升序、固定维度顺序处理并列后的薄弱维度。 */
+  weakDimensions: ReportDimension[]
 }
