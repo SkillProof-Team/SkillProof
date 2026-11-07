@@ -8,7 +8,7 @@
 
 路径、认证方式和主要字段参考现有后端实现。本文定义Alpha调用方需要依赖的最小字段；现有最终版可能返回更多字段，下面示例不表示完整最终版响应。示例中的账号、标识和分数仅用于说明，不是真实用户或测试记录。
 
-岗位 `enabled` 是为Alpha开放状态新增的契约提案，现有最终版尚未实现。初稿建议只开放 `backend`；T03、T04和测评负责人须在Review中确认，并在对应实现中同步支持。
+T04 岗位接口按 T03 能力树提供开放状态：仅 `backend` 的 `enabled` 为 true，其他三个岗位为 false。测评创建接口须由对应负责人使用同一开放规则，T04 不实现测评接口。
 
 ## 2. 通用约定与认证
 
@@ -73,31 +73,105 @@
 
 无需登录，无请求体。成功返回200。`roles` 支持岗位卡片展示与选择，`topics` 支持按维度展示知识点，`dimensions` 提供六维名称和说明。
 
-下面仅展示一个岗位；实际岗位列表保留四个固定ID。`enabled` 按第1节的新增提案实现，未开放岗位不得显示为可测评，创建接口也应拒绝该岗位。
+下面仅展示一个岗位；实际岗位列表保留四个固定ID，未开放岗位 topics 为 {}。后端岗位及知识点读取 T03 的 ability-tree.json，topics 数组投影为知识点名称，源文件保留稳定知识点 ID。未开放岗位不得显示为可测评，创建接口也应拒绝该岗位。
 
 ```json
 {
-  "roles": [{
-    "id":"backend",
-    "name":"后端开发",
-    "description":"关注数据库、服务端程序与可靠接口",
-    "enabled":true,
-    "topics": {
-      "programming":["程序语义","数据结构","异常与边界"],
-      "algorithms":["复杂度","搜索排序","算法策略"],
-      "database":["SQL","事务","索引"],
-      "network":["HTTP","TCP/UDP","网络协议"],
-      "os":["进程与线程","同步","内存管理"],
-      "software":["需求","测试","版本控制"]
+  "roles": [
+    {
+      "id": "backend",
+      "name": "后端开发",
+      "description": "关注数据库、服务端程序与可靠接口",
+      "enabled": true,
+      "topics": {
+        "programming": [
+          "队列与先进先出",
+          "输入校验与边界",
+          "引用与可变对象",
+          "异常与资源释放",
+          "金额表示与数值精度",
+          "哈希键与相等关系",
+          "嵌套数据的隔离"
+        ],
+        "algorithms": [
+          "二分查找的前提",
+          "时间复杂度分析",
+          "哈希集合与去重",
+          "无权图最短路径",
+          "有序序列合并",
+          "流式 Top-K",
+          "有向图环检测"
+        ],
+        "database": [
+          "SQL 查询与过滤",
+          "主键与外键约束",
+          "事务原子性",
+          "LEFT JOIN 与过滤位置",
+          "索引与执行计划",
+          "乐观并发控制",
+          "事务 Outbox 与重复投递"
+        ],
+        "network": [
+          "HTTP 内容类型",
+          "TCP 字节流与消息边界",
+          "HTTP 创建资源响应",
+          "HTTP 条件请求与 ETag",
+          "超时与安全重试",
+          "反向代理与转发头信任",
+          "Cookie 会话、CSRF 与对象授权"
+        ],
+        "os": [
+          "进程地址空间",
+          "线程共享与私有资源",
+          "共享计数器与临界区",
+          "阻塞 I/O 与事件循环",
+          "多锁与死锁风险",
+          "条件变量与谓词重检",
+          "有界缓冲区与信号量"
+        ],
+        "software": [
+          "单元测试与外部依赖",
+          "日志与敏感信息",
+          "幂等请求的验收测试",
+          "版本控制与冲突处理",
+          "持续集成与依赖锁定",
+          "兼容性数据库迁移",
+          "至少一次投递与消费幂等"
+        ]
+      }
     }
-  }],
-  "dimensions":[
-    {"id":"programming","name":"程序设计","description":"程序语义、数据结构基础与代码理解"},
-    {"id":"algorithms","name":"算法基础","description":"复杂度、搜索排序与算法策略"},
-    {"id":"database","name":"数据库","description":"关系建模、SQL、事务与索引"},
-    {"id":"network","name":"计算机网络","description":"协议、HTTP、可靠传输与网络基础"},
-    {"id":"os","name":"操作系统","description":"进程、并发、内存与文件管理"},
-    {"id":"software","name":"软件工程","description":"需求、测试、版本控制与工程实践"}
+  ],
+  "dimensions": [
+    {
+      "id": "programming",
+      "name": "程序设计",
+      "description": "程序语义、数据结构基础与代码理解"
+    },
+    {
+      "id": "algorithms",
+      "name": "算法基础",
+      "description": "复杂度、搜索排序与算法策略"
+    },
+    {
+      "id": "database",
+      "name": "数据库",
+      "description": "关系建模、SQL、事务与索引"
+    },
+    {
+      "id": "network",
+      "name": "计算机网络",
+      "description": "协议、HTTP、可靠传输与网络基础"
+    },
+    {
+      "id": "os",
+      "name": "操作系统",
+      "description": "进程、并发、内存与文件管理"
+    },
+    {
+      "id": "software",
+      "name": "软件工程",
+      "description": "需求、测试、版本控制与工程实践"
+    }
   ]
 }
 ```
@@ -232,3 +306,24 @@
 Issue #5 第一版题库位于 `backend/app/content/questions.json`，共 42 题，六维各 7 题；配套能力树与版本清单保存在同目录。参见 [能力树](ability-tree.md)、[题库数据与接入约定](question-bank-contract.md) 和 [人工复核记录](../testing/question-bank-review.md)。
 
 本次只新增题库内容与文档，不改变以上路由、请求或响应约定。题库建立者初始标注为 30 道 easy、12 道 medium、0 道 hard，尚待其他成员独立人工复核，题目仍为 draft。当前缺少 hard 题，无法直接满足第 5 节的三难度抽题蓝图；T06 须与内容负责人协调补题或调整策略，本次不修改该 API 约定。测评实现接入时须继续使用公开字段白名单，不能把正确答案、解析、来源或审核元数据返回给进行中的测评。
+
+## T04 本地接入说明
+
+Vite 通过 `/api` 代理转发到 `http://localhost:8000` 时，后端允许的 Origin 必须是浏览器页面地址，例如 `http://localhost:5173`。代理由前端配置，不重写或放宽服务端的来源校验。浏览器统一使用 localhost，不混用 127.0.0.1。
+
+在已激活的 se-skillproof 环境、仓库根目录安装测试依赖：
+
+```bash
+python -m pip install -r backend/requirements-test.txt
+python -B -m unittest discover -s backend/tests -p 'test_*.py' -v
+```
+
+然后从 backend 启动（配置通过进程环境读取，不自动加载 .env）：
+
+```bash
+export SKILLPROOF_ORIGIN=http://localhost:5173
+export SKILLPROOF_COOKIE_SECURE=0
+python -m uvicorn app.main:app --host localhost --port 8000
+```
+
+如果直接从 localhost:8000 同源访问，将 Origin 配为该地址；端口改变时同步配置。保留 Host、Origin 和 CSRF 校验；生产 HTTPS 必须启用 Secure Cookie。认证响应可能包含安全的额外用户字段，前端仅依赖上述最小字段。
