@@ -3,19 +3,25 @@ import os
 import sqlite3
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from .api_auth import router as auth_router
 from .api_catalog import load_catalog, router as catalog_router
 from .config import Settings
-from .db import initialize
+from .db import connect, initialize
 from .api_assessments import router as assessments_router
+from .reports import require_report_user, router as reports_router
 from .request_guard import RequestGuard
+from .security import Principal, require_user
 
 LOGGER = logging.getLogger("skillproof")
 
+
+
+def report_user_id(principal: Principal = Depends(require_user)) -> str:
+    return principal.user["id"]
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -33,6 +39,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     app.state.settings = settings
+    app.state.report_connection_factory = lambda: connect(settings)
+    app.dependency_overrides[require_report_user] = report_user_id
     app.add_middleware(RequestGuard, settings=settings)
 
     @app.exception_handler(RequestValidationError)
@@ -62,6 +70,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(auth_router)
     app.include_router(catalog_router)
     app.include_router(assessments_router)
+    app.include_router(reports_router)
     return app
 
 

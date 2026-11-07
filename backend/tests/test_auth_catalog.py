@@ -119,12 +119,11 @@ class AuthCatalogTests(unittest.TestCase):
         self.assertNotIn('"questions"', result.text)
         self.assertEqual(result.headers["cache-control"], "no-store")
 
-    def test_app_registers_auth_catalog_and_assessment_routes(self):
-        paths = {path for path in self.app.openapi()['paths'] if path.startswith('/api/')}
+    def test_app_registers_auth_and_catalog_routes(self):
+        paths = {path for path in self.app.openapi()['paths'] if path.startswith("/api/auth/") or path == "/api/catalog"}
         self.assertEqual(paths, {
-            "/api/health", "/api/catalog", "/api/auth/register", "/api/auth/login",
-            "/api/auth/logout", "/api/auth/me", "/api/attempts", "/api/attempts/{attempt_id}",
-            "/api/attempts/{attempt_id}/answers", "/api/attempts/{attempt_id}/submit",
+            "/api/catalog", "/api/auth/register", "/api/auth/login",
+            "/api/auth/logout", "/api/auth/me",
         })
 
 

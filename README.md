@@ -7,7 +7,7 @@
 
 Alpha工程初始化，已建立前后端基础工程和健康检查接口。
 
-注册登录、岗位、题库、测评和评分功能通过后续Issue开发。
+注册登录、岗位、题库和测评流程通过后续 Issue 开发。Issue #9 已提供独立评分函数和结果查询路由；真实结果查询需接入数据库、会话认证及测评提交模块，见 [评分与结果接入说明](docs/design/scoring.md)。
 
 
 
@@ -113,6 +113,18 @@ Invoke-RestMethod http://127.0.0.1:8000/api/health
 ```
 
 预期返回 `Status: ok`。
+
+### 后端评分与结果测试
+
+从仓库根目录执行（测试只使用临时 SQLite 文件，不写入业务数据库）：
+
+```powershell
+.\backend\.venv\Scripts\python.exe -m pip install -r backend/requirements-dev.txt
+$env:PYTHONPATH = 'backend'
+.\backend\.venv\Scripts\python.exe -m unittest discover -s backend/tests -v
+```
+
+当前验证范围与未完成联调项见 [Issue #9 测试记录](docs/testing/issue-9-scoring-results.md)。
 
 ## 协作方式
 
