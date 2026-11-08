@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { createAttempt, getAttempt, saveAnswers, submitAttempt } from '../../api'
+import { ApiError, getAttempt, saveAnswers, submitAttempt } from '../../api'
 import type { Answers, Attempt, Question } from './types'
 import './assessment.css'
 
 type AssessmentProps = {
-  roleId?: string
-  attemptId?: string
+  attemptId: string
   onResult?: (id: string) => void
+  onBack: () => void
+  registerNavigationGuard: (guard: (() => boolean) | null) => void
 }
 
 function sameAnswers(questions: Question[], left: Answers, right: Answers) {
@@ -18,14 +19,14 @@ function sameAnswers(questions: Question[], left: Answers, right: Answers) {
 }
 
 function Assessment(props: AssessmentProps) {
-  return <AssessmentContent key={`${props.attemptId ?? ''}:${props.roleId ?? ''}`} {...props} />
+  return <AssessmentContent key={props.attemptId} {...props} />
 }
 
-function AssessmentContent({ roleId, attemptId, onResult }: AssessmentProps) {
+function AssessmentContent({ attemptId, onResult, onBack, registerNavigationGuard }: AssessmentProps) {
   const [current, setCurrent] = useState(0)
   const [answers, setAnswers] = useState<Answers>({})
   const [attempt, setAttempt] = useState<Attempt | null>(null)
-  const [loading, setLoading] = useState(Boolean(roleId || attemptId))
+  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -46,14 +47,9 @@ function AssessmentContent({ roleId, attemptId, onResult }: AssessmentProps) {
   const busy = saving || submitting
 
   useEffect(() => {
-    if (!attemptId && !roleId) return
     const controller = new AbortController()
     request.current = controller
-    const load = attemptId
-      ? getAttempt(attemptId, controller.signal)
-      : createAttempt(roleId!, controller.signal)
-
-    load.then((data) => {
+    getAttempt(attemptId, controller.signal).then((data) => {
       if (controller.signal.aborted) return
       setAttempt(data)
       setAnswers(data.answers)
@@ -65,17 +61,32 @@ function AssessmentContent({ roleId, attemptId, onResult }: AssessmentProps) {
       if (!controller.signal.aborted) setLoading(false)
     })
     return () => controller.abort()
-  }, [attemptId, roleId, retry])
+  }, [attemptId, retry])
 
   useEffect(() => {
-    if (!changed || submitted) return
+    if ((!changed && !busy) || submitted) return
     function warnBeforeUnload(event: BeforeUnloadEvent) {
       event.preventDefault()
       event.returnValue = ''
     }
     window.addEventListener('beforeunload', warnBeforeUnload)
     return () => window.removeEventListener('beforeunload', warnBeforeUnload)
-  }, [changed, submitted])
+  }, [changed, busy, submitted])
+
+  useEffect(() => {
+    registerNavigationGuard(() => {
+      if (pending.current) {
+        setError('正在保存或提交，请等待完成后再离开。')
+        return false
+      }
+      if (changed && !submitted) {
+        setError('有未保存的答案，请先保存后再离开。')
+        return false
+      }
+      return true
+    })
+    return () => registerNavigationGuard(null)
+  }, [changed, submitted, registerNavigationGuard])
 
   useEffect(() => {
     if (!submitted || !attempt || !onResult || resultShown.current) return
@@ -128,7 +139,7 @@ function AssessmentContent({ roleId, attemptId, onResult }: AssessmentProps) {
   }
 
   async function save() {
-    if (!question || submitted || pending.current) return
+    if (!attempt || !question || submitted || pending.current) return
     const signal = request.current?.signal
     pending.current = true
     setSaving(true)
@@ -136,7 +147,17 @@ function AssessmentContent({ roleId, attemptId, onResult }: AssessmentProps) {
     try {
       await storeAnswers(signal)
     } catch (error) {
-      if (!signal?.aborted) setError(error instanceof Error ? error.message : '保存答案失败，请重试')
+      if (signal?.aborted || (error instanceof ApiError && error.status === 401)) return
+      if (error instanceof ApiError && error.status === 409) {
+        const latest = await getAttempt(attempt.id, signal).catch(() => null)
+        if (signal?.aborted) return
+        if (latest?.status === 'submitted') {
+          setAttempt(latest)
+          setAnswers(latest.answers)
+          return
+        }
+      }
+      setError(error instanceof Error ? error.message : '保存答案失败，请重试')
     } finally {
       pending.current = false
       if (!signal?.aborted) setSaving(false)
@@ -161,7 +182,7 @@ function AssessmentContent({ roleId, attemptId, onResult }: AssessmentProps) {
       await submitAttempt(data.id, signal)
       if (!signal?.aborted) setAttempt({ ...data, status: 'submitted' })
     } catch (error) {
-      if (signal?.aborted) return
+      if (signal?.aborted || (error instanceof ApiError && error.status === 401)) return
       // 请求中断时服务器可能已经提交成功，再查询一次确认状态。
       const latest = await getAttempt(attempt.id, signal).catch(() => null)
       if (signal?.aborted) return
@@ -180,6 +201,7 @@ function AssessmentContent({ roleId, attemptId, onResult }: AssessmentProps) {
   return (
     <main className="assessment">
       <header className="assessment-header">
+        <button type="button" disabled={busy} onClick={onBack}>返回岗位选择</button>
         <h1>能力测评</h1>
         <p>按题目提示选择答案，可通过题号检查和修改。</p>
         {attempt && <p>当前岗位：{attempt.roleName}</p>}
@@ -192,8 +214,8 @@ function AssessmentContent({ roleId, attemptId, onResult }: AssessmentProps) {
       ) : !question ? (
         <section className="assessment-panel assessment-empty" role="status">
           <h2>{error ? '测评加载失败' : attempt ? '暂无测评题目' : '尚未加载测评'}</h2>
-          <p>{attempt ? '接口未返回题目，暂时无法作答或提交。' : '需要岗位 ID 创建测评，或测评 ID 恢复答题。'}</p>
-          {(roleId || attemptId) && <button type="button" onClick={reload}>重新加载</button>}
+          <p>{attempt ? '接口未返回题目，暂时无法作答或提交。' : '请重试加载，或返回岗位选择。'}</p>
+          <button type="button" onClick={reload}>重新加载</button>
         </section>
       ) : (
         <>

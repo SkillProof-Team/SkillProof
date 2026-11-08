@@ -54,14 +54,17 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   }
 
   let response: Response
+  const timeout = AbortSignal.timeout(30000)
   try {
     response = await fetch(`/api${path}`, {
       ...requestOptions,
       headers,
       credentials: 'include',
+      signal: requestOptions.signal ? AbortSignal.any([requestOptions.signal, timeout]) : timeout,
     })
   } catch (error) {
     if (requestOptions.signal?.aborted) throw error
+    if (timeout.aborted) throw new ApiError(0, '请求超时，请稍后重试')
     throw new ApiError(0, '无法连接服务器，请检查网络后重试')
   }
 
