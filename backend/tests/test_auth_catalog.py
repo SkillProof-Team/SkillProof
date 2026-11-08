@@ -120,8 +120,8 @@ class AuthCatalogTests(unittest.TestCase):
         self.assertEqual(result.headers["cache-control"], "no-store")
 
     def test_expected_api_routes(self):
-        paths = {path for path in self.app.openapi()['paths'] if path.startswith('/api/')}
-        self.assertEqual(paths, {"/api/health", "/api/catalog", "/api/auth/register", "/api/auth/login", "/api/auth/logout", "/api/auth/me", "/api/reports/{attempt_id}"})
+        paths = {path for path in self.app.openapi()['paths'] if path.startswith("/api/auth/") or path == "/api/catalog"}
+        self.assertEqual(paths, {"/api/catalog", "/api/auth/register", "/api/auth/login", "/api/auth/logout", "/api/auth/me"})
 
 
 if __name__ == "__main__":

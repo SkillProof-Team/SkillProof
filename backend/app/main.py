@@ -7,6 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from .api_assessments import router as assessments_router
 from .api_auth import router as auth_router
 from .api_catalog import load_catalog, router as catalog_router
 from .config import Settings
@@ -60,6 +61,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(auth_router)
     app.include_router(catalog_router)
+    app.include_router(assessments_router)
     app.include_router(reports_router)
     return app
 
