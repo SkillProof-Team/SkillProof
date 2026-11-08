@@ -5,9 +5,9 @@
 
 ## 当前阶段
 
-Alpha工程初始化，已建立前后端基础工程和健康检查接口。
+Alpha 阶段已建立前后端基础工程、SQLite 持久化、会话认证与岗位查询。
 
-注册登录、岗位、题库和测评流程通过后续 Issue 开发。Issue #9 已提供独立评分函数和结果查询路由；真实结果查询需接入数据库、会话认证及测评提交模块，见 [评分与结果接入说明](docs/design/scoring.md)。
+Issue #9 提供独立评分函数和本人结果快照查询，已接入统一数据库与会话认证。测评创建、保存和提交由 T06 接入；函数契约、提交事务示例与验收边界见 [评分与结果接入说明](docs/design/scoring.md)。
 
 
 
@@ -15,7 +15,7 @@ Alpha工程初始化，已建立前后端基础工程和健康检查接口。
 
 - 前端：React + TypeScript + Vite
 - 后端： Python + FastAPI
-- 数据库： 后续接入 SQLite
+- 数据库：SQLite
 
 
 
@@ -119,7 +119,7 @@ Invoke-RestMethod http://127.0.0.1:8000/api/health
 从仓库根目录执行（测试只使用临时 SQLite 文件，不写入业务数据库）：
 
 ```powershell
-.\backend\.venv\Scripts\python.exe -m pip install -r backend/requirements-dev.txt
+.\backend\.venv\Scripts\python.exe -m pip install -r backend/requirements-test.txt
 $env:PYTHONPATH = 'backend'
 .\backend\.venv\Scripts\python.exe -m unittest discover -s backend/tests -v
 ```
@@ -129,4 +129,4 @@ $env:PYTHONPATH = 'backend'
 ## 协作方式
 
 先建立 Issue，再创建对应分支开发。
-完成自测后提交 PR，经另一名成员 Review 后合并到 main。
+完成自测后提交 PR，至少经另一名成员批准（Approve），再由其他成员合并到 main。

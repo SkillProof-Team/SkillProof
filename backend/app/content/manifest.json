@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0",
+  "bankId": "skillproof-backend-original",
+  "bankVersion": "0.1.2-draft",
+  "roleId": "backend",
+  "questionFile": "questions.json",
+  "abilityTreeFile": "ability-tree.json",
+  "questionCount": 42,
+  "authoredAt": "2026-10-31",
+  "origin": "ai_original",
+  "contentNote": "AI 原创题目草稿；未导入外部题库，内容与难度尚待其他成员独立复核。",
+  "review": {
+    "status": "pending_human_review",
+    "reviewer": null,
+    "reviewedAt": null
+  },
+  "difficultyNote": "题库建立者初始标注：30 道 easy、12 道 medium、0 道 hard，每维 5/2/0；尚待其他成员独立复核，未经学生样本难度校准。当前缺少 hard，不能覆盖既有三难度抽题蓝图。",
+  "files": {
+    "questions.json": "872caabe30433f3a1faa836ec52876f2f974779e1f77242350aed158e7af2ec1",
+    "ability-tree.json": "37d4d1c9734b7ffbbc25d48861fe94e579c4ee82868e77c42d5fc8fcba536835"
+  },
+  "difficultyProfile": {
+    "easy": 5,
+    "medium": 2,
+    "hard": 0
+  }
+}

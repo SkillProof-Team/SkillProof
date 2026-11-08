@@ -1,0 +1,1448 @@
+[
+  {
+    "id": "SP5-PRG-001",
+    "dimension": "programming",
+    "topicId": "programming.queue",
+    "topic": "队列与先进先出",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "一个后台任务容器要求最先加入的任务最先被取出。不考虑任务优先级，应采用哪种基本数据结构？",
+    "options": [
+      {
+        "id": "A",
+        "text": "栈：只从栈顶加入和移除"
+      },
+      {
+        "id": "B",
+        "text": "队列：从队尾加入、从队首取出"
+      },
+      {
+        "id": "C",
+        "text": "集合：只保证元素不重复"
+      },
+      {
+        "id": "D",
+        "text": "无序映射：按键查找任务"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "队列的先进先出规则直接符合到达顺序要求；栈通常后进先出。集合解决去重，映射解决按键查找，它们本身不定义题目要求的出队规则。这里不讨论带优先级的任务调度。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-PRG-002",
+    "dimension": "programming",
+    "topicId": "programming.input-validation",
+    "topic": "输入校验与边界",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "后端接口接收用户提交的分页参数 page 和 pageSize。以下哪些做法属于有效的服务端输入校验？",
+    "options": [
+      {
+        "id": "A",
+        "text": "检查参数是整数且处于允许范围"
+      },
+      {
+        "id": "B",
+        "text": "只要前端已校验，服务端即可信任参数"
+      },
+      {
+        "id": "C",
+        "text": "限制 pageSize 的上限以控制单次查询规模"
+      },
+      {
+        "id": "D",
+        "text": "把任意非法值转换为 0，并继续执行查询"
+      }
+    ],
+    "correct": [
+      "A",
+      "C"
+    ],
+    "explanation": "服务端需要自行检查类型与范围，并限制单次请求规模，因为调用者可以绕过前端。把所有非法值静默改为 0 会掩盖输入错误，也可能违反分页约束；应按接口约定拒绝或明确处理非法输入。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-PRG-003",
+    "dimension": "programming",
+    "topicId": "programming.aliasing",
+    "topic": "引用与可变对象",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "在 Python 3 中执行以下代码，最后输出什么？\na = [1, 2]\nb = a\nb.append(3)\nprint(len(a))",
+    "options": [
+      {
+        "id": "A",
+        "text": "3"
+      },
+      {
+        "id": "B",
+        "text": "1"
+      },
+      {
+        "id": "C",
+        "text": "2"
+      },
+      {
+        "id": "D",
+        "text": "抛出异常"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "赋值 b = a 让两个名字引用同一个列表，没有复制列表。append 原地增加一个元素，因此 a 和 b 看到的列表长度都变为 3。若需要独立的浅层列表，必须显式复制；嵌套对象还需另行考虑。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-PRG-004",
+    "dimension": "programming",
+    "topicId": "programming.resource-cleanup",
+    "topic": "异常与资源释放",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "某函数成功打开一个文件后开始解析，解析可能抛出异常；调用方需要接收该异常。以下哪种结构最能保证离开该代码块时关闭文件，并保留解析异常的传播？假设关闭文件本身成功。",
+    "options": [
+      {
+        "id": "A",
+        "text": "只在解析正常结束后调用 close"
+      },
+      {
+        "id": "B",
+        "text": "捕获所有异常并直接忽略"
+      },
+      {
+        "id": "C",
+        "text": "只在异常分支关闭文件，正常分支不关闭"
+      },
+      {
+        "id": "D",
+        "text": "使用 with 上下文管理文件，在块中解析且不吞掉异常"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "文件上下文管理器在正常离开和异常离开时都会关闭文件；不捕获或不吞掉解析异常，调用方仍能获知失败。只在成功路径释放会在异常路径泄漏资源；忽略异常则破坏了题目要求的错误传播。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-PRG-005",
+    "dimension": "programming",
+    "topicId": "programming.money-representation",
+    "topic": "金额表示与数值精度",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "一个账务接口只允许非负且最多两位小数的金额，需要精确累计到分。以下哪些设计可以避免直接用二进制浮点数累计小数金额带来的表示误差？",
+    "options": [
+      {
+        "id": "A",
+        "text": "使用二进制浮点数后，假定所有十进制小数都能被精确表示"
+      },
+      {
+        "id": "B",
+        "text": "校验小数位后，将金额转换为整数分再累计，并检查整数溢出边界"
+      },
+      {
+        "id": "C",
+        "text": "把金额都转换为字符串，按字符串拼接完成加法"
+      },
+      {
+        "id": "D",
+        "text": "使用从十进制输入构造的十进制定点/Decimal 类型，并明确精度与舍入规则"
+      }
+    ],
+    "correct": [
+      "B",
+      "D"
+    ],
+    "explanation": "整数分将两位小数金额映射为整数运算，但仍需检查合法范围；十进制数类型可以按设定精度执行十进制运算，输入应直接来自十进制字符串等准确形式。二进制浮点并不能精确表示所有十进制小数；字符串拼接不是金额加法。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-PRG-006",
+    "dimension": "programming",
+    "topicId": "programming.hash-key",
+    "topic": "哈希键与相等关系",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "某哈希映射要求键在存入期间，其哈希值及用于判等的字段保持不变。以下哪种缓存键设计符合这一约束？",
+    "options": [
+      {
+        "id": "A",
+        "text": "使用可修改的对象，并允许修改参与哈希的字段"
+      },
+      {
+        "id": "B",
+        "text": "每次查找时随机生成同一键的哈希值"
+      },
+      {
+        "id": "C",
+        "text": "使用不可变的用户 ID 字符串作为键"
+      },
+      {
+        "id": "D",
+        "text": "只要两个键不同，就强制要求它们的哈希值一定不同"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "不可变用户 ID 可以维持键的哈希值和相等语义。修改参与哈希或判等的字段可能使已有条目难以找到；随机哈希同样破坏一致性。哈希碰撞是允许存在的，不能要求所有不同键都拥有不同哈希值。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-PRG-007",
+    "dimension": "programming",
+    "topicId": "programming.copy-isolation",
+    "topic": "嵌套数据的隔离",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "缓存保存一个字典，其中 values 字段是列表。接口需返回独立数据，调用方修改返回数据时不能改变缓存。假设复制期间没有其他线程修改缓存，下列哪些方式满足要求？",
+    "options": [
+      {
+        "id": "A",
+        "text": "对题设中的字典及其嵌套列表执行深复制，再返回复制结果"
+      },
+      {
+        "id": "B",
+        "text": "将字典和嵌套列表完整序列化后重新反序列化，得到独立对象；假设这些值均可被该格式无损表示"
+      },
+      {
+        "id": "C",
+        "text": "只浅复制最外层字典，并直接共享原 values 列表"
+      },
+      {
+        "id": "D",
+        "text": "把原字典换一个变量名后返回"
+      }
+    ],
+    "correct": [
+      "A",
+      "B"
+    ],
+    "explanation": "深复制以及在题设可无损表示条件下的序列化重建，都会为嵌套列表建立独立对象。浅复制只复制最外层，列表仍共享；变量改名也不创建副本。题目明确排除了复制期间并发修改的问题，不应把深复制当成通用并发控制。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-ALG-001",
+    "dimension": "algorithms",
+    "topicId": "algorithms.binary-search",
+    "topic": "二分查找的前提",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "后端在一个支持常数时间下标访问的数组上按元素值执行标准二分查找。除了可比较元素外，通常还需要满足哪个前提？",
+    "options": [
+      {
+        "id": "A",
+        "text": "数组长度必须是偶数"
+      },
+      {
+        "id": "B",
+        "text": "所有元素必须互不相同"
+      },
+      {
+        "id": "C",
+        "text": "数组已按查找使用的比较规则有序"
+      },
+      {
+        "id": "D",
+        "text": "数组必须先转换为链表"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "标准二分查找依靠有序关系确定目标不可能位于哪一半区间。数组可以包含重复值，长度也无需为偶数；重复值影响查找哪个匹配位置的约定，不会取消有序这一基本前提。链表也不是题设要求的数据结构。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-ALG-002",
+    "dimension": "algorithms",
+    "topicId": "algorithms.complexity",
+    "topic": "时间复杂度分析",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "以下操作的单步成本均为 O(1)，n 为输入规模。哪些渐近时间复杂度描述正确？",
+    "options": [
+      {
+        "id": "A",
+        "text": "两个独立的嵌套循环各执行 n 次，整体对应 O(n)"
+      },
+      {
+        "id": "B",
+        "text": "先执行一次 n 次循环，再执行一次 n 次循环，整体对应 O(n²)"
+      },
+      {
+        "id": "C",
+        "text": "单个循环从 0 到 n-1，对应 O(n)"
+      },
+      {
+        "id": "D",
+        "text": "每轮把正整数搜索区间规模约减半，直到为 1，对应 O(log n)"
+      }
+    ],
+    "correct": [
+      "C",
+      "D"
+    ],
+    "explanation": "顺序执行两次线性循环的总成本为 2n，仍为 O(n)；两个完整嵌套循环则为 n² 次操作。规模每轮约减半时，轮数随 log n 增长。这里分析渐近数量级，省略常数因子。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-ALG-003",
+    "dimension": "algorithms",
+    "topicId": "algorithms.deduplication",
+    "topic": "哈希集合与去重",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "需要判断含 n 个用户 ID 的数组是否有重复项。使用哈希集合依次检查并插入；假设哈希查找和插入的期望时间均为 O(1)。最坏需要扫描全部数组时，期望总时间和额外空间上界分别是什么？",
+    "options": [
+      {
+        "id": "A",
+        "text": "O(n²) 时间、O(1) 空间"
+      },
+      {
+        "id": "B",
+        "text": "O(n) 时间、O(n) 空间"
+      },
+      {
+        "id": "C",
+        "text": "O(log n) 时间、O(n) 空间"
+      },
+      {
+        "id": "D",
+        "text": "O(n) 时间、O(1) 空间"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "每个 ID 最多执行常数次期望 O(1) 的集合操作，扫描 n 个元素的期望总时间为 O(n)。若所有 ID 不重复，集合会保存 n 个 ID，因此额外空间上界是 O(n)。题目已经给出了哈希操作的期望成本假设。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-ALG-004",
+    "dimension": "algorithms",
+    "topicId": "algorithms.bfs",
+    "topic": "无权图最短路径",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "服务依赖关系构成一个有限无权图，每条边都代表一次等成本跳转。需要从给定服务找到到其他服务的最少跳数，并在首次入队时标记已访问。应优先采用哪种算法？",
+    "options": [
+      {
+        "id": "A",
+        "text": "广度优先搜索 BFS"
+      },
+      {
+        "id": "B",
+        "text": "只沿第一条边不断深入且不回溯"
+      },
+      {
+        "id": "C",
+        "text": "按服务名称排序后顺序访问"
+      },
+      {
+        "id": "D",
+        "text": "任意深度优先搜索的首次到达深度一定最小"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "BFS 按距离起点的层数逐层扩展，在等权边条件下首次发现一个顶点时即可得到最少跳数。首次入队时标记可避免重复入队。普通 DFS 的首次到达顺序不保证最短，按名称排序与路径长度没有必然关系。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-ALG-005",
+    "dimension": "algorithms",
+    "topicId": "algorithms.merge",
+    "topic": "有序序列合并",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "两个非降序数组长度分别为 n 和 m，需要把它们合并为保留全部重复元素的非降序数组。关于标准双指针合并，哪些说法正确？",
+    "options": [
+      {
+        "id": "A",
+        "text": "比较两个当前元素，将较小者写入结果并前移对应指针，可以得到有序结果"
+      },
+      {
+        "id": "B",
+        "text": "为了处理相同元素，必须先删除两个数组中的全部重复值"
+      },
+      {
+        "id": "C",
+        "text": "即使两个输入已排序，合并也必须执行 O((n+m)²) 次比较"
+      },
+      {
+        "id": "D",
+        "text": "写出完整结果需要 O(n+m) 次写入，标准合并的时间复杂度为 O(n+m)"
+      }
+    ],
+    "correct": [
+      "A",
+      "D"
+    ],
+    "explanation": "双指针只从两个未处理后缀的首元素中选择较小者；每步至少前移一个指针，直到写出 n+m 个元素。遇到相同值时仍需保留双方出现次数，不能删除重复值。输入有序使得线性合并成为可能。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-ALG-006",
+    "dimension": "algorithms",
+    "topicId": "algorithms.top-k",
+    "topic": "流式 Top-K",
+    "type": "single",
+    "difficulty": "medium",
+    "stem": "要从 n 个整数中保留最大的 k 个数，1 < k < n，结果暂不要求排序。维护一个至多包含 k 个元素的最小堆，逐个处理输入。该方法的时间复杂度与额外空间上界是什么？",
+    "options": [
+      {
+        "id": "A",
+        "text": "O(n²) 时间、O(n) 空间"
+      },
+      {
+        "id": "B",
+        "text": "O(n) 时间、O(1) 空间"
+      },
+      {
+        "id": "C",
+        "text": "O(log n) 时间、O(k) 空间"
+      },
+      {
+        "id": "D",
+        "text": "O(n log k) 时间、O(k) 空间"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "最小堆的堆顶是当前保留的 k 个数中最小的一个。新数更大时替换堆顶并调整堆，单次调整 O(log k)，最多处理 n 次；堆最多保存 k 个元素。若最后要求有序输出，还需另计对这 k 个数排序的成本。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-ALG-007",
+    "dimension": "algorithms",
+    "topicId": "algorithms.directed-cycle",
+    "topic": "有向图环检测",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "对有限有向图检查是否有环，算法遍历所有顶点。以下哪些判断成立？",
+    "options": [
+      {
+        "id": "A",
+        "text": "DFS 中只要遇到任何曾访问过的顶点，就一定存在有向环"
+      },
+      {
+        "id": "B",
+        "text": "DFS 中遇到指向当前递归路径上顶点的边，可以判定存在有向环"
+      },
+      {
+        "id": "C",
+        "text": "使用 Kahn 拓扑排序，最终移除的顶点数少于总顶点数，可以判定存在环"
+      },
+      {
+        "id": "D",
+        "text": "图中只要某个顶点有两条出边，就一定有环"
+      }
+    ],
+    "correct": [
+      "B",
+      "C"
+    ],
+    "explanation": "DFS 需要区分当前仍在递归路径上的顶点与已经处理完成的顶点；指向前者的回边构成环，指向后者未必构成环。Kahn 算法不断移除入度为零的顶点，若仍剩顶点而无法继续，则剩余部分存在有向环。出边数量本身不是判环依据。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-001",
+    "dimension": "database",
+    "topicId": "database.sql-filter",
+    "topic": "SQL 查询与过滤",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "表 users(id, active) 中 active 为整数，1 表示启用。哪条 SQL 用于查询全部启用用户的 id？",
+    "options": [
+      {
+        "id": "A",
+        "text": "DELETE FROM users WHERE active = 1"
+      },
+      {
+        "id": "B",
+        "text": "UPDATE users SET active = 1"
+      },
+      {
+        "id": "C",
+        "text": "INSERT INTO users(id, active) VALUES (1, 1)"
+      },
+      {
+        "id": "D",
+        "text": "SELECT id FROM users WHERE active = 1"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "SELECT 查询记录，WHERE active = 1 限定启用用户，并且只投影 id 列。DELETE 删除记录，UPDATE 修改记录，INSERT 插入记录，这些语句都不满足题目的只读查询要求。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-002",
+    "dimension": "database",
+    "topicId": "database.constraints",
+    "topic": "主键与外键约束",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "某关系数据库启用了主键和外键约束，外键列明确允许 NULL。以下哪些描述正确？",
+    "options": [
+      {
+        "id": "A",
+        "text": "主键用于唯一标识一行，主键列不能为 NULL"
+      },
+      {
+        "id": "B",
+        "text": "任意两行只要名字不同，就可以使用相同主键"
+      },
+      {
+        "id": "C",
+        "text": "非 NULL 外键值必须满足已声明的参照约束，允许 NULL 并不等于允许任意不存在的非 NULL 值"
+      },
+      {
+        "id": "D",
+        "text": "为一列建立普通非唯一索引，就自动获得外键约束"
+      }
+    ],
+    "correct": [
+      "A",
+      "C"
+    ],
+    "explanation": "主键提供唯一且非空的行标识；其他列不同不能抵消主键冲突。允许 NULL 的外键与普通非空外键值的参照检查是两回事。普通索引是一种访问结构，不会自动声明或替代外键约束。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-003",
+    "dimension": "database",
+    "topicId": "database.transaction-atomicity",
+    "topic": "事务原子性",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "转账需要在同一数据库内执行扣款和入账，两步被包含在同一个支持回滚的事务中。若入账失败而事务回滚，哪项事务特性要求已执行的扣款也被撤销？",
+    "options": [
+      {
+        "id": "A",
+        "text": "索引有序性"
+      },
+      {
+        "id": "B",
+        "text": "字段可空性"
+      },
+      {
+        "id": "C",
+        "text": "原子性"
+      },
+      {
+        "id": "D",
+        "text": "查询分页性"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "原子性要求事务内的操作作为一个整体提交或回滚，因此入账失败导致事务回滚时，扣款也不能留下部分成功的结果。它不等同于跨任意外部系统的自动补偿；本题明确把两步限制在同一数据库事务内。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-004",
+    "dimension": "database",
+    "topicId": "database.left-join",
+    "topic": "LEFT JOIN 与过滤位置",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "要查询每个用户及其状态为 paid 的订单，同时保留没有 paid 订单的用户。表为 users u 和 orders o，关联条件为 o.user_id = u.id。以下哪种查询结构符合要求？",
+    "options": [
+      {
+        "id": "A",
+        "text": "使用 INNER JOIN，再过滤 o.status = 'paid'"
+      },
+      {
+        "id": "B",
+        "text": "使用 LEFT JOIN，并把 o.status = 'paid' 放在 ON 关联条件中"
+      },
+      {
+        "id": "C",
+        "text": "先 LEFT JOIN，再在 WHERE 中要求 o.status = 'paid'"
+      },
+      {
+        "id": "D",
+        "text": "只查询 orders 中的 paid 订单，不关联 users"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "LEFT JOIN 的 ON 条件只决定右表的匹配记录，无匹配时仍保留左表用户并以 NULL 补右侧字段。把 o.status = 'paid' 放到 WHERE 中会排除右侧为 NULL 的行，从而失去题目要求保留的用户。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-005",
+    "dimension": "database",
+    "topicId": "database.index-tradeoff",
+    "topic": "索引与执行计划",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "对一般关系数据库中的 B-tree 索引，下列哪些说法合理？不假定优化器必须选择某一条具体访问路径。",
+    "options": [
+      {
+        "id": "A",
+        "text": "建立索引后，所有查询和写入都一定更快"
+      },
+      {
+        "id": "B",
+        "text": "索引占用额外存储，相关数据写入时通常需要维护索引"
+      },
+      {
+        "id": "C",
+        "text": "复合索引 (a,b) 和 (b,a) 对所有查询都完全等价"
+      },
+      {
+        "id": "D",
+        "text": "优化器会结合选择性、统计信息和成本评估，建立了索引也可能选择扫描表"
+      }
+    ],
+    "correct": [
+      "B",
+      "D"
+    ],
+    "explanation": "索引是读写成本之间的权衡，需要存储并随数据变动维护。优化器通常根据估计成本选择访问路径，低选择性查询等情况可能更适合表扫描。复合索引的键顺序影响可利用的访问方式，不能视为任意查询下等价。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-006",
+    "dimension": "database",
+    "topicId": "database.optimistic-concurrency",
+    "topic": "乐观并发控制",
+    "type": "single",
+    "difficulty": "medium",
+    "stem": "两个请求均读到文档 version=7。每次更新都执行 UPDATE documents SET body=?, version=version+1 WHERE id=? AND version=7，并检查受影响行数；不允许其他路径重置 version。第一个请求已成功提交，第二个请求应如何处理受影响行数为 0 的结果？",
+    "options": [
+      {
+        "id": "A",
+        "text": "识别为版本冲突，重新读取后由调用方决定重试或合并"
+      },
+      {
+        "id": "B",
+        "text": "仍返回更新成功，因为曾读到 version=7"
+      },
+      {
+        "id": "C",
+        "text": "不带版本条件强制覆盖，以保证两个请求都成功"
+      },
+      {
+        "id": "D",
+        "text": "把 version 重新改回 7 后再次执行原更新"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "第一个请求提交后版本变为 8，第二个请求的 version=7 条件不再匹配。受影响行数为 0 表示这次条件更新没有生效，应按冲突处理，而不是宣称成功或悄悄取消版本保护。重新读取能让调用方基于最新内容作出决定。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-DB-007",
+    "dimension": "database",
+    "topicId": "database.transactional-outbox",
+    "topic": "事务 Outbox 与重复投递",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "服务更新订单后需要向消息系统发送事件，希望避免数据库已提交但应用在发送前崩溃导致事件永久丢失。采用同库事务 Outbox 时，哪些设计正确？",
+    "options": [
+      {
+        "id": "A",
+        "text": "把订单变更和待发送事件写入同一个数据库事务"
+      },
+      {
+        "id": "B",
+        "text": "发布者可能重发事件，消费者应根据事件 ID 等实现幂等处理"
+      },
+      {
+        "id": "C",
+        "text": "先提交订单，再仅在进程内存中记录待发送事件"
+      },
+      {
+        "id": "D",
+        "text": "只要使用 Outbox，就能保证消息绝不重复投递"
+      }
+    ],
+    "correct": [
+      "A",
+      "B"
+    ],
+    "explanation": "订单变更和 Outbox 记录同事务提交，使已提交业务对应的待发送事件能够被持久化发现。发布者发送成功后可能在标记完成前崩溃，恢复后会重发，所以 Outbox 不自动提供全链路恰好一次。消费者仍需可靠去重和幂等处理。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-NET-001",
+    "dimension": "network",
+    "topicId": "network.http-content-type",
+    "topic": "HTTP 内容类型",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "HTTP 客户端收到一个成功响应，需要知道响应体应按 JSON 还是其他格式解析。按 HTTP 语义，通常应读取哪个响应头？",
+    "options": [
+      {
+        "id": "A",
+        "text": "Content-Type"
+      },
+      {
+        "id": "B",
+        "text": "Host"
+      },
+      {
+        "id": "C",
+        "text": "Authorization"
+      },
+      {
+        "id": "D",
+        "text": "Retry-After"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Content-Type 描述响应表示的媒体类型，例如 application/json。Host 用于标识请求目标主机，Authorization 携带认证信息，Retry-After 描述何时适合重试；它们不能替代响应体的媒体类型声明。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-NET-002",
+    "dimension": "network",
+    "topicId": "network.tcp-stream",
+    "topic": "TCP 字节流与消息边界",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "应用使用 TCP 连接传送多条 JSON 消息，连接上的字节没有额外的应用层分帧。以下哪些描述正确？",
+    "options": [
+      {
+        "id": "A",
+        "text": "发送端调用一次 send，接收端就一定只需一次 recv 且恰好得到这一整条消息"
+      },
+      {
+        "id": "B",
+        "text": "只要使用 TCP，就不需要处理连接中断或读写超时"
+      },
+      {
+        "id": "C",
+        "text": "TCP 提供有序字节流，应用仍需自行规定如何识别一条消息结束"
+      },
+      {
+        "id": "D",
+        "text": "可以约定长度前缀，接收端按协议累计字节后再解析完整消息"
+      }
+    ],
+    "correct": [
+      "C",
+      "D"
+    ],
+    "explanation": "TCP 不保留应用的 send 调用边界，接收一次可能只拿到部分消息，也可能包含多条消息的字节。应用可采用长度前缀或其他可靠分帧规则，并累计到完整消息后解析。可靠传输语义不表示连接永不失败，也不替应用设置超时。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-NET-003",
+    "dimension": "network",
+    "topicId": "network.http-created",
+    "topic": "HTTP 创建资源响应",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "POST /orders 已成功创建一个新订单，希望返回表达“资源已经创建”的标准 HTTP 状态码。以下哪一个最符合这一语义？",
+    "options": [
+      {
+        "id": "A",
+        "text": "204 No Content，专门表示资源尚未创建"
+      },
+      {
+        "id": "B",
+        "text": "409 Conflict，表示任何成功写入"
+      },
+      {
+        "id": "C",
+        "text": "304 Not Modified，表示创建成功"
+      },
+      {
+        "id": "D",
+        "text": "201 Created"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "201 Created 明确表示请求已完成并产生了新资源；响应可用 Location 等信息定位资源。204 表示成功且没有响应内容，不能解释成尚未创建；409 表示冲突；304 则用于条件请求中复用已有缓存表示的情形。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-NET-004",
+    "dimension": "network",
+    "topicId": "network.conditional-cache",
+    "topic": "HTTP 条件请求与 ETag",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "客户端已缓存某资源及其 ETag，随后发送 GET 并携带 If-None-Match。服务器确认该条件请求匹配当前资源表示且无需发送新的表示体。通常返回哪个状态码？",
+    "options": [
+      {
+        "id": "A",
+        "text": "201 Created"
+      },
+      {
+        "id": "B",
+        "text": "401 Unauthorized"
+      },
+      {
+        "id": "C",
+        "text": "304 Not Modified"
+      },
+      {
+        "id": "D",
+        "text": "500 Internal Server Error"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "GET 条件请求的实体标签匹配当前表示时，304 表示客户端可以继续使用已缓存的表示，响应不再发送新的表示体。ETag 是验证器，不是登录凭据，也不表示发生了服务器异常或新资源创建。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-NET-005",
+    "dimension": "network",
+    "topicId": "network.safe-retry",
+    "topic": "超时与安全重试",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "客户端调用扣款接口后超时，无法确认服务端是否已经完成扣款。关于重试，以下哪些做法合理？",
+    "options": [
+      {
+        "id": "A",
+        "text": "使用持久化的幂等键，并由服务端将去重记录与扣款效果可靠关联"
+      },
+      {
+        "id": "B",
+        "text": "只要客户端超时，就能确定服务端没有执行扣款，可以无条件再次扣款"
+      },
+      {
+        "id": "C",
+        "text": "取消所有超时设置，任何调用都无限等待"
+      },
+      {
+        "id": "D",
+        "text": "在业务允许重试且幂等得到保障时，设置总重试上限并使用退避，避免故障时集中重试"
+      }
+    ],
+    "correct": [
+      "A",
+      "D"
+    ],
+    "explanation": "超时只表示客户端没有在期限内拿到结果，不能证明服务端未执行。幂等键必须由服务端可靠保存并与业务效果关联，才能抑制重复效果。即使允许重试，也应限制次数或总时长并退避；无限等待或无条件重试都不能解决结果未知问题。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-NET-006",
+    "dimension": "network",
+    "topicId": "network.proxy-trust",
+    "topic": "反向代理与转发头信任",
+    "type": "single",
+    "difficulty": "medium",
+    "stem": "应用部署在受控反向代理后，并按客户端 IP 执行部分限流。攻击者可以自行设置请求头 X-Forwarded-For。以下哪种处理更合适？",
+    "options": [
+      {
+        "id": "A",
+        "text": "直接信任所有请求中该头的第一个值"
+      },
+      {
+        "id": "B",
+        "text": "只信任明确配置的代理来源，并由受信代理清理或规范化客户端可伪造的转发头，再按约定解析"
+      },
+      {
+        "id": "C",
+        "text": "把该头当成已认证用户 ID 使用"
+      },
+      {
+        "id": "D",
+        "text": "只要头名大小写正确，就认为它不可伪造"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "转发头本身不是可信身份凭据，直接接受客户端提交的值会让攻击者伪造限流依据。需要先建立受信代理边界，确保外部请求不能任意影响应用采用的客户端地址。具体地址选择还取决于代理链配置，不能只靠头名判断可信性。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-NET-007",
+    "dimension": "network",
+    "topicId": "network.session-request-security",
+    "topic": "Cookie 会话、CSRF 与对象授权",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "一个浏览器应用使用 Cookie 会话访问私有测评。以下哪些服务端措施分别有助于防止跨站伪造写请求或访问其他用户的测评？",
+    "options": [
+      {
+        "id": "A",
+        "text": "只设置 HttpOnly，就认为所有 CSRF 风险都已消失"
+      },
+      {
+        "id": "B",
+        "text": "按会话验证写请求的 CSRF Token，并结合来源检查"
+      },
+      {
+        "id": "C",
+        "text": "每次读取或修改测评时检查测评所属用户与当前用户是否一致"
+      },
+      {
+        "id": "D",
+        "text": "只配置 CORS，不再对私有对象检查所属用户"
+      }
+    ],
+    "correct": [
+      "B",
+      "C"
+    ],
+    "explanation": "CSRF 防护面向浏览器自动携带 Cookie 所带来的伪造请求风险，Token 与来源检查是相应的服务端措施。对象所属关系检查解决的是越权访问，两者不能互相替代。HttpOnly 限制脚本读取 Cookie；CORS 控制跨源脚本访问，都不能据此取消这些检查。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-OS-001",
+    "dimension": "os",
+    "topicId": "os.process-isolation",
+    "topic": "进程地址空间",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "同一操作系统上的两个普通用户态进程，没有显式共享内存等机制。关于它们的内存访问，以下哪项描述最准确？",
+    "options": [
+      {
+        "id": "A",
+        "text": "只要两个变量地址数值相同，进程就一定共享同一对象"
+      },
+      {
+        "id": "B",
+        "text": "各自通常拥有独立虚拟地址空间，不能把一个进程内的普通指针直接交给另一个进程解引用"
+      },
+      {
+        "id": "C",
+        "text": "所有进程自动共享同一个调用栈"
+      },
+      {
+        "id": "D",
+        "text": "只要进程属于同一用户，所有堆对象就自动共享"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "普通指针只在所属进程的地址空间内具有对应含义，相同的虚拟地址数值不代表两个进程访问同一对象。跨进程传递数据需要 IPC、显式共享内存等机制。相同用户身份也不会自动共享堆和调用栈。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-OS-002",
+    "dimension": "os",
+    "topicId": "os.thread-resources",
+    "topic": "线程共享与私有资源",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "在常见的同一进程多线程模型中，以下哪些描述正确？不考虑语言运行时额外施加的访问限制。",
+    "options": [
+      {
+        "id": "A",
+        "text": "线程通常共享进程的堆和全局数据，因此共享可变状态可能需要同步"
+      },
+      {
+        "id": "B",
+        "text": "每个线程的任意全局变量都天然是独立副本"
+      },
+      {
+        "id": "C",
+        "text": "每个线程通常有自己的调用栈和执行上下文"
+      },
+      {
+        "id": "D",
+        "text": "创建线程后会自动得到完全独立于进程的虚拟地址空间"
+      }
+    ],
+    "correct": [
+      "A",
+      "C"
+    ],
+    "explanation": "线程共享进程地址空间，堆和普通全局数据并非自动隔离；并发修改共享状态时可能需要同步。调用栈和寄存器等执行上下文则属于各线程自身。线程局部存储是额外机制，不能把所有全局变量都当成线程私有。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-OS-003",
+    "dimension": "os",
+    "topicId": "os.mutual-exclusion",
+    "topic": "共享计数器与临界区",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "共享计数器初始为 0。两个线程分别执行一次“读取、加 1、写回”，该复合操作不是原子的。要保证最终结果为 2，应采用哪种方法？",
+    "options": [
+      {
+        "id": "A",
+        "text": "把完整的读改写操作放入同一互斥锁保护的临界区，所有写入路径都遵守该锁"
+      },
+      {
+        "id": "B",
+        "text": "两个线程都先读取计数器，然后随机等待"
+      },
+      {
+        "id": "C",
+        "text": "仅把计数器变量名改得更长"
+      },
+      {
+        "id": "D",
+        "text": "只对读取加锁，写回时立即释放保护且不再同步"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "读、改、写必须作为受保护的完整操作，否则两个线程可能都读到 0，随后分别写回 1，造成丢失更新。同一互斥锁能让遵守该锁的复合操作串行完成。只保护读取不足以保护整个更新过程，等待也不构成同步保证。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-OS-004",
+    "dimension": "os",
+    "topicId": "os.blocking-io",
+    "topic": "阻塞 I/O 与事件循环",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "一个服务的单线程事件循环需要及时处理多个连接，但某请求执行数秒的阻塞文件读取。以下哪种处理最符合保持事件循环响应性的目标？",
+    "options": [
+      {
+        "id": "A",
+        "text": "在事件循环中不断空转，等待文件读取结束"
+      },
+      {
+        "id": "B",
+        "text": "只增加 HTTP 请求头数量"
+      },
+      {
+        "id": "C",
+        "text": "认为函数写成 async 就会自动把内部阻塞读取变成非阻塞"
+      },
+      {
+        "id": "D",
+        "text": "采用真正异步 I/O，或将阻塞操作交给受控的工作线程/执行器，并等待其结果"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "事件循环所在的线程一旦被阻塞，其他连接的调度也会延迟。真正异步 I/O 或受控执行器能让等待不占住事件循环线程。async 关键字本身不会改写内部同步阻塞函数的执行方式；工作线程还需容量和超时控制。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-OS-005",
+    "dimension": "os",
+    "topicId": "os.deadlock-prevention",
+    "topic": "多锁与死锁风险",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "两个线程可能同时需要互斥锁 L1 和 L2。以下哪些做法可以降低或避免题设中的循环等待风险？",
+    "options": [
+      {
+        "id": "A",
+        "text": "线程甲先拿 L1 再拿 L2，线程乙必须反过来，才能保证公平"
+      },
+      {
+        "id": "B",
+        "text": "所有相关代码统一按 L1 后 L2 的顺序获取这两把锁"
+      },
+      {
+        "id": "C",
+        "text": "给两个线程设置相同名称，就能避免死锁"
+      },
+      {
+        "id": "D",
+        "text": "使用尝试获取/超时协议，获取第二把锁失败时释放已持有的锁后再按策略重试"
+      }
+    ],
+    "correct": [
+      "B",
+      "D"
+    ],
+    "explanation": "统一锁顺序能破坏这两把锁之间的循环等待条件。尝试获取失败后释放已有锁，也能避免一直持有一把锁等待另一把；这种方案仍需防范反复竞争和活锁。相反顺序获取正是典型死锁风险，线程名称不提供同步保证。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-OS-006",
+    "dimension": "os",
+    "topicId": "os.condition-variable",
+    "topic": "条件变量与谓词重检",
+    "type": "single",
+    "difficulty": "medium",
+    "stem": "消费者在互斥锁保护下检查队列是否为空，若为空则通过条件变量等待。生产者在同一锁保护下加入元素。消费者被唤醒并重新持锁后，为何通常应在 while 循环中再次检查队列非空，而不是只检查一次？",
+    "options": [
+      {
+        "id": "A",
+        "text": "因为被唤醒就一定有无限多个元素"
+      },
+      {
+        "id": "B",
+        "text": "因为通知本身会替消费者自动取走元素"
+      },
+      {
+        "id": "C",
+        "text": "因为唤醒不等于谓词必然成立，可能有虚假唤醒，或元素已被其他消费者取走"
+      },
+      {
+        "id": "D",
+        "text": "因为 while 能替代互斥锁，不再需要持锁检查队列"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "条件变量的通知只表示状态可能发生变化，不等于把资源保留给特定等待者。等待返回并重新获得锁时，队列可能仍为空，必须重新检查谓词；while 正是为了把等待和条件检查关联起来。循环不能替代对共享状态的互斥保护。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-OS-007",
+    "dimension": "os",
+    "topicId": "os.bounded-buffer",
+    "topic": "有界缓冲区与信号量",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "容量为 N 的共享队列初始为空，empty 信号量初值 N，full 初值 0，另有互斥锁保护队列操作。正常运行时，以下哪些操作顺序正确？只讨论操作均成功且没有取消或异常的情况。",
+    "options": [
+      {
+        "id": "A",
+        "text": "生产者先等待 empty，再持互斥锁入队；释放锁后增加 full"
+      },
+      {
+        "id": "B",
+        "text": "消费者先等待 full，再持互斥锁出队；释放锁后增加 empty"
+      },
+      {
+        "id": "C",
+        "text": "生产者先持互斥锁，再在队列满时一直等待 empty，消费者也必须持该锁才能出队"
+      },
+      {
+        "id": "D",
+        "text": "消费者无需检查 full，直接出队，队列为空时读取未初始化数据"
+      }
+    ],
+    "correct": [
+      "A",
+      "B"
+    ],
+    "explanation": "empty 表示可用槽位，full 表示已放入的元素数量；生产者和消费者先获得对应配额，再短暂持锁改变队列，最后释放对方配额。若生产者持队列锁等待空位，消费者可能无法获得锁来释放空位。题目排除了异常路径；实际实现还需处理取消后的配额恢复。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-SWE-001",
+    "dimension": "software",
+    "topicId": "software.unit-testing",
+    "topic": "单元测试与外部依赖",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "一个函数按规则计算订单折扣，并调用外部 HTTP 服务查询会员等级。要让折扣规则的单元测试稳定且不依赖真实网络，哪种方式更合适？",
+    "options": [
+      {
+        "id": "A",
+        "text": "每次都调用生产服务，失败时重新运行直到成功"
+      },
+      {
+        "id": "B",
+        "text": "在测试中忽略全部断言"
+      },
+      {
+        "id": "C",
+        "text": "注入可替换的会员查询依赖，测试时使用返回已知等级的替身"
+      },
+      {
+        "id": "D",
+        "text": "把生产会员访问令牌硬编码在测试源码中"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "依赖注入使测试能提供确定的会员等级，从而专注验证折扣规则并避免网络波动。真实集成行为应另做集成测试；重复运行直到成功会掩盖不稳定性，忽略断言没有验证作用，生产凭据也不应进入测试源码。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-SWE-002",
+    "dimension": "software",
+    "topicId": "software.safe-logging",
+    "topic": "日志与敏感信息",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "服务需要排查跨多个组件的请求失败，同时保护用户凭据。以下哪些日志做法合理？",
+    "options": [
+      {
+        "id": "A",
+        "text": "把用户完整密码和会话 Cookie 原样写入每一条日志"
+      },
+      {
+        "id": "B",
+        "text": "为了减少日志量，把所有错误都记录为成功"
+      },
+      {
+        "id": "C",
+        "text": "记录请求关联 ID、操作名和必要的错误类别，便于串联事件"
+      },
+      {
+        "id": "D",
+        "text": "对令牌等敏感字段脱敏或不记录，并限制日志访问权限"
+      }
+    ],
+    "correct": [
+      "C",
+      "D"
+    ],
+    "explanation": "关联 ID 和错误类别有助于定位失败，同时应遵守最小必要记录原则，不把密码、令牌和会话凭据写入日志。脱敏和访问限制降低敏感信息暴露风险。将失败伪装成成功会破坏可观测性，无法帮助故障排查。",
+    "sources": [],
+    "version": 1,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-SWE-003",
+    "dimension": "software",
+    "topicId": "software.idempotency-test",
+    "topic": "幂等请求的验收测试",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "创建订单接口约定：同一用户使用同一幂等键和相同请求体重复调用，应返回同一订单且只产生一次扣库存效果。哪项测试最直接验证这一约定？",
+    "options": [
+      {
+        "id": "A",
+        "text": "只确认两次响应都是合法 JSON"
+      },
+      {
+        "id": "B",
+        "text": "先后提交两次相同键和相同请求体，检查订单 ID 一致、订单数量只增加 1、库存只减少一次"
+      },
+      {
+        "id": "C",
+        "text": "两次请求使用不同幂等键，只检查日志没有异常"
+      },
+      {
+        "id": "D",
+        "text": "只检查按钮颜色没有变化"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "验收需要同时检查返回对象一致性和持久化业务效果：只返回同一状态码或合法 JSON 不能证明没有重复创建或重复扣库存。使用不同键也无法直接覆盖题目规定的同键重放行为；并发重放等情况可另补测试。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-SWE-004",
+    "dimension": "software",
+    "topicId": "software.merge-review",
+    "topic": "版本控制与冲突处理",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "合并分支时，两个提交修改了同一接口的校验逻辑并产生冲突。哪种处理最合理？",
+    "options": [
+      {
+        "id": "A",
+        "text": "结合接口约定理解双方修改，解决语义冲突后运行相关测试并检查最终差异"
+      },
+      {
+        "id": "B",
+        "text": "总是选择当前分支全部内容，不必理解另一分支"
+      },
+      {
+        "id": "C",
+        "text": "直接删除有冲突的整个函数，让版本控制工具不再报冲突"
+      },
+      {
+        "id": "D",
+        "text": "只要冲突标记消失，就能证明业务行为正确"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "文本冲突解决不代表语义正确，需要理解两个修改的意图并对照接口约定组合结果，再验证相关行为。机械选择一方或删掉函数可能丢失必要逻辑。检查最终差异还能发现意外删除或残留冲突标记。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-SWE-005",
+    "dimension": "software",
+    "topicId": "software.ci-delivery",
+    "topic": "持续集成与依赖锁定",
+    "type": "multiple",
+    "difficulty": "easy",
+    "stem": "团队希望每次提交都能重复检查后端项目质量，并在校验失败时阻止自动部署。以下哪些流水线设计符合这一目标？",
+    "options": [
+      {
+        "id": "A",
+        "text": "按锁定的依赖版本安装，再执行约定的测试和静态检查"
+      },
+      {
+        "id": "B",
+        "text": "每次随机选取依赖版本，以便自动验证所有组合"
+      },
+      {
+        "id": "C",
+        "text": "将所有校验失败都转换为退出码 0"
+      },
+      {
+        "id": "D",
+        "text": "部署阶段依赖校验阶段成功，不把失败当成可部署结果"
+      }
+    ],
+    "correct": [
+      "A",
+      "D"
+    ],
+    "explanation": "锁定依赖有助于重复构建，测试和静态检查提供可核对的质量信号；部署阶段应以这些检查成功为前提。随机依赖版本不能提供稳定基线，把失败改成成功会让门禁失效。依赖升级可以另走受控验证流程。",
+    "sources": [],
+    "version": 2,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-SWE-006",
+    "dimension": "software",
+    "topicId": "software.schema-migration",
+    "topic": "兼容性数据库迁移",
+    "type": "single",
+    "difficulty": "medium",
+    "stem": "服务滚动发布期间，新旧实例会短时间并存。准备把数据库字段 old_name 迁移为 new_name。哪种方案更能降低旧实例立即失效的风险？",
+    "options": [
+      {
+        "id": "A",
+        "text": "先删除 old_name，再慢慢升级应用"
+      },
+      {
+        "id": "B",
+        "text": "只升级一台实例后，假定所有实例已同时使用新字段"
+      },
+      {
+        "id": "C",
+        "text": "直接修改所有历史备份中的字段名，作为唯一迁移措施"
+      },
+      {
+        "id": "D",
+        "text": "先扩展兼容结构并完成过渡读写/回填，再确认旧实例退出后收缩旧结构"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "扩展—迁移—收缩让新旧实例在过渡期有兼容的数据结构可用。回填和过渡读写需按实际一致性要求设计，确认旧版本不再依赖旧字段后才能移除。先删字段会使仍运行的旧代码失败，修改备份也不能替代在线迁移。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  },
+  {
+    "id": "SP5-SWE-007",
+    "dimension": "software",
+    "topicId": "software.message-idempotency",
+    "topic": "至少一次投递与消费幂等",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "消息系统承诺至少一次投递，因此同一消息可能被多次消费。服务需要避免重复增加用户积分。以下哪些做法合理？",
+    "options": [
+      {
+        "id": "A",
+        "text": "先永久标记消费成功，再执行积分修改，失败时不补偿也不重试"
+      },
+      {
+        "id": "B",
+        "text": "以消息唯一 ID 建立去重记录，并把去重判断/写入与积分修改放在同一可靠事务边界内"
+      },
+      {
+        "id": "C",
+        "text": "增加重复消息和并发重复消费测试，检查最终积分只增加一次"
+      },
+      {
+        "id": "D",
+        "text": "多实例消费者只在各自进程内存里记录已消费 ID，即可保证重启和跨实例的全局去重"
+      }
+    ],
+    "correct": [
+      "B",
+      "C"
+    ],
+    "explanation": "只有去重记录与业务效果可靠关联，才能防止两个消费者都通过检查后重复修改积分。先标记再修改若中间失败可能永久漏处理；各进程内存也无法覆盖重启与其他实例。重复及并发消费测试直接验证最终业务效果，而不是仅看消息处理次数。",
+    "sources": [],
+    "version": 3,
+    "status": "draft"
+  }
+]
