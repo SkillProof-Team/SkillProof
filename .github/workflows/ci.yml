@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: frontend-checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.12.0'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Lint frontend
+        run: npm run lint
+      - name: Type-check and build frontend
+        run: npm run build
+
+  backend:
+    name: backend-checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: backend
+      PYTHONDONTWRITEBYTECODE: '1'
+      SKILLPROOF_ENV: development
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.13.9'
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - name: Install backend dependencies
+        run: python -m pip install -r backend/requirements-test.txt
+      - name: Check backend dependencies
+        run: python -m pip check
+      - name: Run backend tests
+        env:
+          SKILLPROOF_DB_PATH: ${{ runner.temp }}/skillproof-tests.sqlite3
+        run: |
+          python - <<'PY'
+          import sys
+          import unittest
+
+          suite = unittest.defaultTestLoader.discover("backend/tests", pattern="test_*.py")
+          if suite.countTestCases() == 0:
+              sys.exit("No backend tests were discovered")
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          sys.exit(0 if result.wasSuccessful() else 1)
+          PY
+      - name: Start API and check health
+        env:
+          SKILLPROOF_DB_PATH: ${{ runner.temp }}/skillproof-health.sqlite3
+        run: |
+          python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 &
+          api_pid=$!
+          trap 'kill "$api_pid" 2>/dev/null || true' EXIT
+
+          deadline=$((SECONDS + 600))
+          while (( SECONDS < deadline )); do
+            if ! kill -0 "$api_pid" 2>/dev/null; then
+              echo "API exited before becoming ready" >&2
+              exit 1
+            fi
+            if curl --fail --silent --max-time 1 http://127.0.0.1:8000/api/health > "$RUNNER_TEMP/health.json"; then
+              python -c 'import json, sys; body = json.load(sys.stdin); sys.exit(0 if body == {"Status": "ok"} else f"Unexpected health response: {body!r}")' < "$RUNNER_TEMP/health.json"
+              exit 0
+            fi
+            sleep 0.25
+          done
+
+          echo "API did not become ready within 10 minutes" >&2
+          exit 1
