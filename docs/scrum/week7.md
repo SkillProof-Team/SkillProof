@@ -40,3 +40,46 @@
 | Commit | [`5e1466f`](https://github.com/SkillProof-Team/SkillProof/commit/5e1466f) | 刷新契约验证说明与移动端修复，已推送至 PR #23 |
 | Commit | [`98b4adf`](https://github.com/SkillProof-Team/SkillProof/commit/98b4adf) | 记录真实报告流程验证，已推送至 PR #23，CI 通过 |
 
+## 李宛霖
+
+- 记录日期：2026-11-08
+- 负责方向：注册登录与岗位选择、测评答题与提交
+
+### 本周实际进展
+
+- 继续完善 [#7 注册登录与岗位选择](https://github.com/SkillProof-Team/SkillProof/issues/7)，将前端与 Claire 开发的后端接口进行联调，检查了注册、登录、退出、刷新恢复和岗位选择等功能。补充了真实浏览器测试，并将测试结果整理到 `docs/testing/t05-auth-job-selection.md`。
+- 联调时发现，未登录用户刷新注册页面后会自动跳回登录页。检查后发现，首次查询登录状态返回的 401 被当成了已有会话过期。后来调整了首次会话检查的处理方式，修复了这个问题，同时确认真正的会话过期仍能正常跳转。
+- 根据 Claire 的 Review 意见，修改了注册表单的姓名校验。之前输入单独的组合重音符时，前端没有提示错误，但后端会拒绝注册。现在增加了对应检查，同时保留正常带重音姓名的支持。修改后重新进行了浏览器测试，Claire 已确认问题解决，PR #19 获得 APPROVED Review，目前还未合并。
+- 继续开发 [#10 测评答题与提交流程](https://github.com/SkillProof-Team/SkillProof/issues/10)，完成了从岗位选择到创建测评、答题、保存、刷新恢复和提交的页面衔接。增加了答题进度、未答题提示，以及保存失败和重复提交时的处理。
+- 测评页面中比较麻烦的是答案保存和页面状态的同步。用户在页面上修改了答案，不代表服务器已经保存成功。如果请求失败后直接刷新，就可能丢失刚才的选择。因此把当前页面答案和服务器已保存答案分开处理，保存失败时保留页面上的修改，并提醒用户重新保存。
+- 在临时集成环境中接入后端测评、评分和报告接口，完成了真实浏览器测试。联调时曾因为临时环境缺少 Vite 的 `/api` 代理配置，导致登录状态接口返回的内容无法正常解析。补齐配置后重新测试，最终跑通了创建测评、答题、保存、提交和查看结果的流程。相关记录已整理到 `docs/testing/t08-assessment-flow.md`，PR #25 目前仍为 Draft。
+- 参与审核 [PR #23 结果页](https://github.com/SkillProof-Team/SkillProof/pull/23)，检查了报告展示、图表和异常情况。测试中发现非法报告路径可能导致白屏，切换报告时也可能短暂显示上一份报告的数据，已在 Review 中反馈给负责人。
+
+### 下一步计划
+
+- 等待后端 PR #30 合并后，同步最新 `main`，对注册登录和岗位选择进行最后一轮检查，推进 PR #19 合并。
+- 继续完善测评流程，在相关后端代码合并后重新进行完整联调，重点检查答案保存、刷新恢复、提交失败和结果页跳转。
+- 跟进 PR #23 的问题修复，重新检查结果页，并配合完成正式路由接入。
+- 整理最终测试记录，按团队要求完成 Review 后再合并 PR #25。
+
+### 当前困难与需要协作
+
+- 前端和后端分别在不同分支开发，联调时需要临时组合代码。虽然目前已经跑通主要流程，但后端 PR 还没有全部合并，之后仍需要在正式分支上重新检查。
+- 答题过程中需要同时处理页面状态和服务器数据，尤其是保存失败、刷新页面和重复提交时，要避免答案丢失或显示错误的提交状态。目前已经处理了主要情况，但部分断网和请求超时场景还需要继续验证。
+- 测评提交后需要进入结果页，但结果页由其他成员负责，双方都涉及页面路由。已经与负责人约定合并顺序，等注册登录部分合并后再统一接入，避免直接覆盖彼此的代码。
+- 现有题库尚未正式发布，完整流程测试暂时只能使用隔离数据库中的题目，需要内容负责人确认后再进行最终验收。
+
+### Issue、Commit 与 PR 记录
+
+| 类型     | 记录                                                                                                         | 状态                  |
+| ------ | ---------------------------------------------------------------------------------------------------------- | ------------------- |
+| Issue  | [#7 注册登录与岗位选择](https://github.com/SkillProof-Team/SkillProof/issues/7)                                     | Open，已通过 Review，待合并 |
+| Issue  | [#10 测评答题与提交](https://github.com/SkillProof-Team/SkillProof/issues/10)                                     | Open，主要功能完成，待正式集成   |
+| Issue  | [#14 Scrum 记录](https://github.com/SkillProof-Team/SkillProof/issues/14)                                    | Open，本周个人记录         |
+| PR     | [#19 注册登录与岗位选择](https://github.com/SkillProof-Team/SkillProof/pull/19)                                     | APPROVED，未合并        |
+| PR     | [#25 测评答题与提交](https://github.com/SkillProof-Team/SkillProof/pull/25)                                       | Draft，未合并           |
+| Review | [#23 结果页审核](https://github.com/SkillProof-Team/SkillProof/pull/23#pullrequestreview-5817192868)            | 已反馈问题，等待修改          |
+| Commit | [`fa257b7`](https://github.com/SkillProof-Team/SkillProof/commit/fa257b7)                                  | 修复注册页刷新跳转问题         |
+| Commit | [`e86e0e8`](https://github.com/SkillProof-Team/SkillProof/commit/e86e0e8)                                  | 修改姓名校验并补充测试         |
+| Commit | [`eb05cab`](https://github.com/SkillProof-Team/SkillProof/commit/eb05cabff8082c0378159a09628e5e98c87be2eb) | 整合测评流程及验证记录         |
+
