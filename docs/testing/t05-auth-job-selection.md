@@ -101,7 +101,7 @@ HTTP 检查通过 httpx 实际访问 Vite `/api` 代理及 uvicorn；使用 `tru
 | B03 | 登录页进入注册页，再后退、前进 | `/login`、`/register` 与表单对应正确 | 通过 |
 | B04 | 未登录刷新注册页，应保留注册路由 | 修复后仍为 `/register`、姓名框可用 | 通过（已修复） |
 | B05 | 注册填写非法邮箱、零宽姓名、短密码 | 分别显示对应校验信息 | 通过 |
-| B06 | 填写纯组合重音姓名以触发后端 422 | 展示真实“输入内容不符合要求”，提交状态恢复 | 通过 |
+| B06 | 填写纯组合重音姓名以触发后端 422 | 展示真实“输入内容不符合要求”，提交状态恢复；此为修复前历史结果，最新行为见下方审核反馈复测 | 通过（历史） |
 | B07 | 合法注册，应进入真实岗位页 | 显示账户姓名、4 个真实岗位卡片 | 通过 |
 | B08 | SQLite 持有临时写锁，提交真实注册请求 | 显示“注册中…”，输入、提交、返回登录均禁用；释放锁后成功 | 通过 |
 | B09 | 已注册邮箱再次注册 | 展示真实“该邮箱已经注册” | 通过 |
@@ -145,6 +145,55 @@ B19 同时检查了现有代码链路：`role.id` → `onSelectRole(roleId)` →
 - 零宽姓名实际 422、默认 cp936 的题库定向测试通过，原后端问题本次未再现；完整后端质量结论以组长独立复测为依据。
 - #19 保留既有页面结构、样式和命名，仅补上述 2 文件的路由修复及本验收材料。所有数据库、临时脚本、账号与凭据均在工作区外。
 - #19 可以在 #30 合并前送审；最终合并前需 Claire 处理 #30 冲突并合入 main，再由 #19 同步 main，回归注册/登录、刷新恢复、退出/过期和岗位展示。T08 接口由后续测评任务集成，不在此 PR 提前实现。
+
+## PR #19 审核反馈复测（2026-11-08）
+
+对应 [Claire 的评论](https://github.com/SkillProof-Team/SkillProof/pull/19#issuecomment-6719196774)。本节独立记录，不计入上面的 38 项历史验收统计。
+
+开始时正式分支为 `feature/7-auth-job-selection`、HEAD 为 `62316b35694fe6bcb654cc847c504aeadfc747c6`，工作区干净。本节所在提交仅修改 `frontend/src/authValidation.ts` 和本记录。
+
+### 原因与最小修复
+
+Claire #30 的 `8516c23` 在 `valid_name()` 中要求至少有一个 Unicode L/N/P/S 类字符；原前端只检查码点长度和 Cc/Cf/Zl/Zp 禁用字符，故纯 U+0301（Mn）仍会提交。修复前实际运行 Node 断言，确认 `validateName('\u0301')` 返回空字符串，断言失败；修复后新增同样的 L/N/P/S 存在性检查，提示“姓名需包含可显示字符”。组合标记仍可与正常字符共存，没有禁止所有组合标记，也没有收紧为仅允许字母。
+
+保留原长度、控制字符规则及注册表单的首尾 `trim()`。后端的其他可打印性规则未在本次全面重写为前端规则；本次只补齐缺少实际字符的检查，不修改后端、路由、UI 或其他认证代码。
+
+### 实际环境与结果
+
+直接从正式工作区运行 Vite，受测代码为本节所在提交的前端。后端复用上述 `20f55c0` 临时集成 worktree，其 `backend/app/models.py` 与 Claire `8516c23` 无差异；未修改该 worktree。Python 虚拟环境、运行时和代理地址同上。新建独立数据库 `$env:TEMP/skillproof-pr19-name-review-20261108/review.sqlite3`，没有使用历史测试会话。真实 Codex 内置浏览器操作表单，没有 Mock、请求拦截、伪造响应或认证绕过。
+
+| 检查 | 实际结果 |
+| --- | --- |
+| Node 姓名校验断言 | 下方 38 条断言全部通过 |
+| 浏览器非法姓名，15 组 | 单个 U+0301、多重组合重音、空格夹组合重音、Mc（U+093E）、Me（U+20DD）、单独/夹在字母后的 U+200B、内部 U+FEFF、U+007F、内部 U+2028/U+2029、空字符串、纯空格、51 个字母、含组合重音的 51 码点姓名：全部显示对应前端错误，仍在 `/register`，按钮恢复可用 |
+| 非法输入没有注册请求 | 上述完整 15 组提交期间 uvicorn 日志没有 `POST /api/auth/register`；隔离库用户数保持 1（此前测试夹具注册的账号），未增加 |
+| 浏览器合法姓名，9 组 | `张三`、`Alice Smith`、`José`、`Jose\u0301`、1 个字母、49 个字母、50 个汉字、50 个补充平面汉字 U+20BB7、48 个字母加 `e\u0301`：全部真实 POST 201，进入 `/jobs` 并显示对应姓名；每组间正常退出 |
+| B04：访客刷新 `/register` 后注册 | 真实 me 401 后保留注册表单；随后使用 `张三` 成功注册，POST 201 |
+| B13：有效会话刷新 | 保持 `/jobs`，真实 me 200，显示原账户；选择后端开发成功 |
+| B16：会话过期后点击岗位 | 仅在上述新建隔离 SQLite 将唯一测试会话 `expires_at` 置零；点击“已选择”后真实 me 401，回 `/login` 并提示“会话已失效，请重新登录” |
+| 过期后的恢复与退出 | 原账号重新登录 200，回岗位页且没有已选岗位卡片；正常退出 200，回登录页 |
+| 工程检查 | 正式工作区 `npm run lint`、`npm run build`、`git diff --check` 均通过 |
+
+测试夹具曾误将末尾 `A\uFEFF` 设为非法输入，实际被既有 `trim()` 清为 `A` 并注册成功，因此该轮断言中止；修正夹具为内部 `A\uFEFFB` 后重新完整执行上表 15 组，全部通过。未为此改变产品行为。截图 `combining-name-error.png` 和 `browser-results.json` 位于上述临时目录，不提交测试身份、密码、Cookie、Token 或数据库。本次未重跑完整后端套件，未将历史验收冒充本次结果。
+
+### 无新增依赖的断言复现命令
+
+从正式工作区根目录执行（Node.js v24.15.0 直接加载 TypeScript）：
+
+```powershell
+@'
+import assert from 'node:assert/strict';
+import { validateName } from './frontend/src/authValidation.ts';
+const invalid = ['', 'A'.repeat(51), '\u0301', '\u0301\u0308', '\u093e', '\u20dd', ' \u0301 ', ' ', '\u00a0', '\u2003', '\u200b', 'A\u200b', '\ufeff', 'A\0', 'A\n', 'A\t', 'A\u007f', 'A\u0085', 'A\u200d', 'A\u2028', 'A\u2029'];
+const valid = ['中', '张三', 'Alice Smith', 'José', 'Jose\u0301', '李 Jose\u0301', 'A'.repeat(49), 'A'.repeat(50), '中'.repeat(50), '𠮷'.repeat(50), 'A'.repeat(48)+'e\u0301', "O'Connor", 'Anne-Marie', '123', '。', '★'];
+for (const name of invalid) assert.notEqual(validateName(name), '', JSON.stringify(name));
+for (const name of valid) assert.equal(validateName(name), '', JSON.stringify(name));
+assert.equal(validateName('A'.repeat(49)+'e\u0301'), '姓名需为 1–50 个字符');
+console.log(`${invalid.length + valid.length + 1} assertions passed`);
+'@ | node --input-type=module
+```
+
+前端没有既有 `npm test` 脚本，故沿用真实浏览器验收并直接运行 Node 断言，未增加测试框架或依赖。修复前后端接口仍依赖 #30；本次不合入或修改 #30，不改变 Claire 审核请求，也不自行合并 #19。
 
 ## 历史联调
 
