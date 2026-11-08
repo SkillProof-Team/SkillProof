@@ -4,12 +4,10 @@ from concurrent.futures import ThreadPoolExecutor
 from collections import Counter
 import hashlib
 import json
-import os
 from pathlib import Path
 import sys
 import tempfile
 import time
-from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 from uuid import UUID
@@ -24,7 +22,8 @@ from app.assessment_dependencies import get_assessment_roles, get_report_builder
 from app.catalog import BLUEPRINT, DIMENSION_IDS, ROLE_MAP
 from app.config import Settings
 from app.db import connect, dump, initialize, now_iso
-from app.main import app
+from app.main import create_app
+from app.scoring import ScoringError
 
 
 def report_fixture(attempt, submitted_at):
@@ -41,7 +40,7 @@ class AssessmentTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory(prefix="skillproof-t06-")
         self.addCleanup(temporary.cleanup)
-        self.settings = Settings(database_path=Path(temporary.name) / "test.db", environment="development")
+        self.settings = Settings(database_path=Path(temporary.name) / "test.db", environment="development", cookie_secure=False, origin=None, allowed_hosts=("testserver",))
         initialize(self.settings)
         self.con = connect(self.settings)
         self.addCleanup(self.con.close)
@@ -71,15 +70,10 @@ class AssessmentTests(unittest.TestCase):
                 (hashlib.sha256((user_id + "-session").encode()).hexdigest(), user_id,
                  user_id + "-csrf", now_iso(), time.time() + 3600),
             )
+        self.app = create_app(self.settings)
         self.scorer = Mock(side_effect=report_fixture)
-        app.dependency_overrides[get_report_builder] = lambda: self.scorer
-        self.addCleanup(app.dependency_overrides.clear)
-        environment = patch.dict(os.environ, {"SKILLPROOF_DB_PATH": str(self.settings.database_path),
-                                              "SKILLPROOF_ENV": "development", "SKILLPROOF_COOKIE_SECURE": "0",
-                                              "SKILLPROOF_ORIGIN": ""})
-        environment.start()
-        self.addCleanup(environment.stop)
-        self.client = self.enterContext(TestClient(app))
+        self.app.dependency_overrides[get_report_builder] = lambda: self.scorer
+        self.client = self.enterContext(TestClient(self.app))
         self.client.cookies.set("skillproof_session", "alice-session")
         self.headers = {"X-CSRF-Token": "alice-csrf"}
 
@@ -146,7 +140,7 @@ class AssessmentTests(unittest.TestCase):
 
     def test_different_open_role_conflicts_with_active_attempt(self):
         self.create()
-        app.dependency_overrides[get_assessment_roles] = lambda: ROLE_MAP
+        self.app.dependency_overrides[get_assessment_roles] = lambda: ROLE_MAP
         response = self.client.post("/api/attempts", json={"roleId": "frontend"}, headers=self.headers)
         self.assertEqual(response.status_code, 409)
 
@@ -227,7 +221,7 @@ class AssessmentTests(unittest.TestCase):
         self.assertEqual(self.save(attempt, {second: ["B", "A"]}).json()["answers"], {first: ["A"], second: ["A", "B"]})
         response = self.save(attempt, {first: []})
         self.assertEqual(response.json()["answers"], {second: ["A", "B"]})
-        with TestClient(app) as other:
+        with TestClient(self.app) as other:
             other.cookies.set("skillproof_session", "alice-session")
             restored = other.get(f"/api/attempts/{attempt['id']}").json()
         self.assertEqual(restored["answers"], {second: ["A", "B"]})
@@ -290,27 +284,12 @@ class AssessmentTests(unittest.TestCase):
         self.assertIsNone(row["report_json"])
         self.assertIsNone(row["submitted_at"])
 
-    def test_default_scorer_is_unavailable_until_t07_arrives(self):
-        attempt = self.create()
-        self.complete(attempt)
-        app.dependency_overrides.pop(get_report_builder)
-        # Simulate an absent dependency even after the scoring PR is merged.
-        with patch.dict(sys.modules, {"app.scoring": None}):
-            response = self.submit(attempt)
-        self.assertEqual(response.status_code, 503)
-        self.assertEqual(self.row(attempt)["status"], "in_progress")
-
     def test_t07_scoring_error_returns_422_and_preserves_draft(self):
         attempt = self.create()
         answers = self.complete(attempt)
-        app.dependency_overrides.pop(get_report_builder)
+        self.app.dependency_overrides.pop(get_report_builder)
 
-        class ScoringError(ValueError):
-            pass
-
-        scorer = Mock(side_effect=ScoringError("invalid snapshot"))
-        module = SimpleNamespace(ScoringError=ScoringError, build_report=scorer)
-        with patch.dict(sys.modules, {"app.scoring": module}):
+        with patch("app.assessment_dependencies.build_report", side_effect=ScoringError("invalid snapshot")):
             response = self.submit(attempt)
         self.assertEqual(response.status_code, 422)
         row = self.row(attempt)
