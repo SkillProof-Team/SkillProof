@@ -11,6 +11,7 @@ from .api_auth import router as auth_router
 from .api_catalog import load_catalog, router as catalog_router
 from .config import Settings
 from .db import initialize
+from .reports import router as reports_router
 from .request_guard import RequestGuard
 
 LOGGER = logging.getLogger("skillproof")
@@ -59,6 +60,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(auth_router)
     app.include_router(catalog_router)
+    app.include_router(reports_router)
     return app
 
 
