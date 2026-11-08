@@ -41,7 +41,7 @@ function App() {
 
   useEffect(() => {
     const controller = new AbortController()
-    getCurrentUser(controller.signal)
+    getCurrentUser(controller.signal, false)
       .then((data) => {
         if (controller.signal.aborted) return
         setCsrfToken(data.csrfToken)
