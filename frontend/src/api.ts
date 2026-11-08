@@ -103,8 +103,8 @@ export function loginUser(email: string, password: string) {
   })
 }
 
-export function getCurrentUser(signal?: AbortSignal) {
-  return authRequest('/auth/me', { signal })
+export function getCurrentUser(signal?: AbortSignal, authenticated = true) {
+  return authRequest('/auth/me', { signal, authenticated })
 }
 
 export function logoutUser() {

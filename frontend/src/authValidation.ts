@@ -6,6 +6,7 @@ export function validateName(name: string) {
   const length = Array.from(name).length
   if (length < 1 || length > 50) return '姓名需为 1–50 个字符'
   if (/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u.test(name)) return '姓名不能包含控制字符或不可显示字符'
+  if (!/[\p{L}\p{N}\p{P}\p{S}]/u.test(name)) return '姓名需包含可显示字符'
   return ''
 }
 

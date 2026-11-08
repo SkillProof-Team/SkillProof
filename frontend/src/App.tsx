@@ -41,7 +41,7 @@ function App() {
 
   useEffect(() => {
     const controller = new AbortController()
-    getCurrentUser(controller.signal)
+    getCurrentUser(controller.signal, false)
       .then((data) => {
         if (controller.signal.aborted) return
         setCsrfToken(data.csrfToken)
@@ -66,6 +66,39 @@ function App() {
     window.addEventListener('session-expired', handleSessionExpired)
     return () => window.removeEventListener('session-expired', handleSessionExpired)
   }, [clearSession])
+
+  const userId = user?.id
+
+  useEffect(() => {
+    if (!userId) return
+    let controller: AbortController | undefined
+
+    function checkSession() {
+      if (document.visibilityState !== 'visible') return
+      controller?.abort()
+      const request = new AbortController()
+      controller = request
+      getCurrentUser(request.signal)
+        .then((data) => {
+          if (request.signal.aborted) return
+          setCsrfToken(data.csrfToken)
+          setUser(data.user)
+          setAccountError('')
+        })
+        .catch((error: unknown) => {
+          if (request.signal.aborted || (error instanceof ApiError && error.status === 401)) return
+          setAccountError(error instanceof Error ? error.message : '登录状态查询失败，请重试')
+        })
+    }
+
+    window.addEventListener('focus', checkSession)
+    document.addEventListener('visibilitychange', checkSession)
+    return () => {
+      controller?.abort()
+      window.removeEventListener('focus', checkSession)
+      document.removeEventListener('visibilitychange', checkSession)
+    }
+  }, [userId])
 
   const page = user ? '/jobs' : path === '/register' ? '/register' : '/login'
 
@@ -103,6 +136,20 @@ function App() {
     }
   }
 
+  async function selectRole(roleId: string) {
+    setAccountError('')
+    try {
+      const data = await getCurrentUser()
+      setCsrfToken(data.csrfToken)
+      setUser(data.user)
+      setSelectedRoleId(roleId)
+    } catch (error) {
+      if (!(error instanceof ApiError && error.status === 401)) {
+        setAccountError(error instanceof Error ? error.message : '登录状态查询失败，请重试')
+      }
+    }
+  }
+
   function retrySession() {
     setIsCheckingSession(true)
     setSessionError('')
@@ -136,7 +183,7 @@ function App() {
         isLoggingOut={isLoggingOut}
         accountError={accountError}
         selectedRoleId={selectedRoleId}
-        onSelectRole={setSelectedRoleId}
+        onSelectRole={selectRole}
       />
     )
   }
