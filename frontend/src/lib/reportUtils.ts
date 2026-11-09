@@ -39,6 +39,14 @@ export function scoreText(value: number | null | undefined): string {
   return new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 2 }).format(value)
 }
 
+/** 比较两个维度的未舍入答对率，避免使用展示分数造成错误并列。 */
+export function compareDimensionRatios(
+  a: Pick<ReportDimension, 'correct' | 'total'>,
+  b: Pick<ReportDimension, 'correct' | 'total'>,
+): number {
+  return a.correct * b.total - b.correct * a.total
+}
+
 /** 时间展示：统一按本地时区显示到分钟，后端返回 UTC ISO 字符串。 */
 export function dateText(value: string | null | undefined): string {
   if (!value) return '—'
@@ -65,9 +73,12 @@ export function selectWeakDimensions(
 ): ReportDimension[] {
   if (weakDimensions.length <= limit) return weakDimensions
 
-  const cutoff = weakDimensions[limit - 1].score
+  const cutoff = weakDimensions[limit - 1]
   let end = limit
-  while (end < weakDimensions.length && weakDimensions[end].score === cutoff) {
+  while (
+    end < weakDimensions.length &&
+    compareDimensionRatios(weakDimensions[end], cutoff) === 0
+  ) {
     end += 1
   }
   return weakDimensions.slice(0, end)
@@ -77,7 +88,8 @@ export function selectWeakDimensions(
 export function rankLabels(items: ReportDimension[]): number[] {
   return items.reduce<number[]>((acc, item, index) => {
     const previous = items[index - 1]
-    const tiedWithPrevious = previous !== undefined && previous.score === item.score
+    const tiedWithPrevious =
+      previous !== undefined && compareDimensionRatios(previous, item) === 0
     acc.push(tiedWithPrevious ? acc[index - 1] : index + 1)
     return acc
   }, [])

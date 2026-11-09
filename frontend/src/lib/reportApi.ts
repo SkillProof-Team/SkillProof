@@ -1,4 +1,5 @@
 import type { Report } from '../types/report'
+import { compareDimensionRatios } from './reportUtils'
 
 /**
  * 接口基地址。
@@ -142,10 +143,15 @@ function isReport(value: unknown): value is Report {
 
   return weakDimensions.every((item, index) => {
     if (index === 0) return true
-    const previous = weakDimensions[index - 1] as { id: string; score: number }
-    const current = item as { id: string; score: number }
-    if (previous.score < current.score) return true
-    if (previous.score > current.score) return false
+    const previous = weakDimensions[index - 1] as {
+      id: string
+      correct: number
+      total: number
+    }
+    const current = item as { id: string; correct: number; total: number }
+    const ratioOrder = compareDimensionRatios(previous, current)
+    if (ratioOrder < 0) return true
+    if (ratioOrder > 0) return false
     return REQUIRED_DIMENSIONS.indexOf(previous.id) < REQUIRED_DIMENSIONS.indexOf(current.id)
   })
 }

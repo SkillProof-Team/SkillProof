@@ -8,12 +8,32 @@ import './App.css'
 /** 结果页路由：/reports/{测评ID}。整体路由方案由 Issue #7 统一收敛，此处只处理结果页入口。 */
 const REPORT_PATH = /^\/reports\/([^/]+)\/?$/
 
+function decodeReportId(value: string): string | null {
+  try {
+    const decoded = decodeURIComponent(value)
+    return decoded.trim() ? decoded : null
+  } catch {
+    return null
+  }
+}
+
 function App() {
   const [count, setCount] = useState(0)
 
   const reportMatch = REPORT_PATH.exec(window.location.pathname)
   if (reportMatch) {
-    return <ResultPage attemptId={decodeURIComponent(reportMatch[1])} />
+    const attemptId = decodeReportId(reportMatch[1])
+    if (!attemptId) {
+      return (
+        <main className="result-page">
+          <div className="result-state" role="alert">
+            <h1 className="result-state__title">报告链接无效</h1>
+            <p className="result-state__message">报告地址无法解析，请检查链接后重试。</p>
+          </div>
+        </main>
+      )
+    }
+    return <ResultPage attemptId={attemptId} />
   }
 
   return (

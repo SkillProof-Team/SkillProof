@@ -3,14 +3,21 @@ import { RadarChart } from '../../components/reports/RadarChart'
 import { DimensionBars } from '../../components/reports/DimensionBars'
 import { fetchReport } from '../../lib/reportApi'
 import type { ReportLoadError } from '../../lib/reportApi'
-import { dateText, orderDimensions, rankLabels, scoreText, selectWeakDimensions } from '../../lib/reportUtils'
+import {
+  compareDimensionRatios,
+  dateText,
+  orderDimensions,
+  rankLabels,
+  scoreText,
+  selectWeakDimensions,
+} from '../../lib/reportUtils'
 import type { Report } from '../../types/report'
 import '../../styles/report.css'
 
 type PageState =
   | { status: 'loading' }
-  | { status: 'ready'; report: Report }
-  | { status: 'error'; error: ReportLoadError }
+  | { status: 'ready'; report: Report; attemptId: string }
+  | { status: 'error'; error: ReportLoadError; attemptId: string }
 
 const ERROR_TITLE: Record<ReportLoadError['kind'], string> = {
   unauthorized: '需要登录后查看',
@@ -37,8 +44,8 @@ export function ResultPage({ attemptId }: ResultPageProps) {
         if (controller.signal.aborted) return
         setState(
           result.ok
-            ? { status: 'ready', report: result.report }
-            : { status: 'error', error: result.error },
+            ? { status: 'ready', report: result.report, attemptId }
+            : { status: 'error', error: result.error, attemptId },
         )
       })
       .catch(() => {
@@ -54,7 +61,7 @@ export function ResultPage({ attemptId }: ResultPageProps) {
     setReloadToken((value) => value + 1)
   }
 
-  if (state.status === 'loading') {
+  if (state.status === 'loading' || ('attemptId' in state && state.attemptId !== attemptId)) {
     return (
       <main className="result-page" aria-busy="true">
         <p className="result-state__hint">正在加载测评报告…</p>
@@ -163,8 +170,8 @@ export function ResultPage({ attemptId }: ResultPageProps) {
               const previous = weakItems[index - 1]
               const next = weakItems[index + 1]
               const tied =
-                (previous !== undefined && previous.score === item.score) ||
-                (next !== undefined && next.score === item.score)
+                (previous !== undefined && compareDimensionRatios(previous, item) === 0) ||
+                (next !== undefined && compareDimensionRatios(item, next) === 0)
               return (
                 <li className="result-weak__item" key={item.id}>
                   <span className="result-weak__rank" aria-hidden="true">
