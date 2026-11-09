@@ -1,6 +1,127 @@
 # T08 测评答题与提交流程验证
 
-关联 Issue #10 / PR #25。日期：2026-11-08。本记录区分正式工作区、临时集成和最终验收；本轮真实 HTTP、浏览器联调没有使用 Mock、伪造接口响应或绕过登录。
+关联 Issue #10 / PR #25。最新复验：2026-11-09（Asia/Shanghai），执行人：Codex（本地工具实际执行）。本记录区分本轮检查、2026-11-08 历史临时集成和正式验收；临时题目联调通过不等于正式题库验收通过。
+
+## 本轮基线与结论（2026-11-09）
+
+- 开始时工作区干净，分支 `feature/10-assessment-flow`，HEAD `6fda45907b91a006269861984381e55ceaefcec0`。本地此前已合入 main；本轮执行 `git fetch origin` 和 `git merge --no-commit origin/main`，返回 `Already up to date.`，无冲突、无新增合并提交。`origin/main` 为 `9de5faeaea8010f5e2694e7902c9fe93cd1f283c`，无遗漏提交。
+- GitHub 核实 #19、#27、#28、#30、#37 均已合并；后端正式整合不再是阻塞。#25 仍为 Draft，base 仍为 `feature/7-auth-job-selection`，远端 head `eb05cabff8082c0378159a09628e5e98c87be2eb`；本地开始时已领先远端 19 个提交，本轮没有创建提交。#23 仍 Open，head `98b4adf0ec677c3e770af59f498703963f837fc3`。
+- `origin` 保留旧地址 `https://github.com/daybreakju9/SkillProof.git`，可正常拉取；GitHub 返回规范仓库 `SkillProof-Team/SkillProof`。未改远端配置、其他成员分支或 PR 元数据。
+- 完整阅读 README、API、生命周期、评分、数据库、题库发布约定、相关测试记录、CI 和 QA 检查器，并核对 Issue #10、#33 及 PR #25、#37、#23。较早数据库文档的 Python 3.12 环境说明与当前 README/CI 不同，规定版本以当前 CI 的 Python 3.13.9 为准。
+- 现有前端与 main 真实接口契约相符，本轮未发现必须修改的前端业务缺陷，保留 `App.tsx`、`api.ts`、`Assessment.tsx`、岗位页和 UI。与 main 的 `backend` 差异为空。
+- 本轮只新增 `tests/acceptance/requests/25.json`，复用并补强现有测评验收测试，更新本文档。没有引入依赖、Mock 业务接口或新的页面实现。
+- **当前不能宣布正式验收完成或退出 Draft**：正式题库尚未发布，#23 尚未接入统一路由；本轮未推送，新增变更尚无远端 CI 和其他成员 Review。
+
+## 本轮接口与结果路由核对
+
+| 调用 | 本轮核对结论 |
+| --- | --- |
+| 登录 / 刷新 | 真实 Cookie 会话，`GET /api/auth/me` 恢复内存 CSRF；401 清理会话并跳转登录 |
+| 创建 / 恢复 | `POST /api/attempts` 发送 `roleId`；同岗位恢复进行中 ID，前端同步请求锁防重复点击 |
+| 读取 / 作答 | `GET /api/attempts/{id}`；题目、选项、题量由公开响应提供，单选替换、多选增删、切题保留 |
+| 保存 | `PUT .../answers` 发送全部本地选择和清空数组；成功响应确认答案，失败保留本地修改及未保存提示 |
+| 提交 | 定位未答题；等待保存成功后再 `POST .../submit`；失败查询测评状态，已提交则导航结果 |
+| 结果 | 报告 ID 与测评 ID 相同；`onResult(attempt.id)` → `replace` 导航 `/reports/${encodeURIComponent(id)}`；后端查询为 `GET /api/reports/{id}` |
+| #23 衔接 | #23 的 `ResultPage` 接受 `attemptId: string`，其 API 也按测评 ID 查询，参数方案一致。当前 #25 保留结果占位；#23 仍需同步 main，把现有组件接入统一受保护路由，并处理安全解码、切换报告状态及 401 会话失效 |
+
+当前蓝图 `alpha-18-easy12-medium6-v1` 已由 2026-11-08 的生命周期/API 文档确认：每维 2 easy + 1 medium，共 18 题。历史记录中的“蓝图待确认”不再代表当前状态。没有修改后端契约、评分或蓝图。
+
+## 本轮环境与命令
+
+| 项目 | 实际环境 |
+| --- | --- |
+| 代码 | 当前正式工作分支 HEAD `6fda459` 加本轮未提交的测试、登记和文档；前后端业务代码未改 |
+| 运行时 | Windows；Node.js v24.15.0、npm 11.12.1、Python 3.11.9；FastAPI 0.162.0、uvicorn 0.54.0、httpx 0.28.1、Vite 8.3.5 |
+| Python | 复用 `W:/workplace/SkillProof-integration-19/backend/.venv/Scripts/python.exe` 的解释器和依赖；业务源码从本工作区加载 |
+| 隔离数据 | `C:/Users/LiWanlin/AppData/Local/Temp/skillproof-t08-20261109/integration.sqlite3`；未访问默认业务库 |
+| 浏览器 | Codex 内置真实浏览器，通过注册/登录表单、按钮、选项、题号及浏览器刷新/前进/后退操作 |
+| 网络 | 浏览器 `http://localhost:5173` → Vite → 本轮临时转发器 `127.0.0.1:8000` → 当前分支 FastAPI `127.0.0.1:8008` |
+
+临时转发器仅转发真实请求/响应，在指定请求上延迟转发或丢弃真实响应，不生成业务响应，不绕过 Cookie、Origin 或 CSRF。HTTP 检查使用两个独立账号，浏览器另用隔离测试账号，所有写操作使用真实签发的 CSRF。
+
+先验证原始 Draft 题库创建返回 503、不留下测评；再只在隔离 SQLite 把 42 道草稿副本临时标记 published，并加入明确注明“Integration-only draft copy; publication NOT approved”的仓库永久链接。没有修改题干、答案、仓库题库文件或正式发布状态。此操作不代表来源核验或人工审核通过。
+
+实际执行的工程检查命令（根目录，前端命令切到 `frontend`）：
+
+```powershell
+$python = 'W:/workplace/SkillProof-integration-19/backend/.venv/Scripts/python.exe'
+$env:PYTHONPATH = 'backend'
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:SKILLPROOF_ENV = 'development'
+& $python -m pip install -r backend/requirements-test.txt
+& $python -m pip check
+& $python -m unittest discover -s backend/tests -p 'test_*.py' -v
+& $python scripts/check_qa.py --pr 25
+Set-Location frontend
+npm ci
+npm run lint
+npm run build
+Set-Location ..
+git diff --check
+git diff --cached --check
+git diff origin/main -- backend
+```
+
+真实服务使用以下配置启动，另一个终端运行临时目录的 `proxy.py`，前端执行 `npm run dev -- --host 127.0.0.1`：
+
+```powershell
+$env:SKILLPROOF_DB_PATH = 'C:/Users/LiWanlin/AppData/Local/Temp/skillproof-t08-20261109/integration.sqlite3'
+$env:SKILLPROOF_ORIGIN = 'http://localhost:5173'
+& $python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8008
+& $python C:/Users/LiWanlin/AppData/Local/Temp/skillproof-t08-20261109/http_checks.py
+```
+
+本地运行时与 CI 规定的 Node.js 24.12.0、Python 3.13.9 不同；以上通过不能写成规定版本 CI 已通过。后端测试出现既有 Starlette/httpx 弃用提示，预期存储故障用例输出 `OperationalError`，最终套件通过，未因此改依赖。
+
+## 本轮实际结果
+
+### 自动化与真实 HTTP
+
+| 检查 | 结果与边界 |
+| --- | --- |
+| `npm ci`、lint、build | 全部通过，build 包含 TypeScript 检查 |
+| 依赖安装、`pip check` | 依赖均已满足；无依赖冲突 |
+| 完整后端测试 | 75 项通过，0 失败；其中部分既有测试使用合成题、会话夹具及评分替身，不能冒充完整真实浏览器联调 |
+| QA `--pr 25` | 全量 18 项通过，0 失败、0 跳过；#25 必测 1/1，通过完整 ID `test_assessment_flow.AssessmentFlowTests.test_authenticated_submission_lifecycle` 登记 |
+| #25 业务测试补强 | 在既有同一测试方法中新增断言，不增加测试方法数量：单选/多选部分保存、未答完提交 422、非法选项 422、缺 CSRF 403 且草稿不变、新客户端 Cookie 恢复、清空及保留其他答案、会话过期后的查询/提交/报告 401 |
+| 既有必测继续覆盖 | 真实注册登录、创建恢复、全部保存、真实评分异常回滚、并发/重复提交、六维报告和归属；评分 `wraps` 仅统计调用次数，仍执行真实评分函数，不替换业务结果 |
+| QA 覆盖限制 | 这是 TestClient 进程内 ASGI/SQLite 验收，不是前端组件或浏览器自动化；其他 17 项不计作 T08 交互覆盖 |
+| 独立真实 HTTP | `http_checks.py` 24 项通过：健康、双账号注册登录及 me、草稿拒绝且无测评、4 并发创建同 ID、公开 18 题、CSRF、未答完提交、保存/新客户端恢复/非法保存/清空、全量保存、并发及重复提交、六维一致、报告快照、提交后不可修改、他人四类操作 404、匿名/过期 401 |
+| Git 差异检查 | 工作区和暂存区格式检查通过；暂存区为空；与 main 的后端差异为空 |
+
+### 本轮真实浏览器（临时题目）
+
+| 场景 | 实际观察 | 结论 |
+| --- | --- | --- |
+| 注册、登录、岗位与草稿拒绝 | 真实注册进入岗位；原始 Draft 创建显示题库不足 503，按钮恢复 | 通过 |
+| 创建与快速重复点击 | 临时题目下双击创建，仅一份浏览器账号进行中答卷，进入 ID 路由 | 通过 |
+| 单选与切题 | 选择另一项替换前一项，前后切题仍保持同一选择 | 通过 |
+| 多选、取消与题号 | 添加/取消多个选项，前后切题与答题卡保留选择，进度正确 | 通过 |
+| 保存、清空、刷新 | 保存 1 题后刷新恢复；清空保存后刷新为 0 题；会话和 CSRF 正常恢复 | 通过 |
+| 未答题提交 | 显示剩余 18 题并定位第 1 题，没有发送提交请求 | 通过 |
+| 未保存离开 | 返回岗位和后退均保留答卷及 URL，提示先保存 | 通过 |
+| 写请求等待 | 隔离 SQLite 持有写锁时进入保存中，选项、清空、保存、提交和返回禁用；锁释放后保存成功。此轮未触发数据库 503 | 通过 |
+| 30 秒保存超时及重试 | 转发器将真实保存延迟 33 秒；页面显示“请求超时，请稍后重试”，本地选择/未保存标记保留，恢复按钮；重试成功。原超时请求随后也可能落库，前端没有把未知结果误标为保存成功 | 通过 |
+| 真实连接失败 | 停止本轮 Vite，已加载页面保存触发真实 fetch 连接失败，显示网络提示、保留选择；不是代理 502 或伪造响应 | 通过 |
+| 会话过期与重新进入 | 恢复 Vite 后，仅将隔离账号会话置过期，保存真实 401，清理会话进入登录；重新登录选岗，恢复原 ID 与服务端已保存草稿 | 通过 |
+| 提交响应丢失、双击 | 18 题完成后双击提交；转发器收到后端真实 200 后丢弃响应，前端查询 submitted 并自动进入同 ID 的结果路径 | 通过 |
+| 丢失后的后端核对 | 日志只出现一次该答卷的提交 POST；SQLite 为 submitted、18 题答案和六维报告；另一个真实登录 HTTP 客户端重复提交和查询都与原快照完全一致 | 通过 |
+| 结果路径刷新及前后退 | 保持 `/reports/{同一测评ID}`；后退到岗位，前进回结果，无导航循环 | 通过（仅导航） |
+| 新测评和正常提交 | 前一份提交后新建不同 ID，页面作答全部 18 题，未注入故障，先保存再提交并进入新 ID 结果路径 | 通过（仅导航） |
+| 正式结果展示 | 页面仍显示“结果展示暂未开放”；本轮没有复制、临时挂载或修改 #23 组件 | 阻塞 |
+
+响应丢失测试答卷为 `4cdc983c-dcf3-45f8-bc18-24daa1b22cbf`，实际报告 4.17 分、1/18；正常提交流程的新答卷为 `87fcdcbf-bd2e-4ee6-868e-1314a0d6139e`。作答通过 UI 选择，没有从后端读取答案代填。临时目录保留 `http-results.json`、`proxy.jsonl`、`browser-save-timeout.png` 和 `browser-submit-recovered.png`；日志不包含 Cookie、CSRF 或密码。服务与临时页面在本轮结束前关闭。
+
+## 本轮剩余条件
+
+- 正式题库：仓库仍为 42 道 draft、空 sources；`question-bank-review.md` 表格写“通过”，但同文件正文仍写“尚未完成独立人工复核”，能力树和 manifest 也未形成一致的发布证据。本轮不代填、不裁定审核已完成。题库负责人须核实实际独立复核、补齐已核验来源，统一审核/版本/散列及发布状态后按既定蓝图交付，再跑正式内容全流程。
+- #23：负责人需同步已合并的 #19/main，接入现有统一路由，沿用测评 ID；处理已有 Review 中的非法路径解码、切换报告残留、未舍入比例排序和统一 401 失效。本轮只做接口与参数静态核对，未重测这些修复，也未在当前分支验证结果页渲染、六维图表或结果页错误状态。
+- 原生刷新/关闭确认框的完整确认/取消组合、移动端布局、本轮浏览器中的数据库 503/代理 502/保存 409 冲突未重跑；历史结果单独保留。真实网络失败采用停止本轮 Vite，不等于切换浏览器离线模式；提交响应丢失已覆盖，不宣称覆盖所有断流时机。
+- 在双方最终集成和正式题库就绪后重新执行完整浏览器链路；本轮不提交、不推送、不修改 #25 base、不退出 Draft。后续获授权时将 #25 base 调整为 main，更新中文 PR 说明、核对新版本 CI，并取得另一名成员 Approve 后由其他成员合并。
+
+## 历史记录说明（2026-11-08）
+
+从下面“分支与范围”至文末均为 2026-11-08 的历史开发与临时集成记录。其“本轮”“尚未合并”“蓝图待确认”和未覆盖项描述均指当时；当前状态、已补验证和剩余阻塞以上方 2026-11-09 记录为准。历史测试数量不并入本轮。
 
 ## 分支与范围
 
