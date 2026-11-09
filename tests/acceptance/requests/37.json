@@ -1,0 +1,13 @@
+{
+  "required_tests": [
+    "test_qa_checks.QACheckTests.test_empty_or_interrupted_discovery_fails",
+    "test_qa_checks.QACheckTests.test_exit_during_setup_or_cleanup_fails",
+    "test_qa_checks.QACheckTests.test_failure_outside_required_list_still_blocks",
+    "test_qa_checks.QACheckTests.test_invalid_pr_number_fails",
+    "test_qa_checks.QACheckTests.test_invalid_registration_fails",
+    "test_qa_checks.QACheckTests.test_missing_registration_fails",
+    "test_qa_checks.QACheckTests.test_registered_test_passes_when_it_runs_successfully",
+    "test_qa_checks.QACheckTests.test_required_failure_skip_or_expected_failure_blocks",
+    "test_qa_checks.QACheckTests.test_required_test_must_actually_run"
+  ]
+}
