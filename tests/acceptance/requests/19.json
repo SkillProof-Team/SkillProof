@@ -1,0 +1,12 @@
+{
+  "required_tests": [
+    "test_auth_catalog.AuthCatalogTests.test_registration_refresh_and_hash",
+    "test_auth_catalog.AuthCatalogTests.test_duplicate_email_and_bad_login",
+    "test_auth_catalog.AuthCatalogTests.test_registration_requires_a_visible_name",
+    "test_auth_catalog.AuthCatalogTests.test_invalid_input_is_safe_and_uniform",
+    "test_auth_catalog.AuthCatalogTests.test_anonymous_expired_session_and_logout_revocation",
+    "test_auth_catalog.AuthCatalogTests.test_origin_host_and_request_limit",
+    "test_auth_catalog.AuthCatalogTests.test_catalog_matches_t03_and_does_not_expose_questions",
+    "test_auth_catalog.AuthCatalogTests.test_expected_api_routes"
+  ]
+}
