@@ -16,6 +16,9 @@ TZ = ZoneInfo('Asia/Shanghai')
 SNAPSHOT = json.loads((ROOT / 'github-snapshot.json').read_text(encoding='utf-8'))
 ISSUES = {x['number']: x for x in SNAPSHOT['issues'] if 'pull_request' not in x}
 PRS = {x['number']: x for x in SNAPSHOT['pulls']}
+LATEST = json.loads((ROOT / 'week7-latest-status.json').read_text(encoding='utf-8'))
+CURRENT_ISSUES = ISSUES | {x['number']: x for x in LATEST['issues']}
+CHECKED = datetime.strptime(LATEST['checkedAt'], '%Y-%m-%d %H:%M:%S UTC').replace(tzinfo=ZoneInfo('UTC')).astimezone(TZ)
 BASE = {1, *range(3, 15)}
 PR_ISSUE = {2: 1, 18: 14, 19: 7, 20: 3, 21: 14, 22: 5, 23: 11,
             24: 14, 25: 10, 26: 4, 27: 9, 28: 8, 29: 12, 30: 6,
@@ -72,6 +75,14 @@ def main():
         writer.writeheader()
         writer.writerows(rows)
 
+    current_scope = (BASE | {33}) - {13}
+    fixed_now = sorted(n for n in BASE if CURRENT_ISSUES[n]['state'] == 'open')
+    adjusted_now = sorted(n for n in current_scope if CURRENT_ISSUES[n]['state'] == 'open')
+    fixed_after = sorted(set(fixed_now) - {14})
+    adjusted_after = sorted(set(adjusted_now) - {14})
+    assert fixed_now == [12, 13, 14] and adjusted_now == [12, 14]
+    assert fixed_after == [12, 13] and adjusted_after == [12]
+
     font_manager.fontManager.addfont('C:/Windows/Fonts/msyh.ttc')
     plt.rcParams['font.family'] = font_manager.FontProperties(fname='C:/Windows/Fonts/msyh.ttc').get_name()
     plt.rcParams['axes.unicode_minus'] = False
@@ -82,27 +93,18 @@ def main():
         ('week7-burndown', 'fixed_without_pr', 'adjusted_without_pr', '按首次提交PR统计'),
         ('week7-closed-burndown', 'fixed_open', 'adjusted_open', '按Issue关闭统计')]:
         fig, ax = plt.subplots(figsize=(12.5, 5.8), dpi=160)
-        ax.axvspan(7.5, 14.4, color='#eef5fb', zorder=0)
-        ax.plot(range(15), [13] + [r[field] for r in rows], color='#2166ac', marker='o', lw=2.4, label='原13项固定基线')
-        ax.plot(range(15), [13] + [r[adjusted] for r in rows], color='#d97706', marker='s', ms=4, lw=1.8, ls='--', label='调整后P0范围（新增#33、移出#13）')
-        ax.plot(range(15), [13 * (1 - i / 14) for i in range(15)], color='#8a94a3', ls=':', label='原13项理想线')
-        # Keep the requested completion scenario separate from dated GitHub facts.
-        end_fixed, end_adjusted = (2, 2) if field == 'fixed_open' else (1, 0)
-        snapshot_fixed, snapshot_adjusted = (4, 4) if field == 'fixed_open' else (1, 0)
-        ax.plot([14, 15], [rows[-1][field], snapshot_fixed], color='#2166ac', marker='o', lw=2)
-        ax.plot([14, 15], [rows[-1][adjusted], snapshot_adjusted], color='#d97706', marker='s', ls='--')
-        ax.plot([15, 16], [snapshot_fixed, end_fixed], color='#2166ac', marker='D', ls=':', lw=2, label='提交后口径：#10、#14按完成计入')
-        ax.plot([15, 16], [snapshot_adjusted, end_adjusted], color='#d97706', marker='D', ls=':')
-        ax.axvline(13, color='#7c3aed', lw=1, ls=':')
-        ax.text(12.85, 10.7, '11/7会议', ha='right', color='#6d28d9', fontsize=10)
-        ax.set(title='SkillProof两周冲刺燃尽图｜' + title, ylabel='剩余任务数（个）', xlabel='北京时间；提交后为预期完成口径', ylim=(-0.5, 15), xlim=(-0.25, 16.4))
-        ax.set_xticks(range(17), ['基线'] + [(date(2026,10,26)+timedelta(days=i)).strftime('%m/%d') for i in range(14)] + ['11/09快照', '本次提交后'], rotation=35)
+        end_fixed, end_adjusted = (len(fixed_after), len(adjusted_after)) if field == 'fixed_open' else (1, 0)
+        dates = [date(2026, 10, 26) + timedelta(days=i) for i in range(15)]
+        ax.plot(range(15), [r[field] for r in rows] + [end_fixed], color='#2166ac', marker='o', lw=2.4, label='原13项基线')
+        ax.plot(range(15), [r[adjusted] for r in rows] + [end_adjusted], color='#d97706', marker='s', ms=4, lw=1.8, ls='--', label='调整后P0范围')
+        ax.plot(range(15), [13 * (1 - i / 13) for i in range(14)] + [0], color='#8a94a3', ls=':', label='理想线')
+        ax.set(title='SkillProof燃尽图｜' + title, ylabel='剩余任务数（个）', xlabel='日期', ylim=(-0.5, 14), xlim=(-0.25, 14.25))
+        ax.set_xticks(range(15), [day.strftime('%m/%d') for day in dates], rotation=35)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
         ax.grid(axis='y', alpha=.18)
         ax.spines[['top', 'right']].set_visible(False)
-        ax.legend(loc='upper right', fontsize=9)
-        ax.text(.01, -.26, '11/6新增#33；11/8 #13移出P0。末点将PR #25对应#10与T12 #14计为完成，不回填历史关单日期。', transform=ax.transAxes, fontsize=9, color='#475569')
-        fig.tight_layout(rect=(0, .05, 1, 1))
+        ax.legend(loc='upper right', fontsize=10)
+        fig.tight_layout()
         for ext in ['png', 'svg']:
             fig.savefig(assets / f'{filename}.{ext}', facecolor='white')
             if ext == 'svg':
@@ -122,53 +124,25 @@ def main():
             closed_note += '；'+link(13)+'移出P0，仍Open'
         submission += f'| {d.month}月{d.day}日 | {submission_note} | {r["fixed_without_pr"]} | {r["adjusted_without_pr"]} |\n'
         closed += f'| {d.month}月{d.day}日 | {closed_note} | {r["fixed_open"]} | {r["adjusted_open"]} |\n'
-    submission += '| 11月9日快照 | 已有PR提交情况 | 1 | 0 |\n| 本次提交后（组长指定口径） | #10、#14按完成；首次提交PR统计不变 | 1 | 0 |\n'
-    closed += '| 11月9日20:27快照 | #7、#11已关闭 | 4 | 4 |\n| 本次提交后（组长指定口径） | PR #25对应#10、T12 #14按完成计入 | 2 | 2 |\n'
+    submission += '| 11月9日 | 已有PR提交情况 | 1 | 0 |\n'
+    closed += f'| 11月9日 | #7、#10、#11、#33已关闭；按约定计入T12 #14完成 | {len(fixed_after)} | {len(adjusted_after)} |\n'
     with (ROOT / 'completion-scenario.csv').open('w', encoding='utf-8-sig', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['point', 'fixed_open', 'adjusted_open', 'fixed_without_pr', 'adjusted_without_pr', 'counted_complete'])
-        writer.writerow(['2026-11-09 20:27 snapshot', 4, 4, 1, 0, ''])
-        writer.writerow(['after this submission (requested scenario)', 2, 2, 1, 0, '10;14'])
+        writer.writerow([f'{CHECKED:%Y-%m-%d %H:%M} verified status', len(fixed_now), len(adjusted_now), 1, 0, '10;33'])
+        writer.writerow(['after this submission (requested scenario)', len(fixed_after), len(adjusted_after), 1, 0, '10;14;33'])
 
-    commits = {x['sha']:x for x in SNAPSHOT['commits']}
-    evidence = json.loads((ROOT / 'github-evidence.json').read_text(encoding='utf-8'))
-    extra = json.loads((ROOT / 'github-evidence-extra.json').read_text(encoding='utf-8'))
-    for x in evidence['pr25commits'] + extra['pr38commits']:
-        commits[x['sha']] = x
-    entries = [
-        ('付熙瑜','7907e7c','真实会话报告查询、评分契约与测试',9,27),
-        ('付熙瑜','da9860f','审核并合并统一工程检查（合并者贡献）',33,34),
-        ('付熙瑜','17e7d50','审核并合并测评生命周期（合并者贡献）',8,28),
-        ('李宛霖','fa257b7','修复注册页刷新跳转',7,19),
-        ('李宛霖','e86e0e8','修复组合重音姓名校验',7,19),
-        ('李宛霖','eb05cab','整合答题流程',10,25),
-        ('李宛霖','a00ba96','同步main并接入真实结果页',10,25),
-        ('常嶅阳','1951993','对齐真实报告契约',11,23),
-        ('常嶅阳','98b4adf','记录真实报告流程验证',11,23),
-        ('常嶅阳','e52e8e3','修复非法URL、旧报告与精度边界',11,23),
-        ('冯皙丹','1a7fdb4','认证与岗位查询接口',6,30),
-        ('冯皙丹','8516c23','不可见姓名和UTF-8读取修复',6,30),
-        ('冯皙丹','f7df6d4','同步main并保留测试依赖锁定',6,30),
-        ('王斯语','be167be','同步main并完成测评后端联调',8,28),
-        ('王斯语','9095c72','同步已确认18题抽题规则',8,28),
-        ('王绥源','d2f5edd','接入前后端CI检查',33,34),
-        ('王绥源','242ce55','增加PR必测登记检查',33,37),
-        ('王绥源','5906f5f','补充保存提交与评分验收',12,38),
-    ]
-    table = '| 成员 | 日期（北京） | Commit | 签入内容 | 对应Issue | PR / 最新状态 |\n| --- | --- | --- | --- | --- | --- |\n'
-    for person, prefix, description, issue, pr in entries:
-        matches = [sha for sha in commits if sha.startswith(prefix)]
-        assert len(matches) == 1, prefix
-        sha = matches[0]
-        stamp = parse(commits[sha]['commit']['author']['date']).astimezone(TZ)
-        state = '已合并' if PRS[pr]['merged_at'] else 'Draft，未合并' if PRS[pr]['draft'] else 'Open，未合并'
-        table += f'| {person} | {stamp.month}/{stamp.day}' + ('（会后最新）' if stamp.day == 9 else '') + f' | [{prefix}](https://github.com/SkillProof-Team/SkillProof/commit/{sha}) | {description} | {link(issue)} | {link(pr,"pulls")}；{state} |\n'
     doc = ROOT / 'scrum' / 'week7.md'
     content = doc.read_text(encoding='utf-8')
-    for key, value in [('COMMIT',table),('SUBMISSION',submission),('CLOSED',closed)]:
-        content = replace_table(content, key, value)
+    for heading, image, table in [
+        ('### 1.按首次提交PR统计', '![两周燃尽图：剩余未提交PR任务数]', submission),
+        ('### 2.按Issue关闭统计', '![两周燃尽图：剩余未关闭任务数]', closed),
+    ]:
+        begin = content.index(heading) + len(heading)
+        end = content.index(image, begin)
+        content = content[:begin] + '\n\n' + table.rstrip() + '\n\n' + content[end:]
     doc.write_text(content, encoding='utf-8')
-    print('PASS: 14 daily records, both scope series, 18 verified commit rows; charts and blog rebuilt.')
+    print('PASS: history preserved; latest P0 count 2; after T12 completion count 1; tables and charts rebuilt.')
 
 
 if __name__ == '__main__':
