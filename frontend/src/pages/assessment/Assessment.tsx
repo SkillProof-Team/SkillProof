@@ -5,7 +5,7 @@ import './assessment.css'
 
 type AssessmentProps = {
   attemptId: string
-  onResult?: (id: string) => void
+  onResult: (id: string) => void
   onBack: () => void
   registerNavigationGuard: (guard: (() => boolean) | null) => void
 }
@@ -89,7 +89,7 @@ function AssessmentContent({ attemptId, onResult, onBack, registerNavigationGuar
   }, [changed, submitted, registerNavigationGuard])
 
   useEffect(() => {
-    if (!submitted || !attempt || !onResult || resultShown.current) return
+    if (!submitted || !attempt || resultShown.current) return
     resultShown.current = true
     onResult(attempt.id)
   }, [submitted, attempt, onResult])
@@ -325,7 +325,6 @@ function AssessmentContent({ attemptId, onResult, onBack, registerNavigationGuar
               : question ? `还有 ${total - answered} 题未作答。提交前会先保存全部答案。`
               : '题目加载完成后才可保存和提交。'}
           </p>
-          {submitted && !onResult && <p>结果页尚未接入。</p>}
         </div>
         <div className="assessment-actions">
           <button type="button" disabled={loading || !question || busy || submitted || !changed} onClick={save} aria-describedby="assessment-submit-note">

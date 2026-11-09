@@ -5,12 +5,22 @@ import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import JobSelectionPage from './pages/jobs/JobSelectionPage'
 import Assessment from './pages/assessment/Assessment'
+import { ResultPage } from './pages/reports/ResultPage'
 
 const ATTEMPT_PATH = /^\/attempts\/([^/]+)\/?$/
 const REPORT_PATH = /^\/reports\/([^/]+)\/?$/
 
 function authenticatedPath(path: string) {
   return ATTEMPT_PATH.test(path) || REPORT_PATH.test(path) ? path : '/jobs'
+}
+
+function decodeReportId(value: string): string | null {
+  try {
+    const decoded = decodeURIComponent(value)
+    return decoded.trim() ? decoded : null
+  } catch {
+    return null
+  }
 }
 
 function App() {
@@ -252,14 +262,20 @@ function App() {
         onResult={(id) => navigate(`/reports/${encodeURIComponent(id)}`, true)}
         onBack={() => navigate('/jobs')} registerNavigationGuard={registerNavigationGuard} />
     }
-    if (REPORT_PATH.test(page)) {
-      return (
-        <main className="assessment">
-          <h1>测评结果</h1>
-          <p>结果展示暂未开放。</p>
-          <button type="button" onClick={() => navigate('/jobs')}>返回岗位选择</button>
-        </main>
-      )
+    const reportMatch = REPORT_PATH.exec(page)
+    if (reportMatch) {
+      const attemptId = decodeReportId(reportMatch[1])
+      if (!attemptId) {
+        return (
+          <main className="result-page">
+            <div className="result-state" role="alert">
+              <h1 className="result-state__title">报告链接无效</h1>
+              <p className="result-state__message">报告地址无法解析，请检查链接后重试。</p>
+            </div>
+          </main>
+        )
+      }
+      return <ResultPage key={`${user.id}:${attemptId}`} attemptId={attemptId} />
     }
     return (
       <JobSelectionPage
