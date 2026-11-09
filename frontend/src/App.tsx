@@ -1,9 +1,10 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
+import { useCallback, useEffect, useState } from 'react'
+import { ApiError, getCurrentUser, logoutUser, setCsrfToken, type AuthResponse, type User } from './api'
+import AuthLayout from './components/auth/AuthLayout'
+import LoginPage from './pages/auth/LoginPage'
+import RegisterPage from './pages/auth/RegisterPage'
+import JobSelectionPage from './pages/jobs/JobSelectionPage'
 import { ResultPage } from './pages/reports/ResultPage'
-import './App.css'
 
 /** 结果页路由：/reports/{测评ID}。整体路由方案由 Issue #7 统一收敛，此处只处理结果页入口。 */
 const REPORT_PATH = /^\/reports\/([^/]+)\/?$/
@@ -18,9 +19,157 @@ function decodeReportId(value: string): string | null {
 }
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [path, setPath] = useState(window.location.pathname)
+  const [user, setUser] = useState<User | null>(null)
+  const [isCheckingSession, setIsCheckingSession] = useState(true)
+  const [sessionError, setSessionError] = useState('')
+  const [sessionRetry, setSessionRetry] = useState(0)
+  const [message, setMessage] = useState('')
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [accountError, setAccountError] = useState('')
+  const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null)
 
-  const reportMatch = REPORT_PATH.exec(window.location.pathname)
+  const clearSession = useCallback((notice: string) => {
+    setCsrfToken(null)
+    setUser(null)
+    setSelectedRoleId(null)
+    setMessage(notice)
+    setAccountError('')
+    setPath('/login')
+  }, [])
+
+  useEffect(() => {
+    function updatePath() {
+      let nextPath = window.location.pathname
+      if (!isCheckingSession && !sessionError) {
+        nextPath = user ? '/jobs' : nextPath === '/register' ? '/register' : '/login'
+        if (window.location.pathname !== nextPath) window.history.replaceState(null, '', nextPath)
+      }
+      setPath(nextPath)
+    }
+
+    window.addEventListener('popstate', updatePath)
+    return () => window.removeEventListener('popstate', updatePath)
+  }, [user, isCheckingSession, sessionError])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    getCurrentUser(controller.signal, false)
+      .then((data) => {
+        if (controller.signal.aborted) return
+        setCsrfToken(data.csrfToken)
+        setUser(data.user)
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return
+        if (error instanceof ApiError && error.status === 401) setMessage('请先登录')
+        else setSessionError(error instanceof Error ? error.message : '登录状态查询失败，请重试')
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsCheckingSession(false)
+      })
+    return () => controller.abort()
+  }, [sessionRetry])
+
+  useEffect(() => {
+    function handleSessionExpired() {
+      clearSession('会话已失效，请重新登录')
+    }
+
+    window.addEventListener('session-expired', handleSessionExpired)
+    return () => window.removeEventListener('session-expired', handleSessionExpired)
+  }, [clearSession])
+
+  const userId = user?.id
+
+  useEffect(() => {
+    if (!userId) return
+    let controller: AbortController | undefined
+
+    function checkSession() {
+      if (document.visibilityState !== 'visible') return
+      controller?.abort()
+      const request = new AbortController()
+      controller = request
+      getCurrentUser(request.signal)
+        .then((data) => {
+          if (request.signal.aborted) return
+          setCsrfToken(data.csrfToken)
+          setUser(data.user)
+          setAccountError('')
+        })
+        .catch((error: unknown) => {
+          if (request.signal.aborted || (error instanceof ApiError && error.status === 401)) return
+          setAccountError(error instanceof Error ? error.message : '登录状态查询失败，请重试')
+        })
+    }
+
+    window.addEventListener('focus', checkSession)
+    document.addEventListener('visibilitychange', checkSession)
+    return () => {
+      controller?.abort()
+      window.removeEventListener('focus', checkSession)
+      document.removeEventListener('visibilitychange', checkSession)
+    }
+  }, [userId])
+
+  const page = user ? '/jobs' : path === '/register' ? '/register' : '/login'
+  const reportMatch = REPORT_PATH.exec(path)
+
+  useEffect(() => {
+    if (isCheckingSession || sessionError || reportMatch) return
+    if (window.location.pathname !== page) window.history.replaceState(null, '', page)
+  }, [page, isCheckingSession, reportMatch, sessionError])
+
+  function navigate(next: string) {
+    window.history.pushState(null, '', next)
+    setPath(next)
+  }
+
+  function finishLogin(data: AuthResponse) {
+    setCsrfToken(data.csrfToken)
+    setUser(data.user)
+    setMessage('')
+    setPath('/jobs')
+  }
+
+  async function logout() {
+    setIsLoggingOut(true)
+    setAccountError('')
+    try {
+      await logoutUser()
+      clearSession('已退出登录')
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        clearSession('登录状态已失效，请重新登录')
+      } else {
+        setAccountError(error instanceof Error ? error.message : '退出失败，请重试')
+      }
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
+
+  async function selectRole(roleId: string) {
+    setAccountError('')
+    try {
+      const data = await getCurrentUser()
+      setCsrfToken(data.csrfToken)
+      setUser(data.user)
+      setSelectedRoleId(roleId)
+    } catch (error) {
+      if (!(error instanceof ApiError && error.status === 401)) {
+        setAccountError(error instanceof Error ? error.message : '登录状态查询失败，请重试')
+      }
+    }
+  }
+
+  function retrySession() {
+    setIsCheckingSession(true)
+    setSessionError('')
+    setSessionRetry(sessionRetry + 1)
+  }
+
   if (reportMatch) {
     const attemptId = decodeReportId(reportMatch[1])
     if (!attemptId) {
@@ -36,116 +185,40 @@ function App() {
     return <ResultPage attemptId={attemptId} />
   }
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+  if (isCheckingSession || sessionError) {
+    return (
+      <AuthLayout>
+        <div className="auth-box">
+          <h1>SkillProof</h1>
+          {isCheckingSession ? (
+            <p>正在恢复登录状态…</p>
+          ) : (
+            <>
+              <p className="form-message" role="alert">{sessionError}</p>
+              <button className="primary-button" type="button" onClick={retrySession}>重试</button>
+            </>
+          )}
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </AuthLayout>
+    )
+  }
 
-      <div className="ticks"></div>
+  if (user) {
+    return (
+      <JobSelectionPage
+        key={user.id}
+        user={user}
+        logout={logout}
+        isLoggingOut={isLoggingOut}
+        accountError={accountError}
+        selectedRoleId={selectedRoleId}
+        onSelectRole={selectRole}
+      />
+    )
+  }
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+  if (page === '/register') return <RegisterPage navigate={navigate} onAuthenticated={finishLogin} />
+  return <LoginPage navigate={navigate} onAuthenticated={finishLogin} notice={message} />
 }
 
 export default App

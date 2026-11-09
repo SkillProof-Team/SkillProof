@@ -11,7 +11,12 @@ DIMENSIONS = [
 DIMENSION_IDS = tuple(d["id"] for d in DIMENSIONS)
 DIMENSION_NAMES = {d["id"]: d["name"] for d in DIMENSIONS}
 MODEL_VERSION = "2026.1"
-BLUEPRINT = {"version": "2026.1", "questionCount": 18, "perDimension": 3, "difficultyCounts": {"easy": 6, "medium": 6, "hard": 6}}
+BLUEPRINT = {
+    "version": "alpha-18-easy12-medium6-v1",
+    "questionCount": 18,
+    "perDimension": 3,
+    "difficultyCounts": {"easy": 12, "medium": 6, "hard": 0},
+}
 
 _ROLE_DATA = [
     ("backend", "后端开发", "关注数据库、服务端程序与可靠接口", [20, 20, 25, 15, 10, 10]),
