@@ -27,3 +27,6 @@ backend/data/
 .DS_Store
 Thumbs.db
 .idea/
+
+# Scrum 图片与图表仅保存在本地
+/docs/scrum/assets/
