@@ -19,7 +19,7 @@
 
 会议日期由团队提供。以下工作进度根据GitHub提交、PR、Issue事件和Review整理；11月8日及9日的成果属于会后更新，不倒记为11月7日会议时已完成。成员计划根据当前阻塞整理，提交前仍需本人确认。文中测试数量来自相应PR和验证记录，本篇整理时未重新运行业务测试。
 
-11月7日结束时，测试计划PR #31和工程检查PR #34已合并，认证、评分、测评生命周期和前端核心页面仍在推进。随后，11月8日合入三个后端功能及QA登记机制，11月9日合入登录岗位页和结果页。当前答题流程PR #25仍为Draft，正式题库发布与最终回归尚未完成，不能据此宣布整个Alpha已经交付。
+11月7日结束时，测试计划PR #31和工程检查PR #34已合并，认证、评分、测评生命周期和前端核心页面仍在推进。随后，11月8日合入三个后端功能及QA登记机制，11月9日合入登录岗位页和结果页。截至本次核对，答题流程PR #25已转为Ready for review、尚未合并；正式题库发布与最终回归尚未完成，不能据此宣布整个Alpha已经交付。
 
 ## 二、成员工作记录
 
@@ -50,14 +50,15 @@
 - 完善[#7注册登录与岗位选择](https://github.com/SkillProof-Team/SkillProof/issues/7)，接入真实认证、Cookie、CSRF、会话恢复和岗位能力树；修复访客刷新注册页被跳回登录页，以及纯组合重音姓名未被前端拦截的问题。冯皙丹于11月8日复测并APPROVED；会后补充QA登记，11月9日[PR #19](https://github.com/SkillProof-Team/SkillProof/pull/19)合并、#7关闭。
 - PR #19记录11月8日临时集成环境的16项HTTP、22项浏览器检查，以及11月9日T05必测8/8通过；明确这些属于不同轮次和范围，未将接口检查代替全部页面验收。
 - 继续推进[#10测评答题与提交](https://github.com/SkillProof-Team/SkillProof/issues/10)：串联创建或恢复、单选多选、切题、进度、保存刷新、未答提示及离开提醒；提交前先保存，未知提交结果通过查询服务端状态恢复。
-- **11月9日最新更新：** 同步包含结果页的main，删除结果占位并接入真实`ResultPage`。PR #25记录后端75项、QA18项、独立HTTP24项及Chromium流程验证；使用隔离数据库中的草稿副本，正式题库创建仍返回503。[PR #25](https://github.com/SkillProof-Team/SkillProof/pull/25)继续保持Draft，未合并。
-- 参与[PR #23](https://github.com/SkillProof-Team/SkillProof/pull/23)复审，提出非法报告URL白屏、切换报告残留旧数据、薄弱项排序精度问题；修复后于11月9日批准并合并。第七周个人文档[PR #36](https://github.com/SkillProof-Team/SkillProof/pull/36)仍Open，依赖PR #35。
+- **11月9日最新更新：** 同步包含结果页的main，删除结果占位并接入真实`ResultPage`。PR #25记录后端75项、QA18项、独立HTTP24项及Chromium流程验证；使用隔离数据库中的草稿副本，正式题库创建仍返回503。[PR #25](https://github.com/SkillProof-Team/SkillProof/pull/25)已转为Ready for review，当前Open、未合并；#10已按组长要求关闭，PR合并与正式题库验收继续跟进。
+- 临时集成联调时曾因Vite缺少`/api`代理，导致登录状态响应无法解析；补齐代理配置后重新完成创建、答题、保存、提交和查看结果的浏览器流程。页面当前答案与服务端已保存答案分别维护，保存失败时保留修改并提示重试。该问题与处理来自本人[PR #36记录](https://github.com/SkillProof-Team/SkillProof/pull/36)，不记为正式后端接口缺陷。
+- 参与[PR #23](https://github.com/SkillProof-Team/SkillProof/pull/23)复审，提出非法报告URL白屏、切换报告残留旧数据、薄弱项排序精度问题；修复后于11月9日批准并合并。第七周个人文档[PR #36](https://github.com/SkillProof-Team/SkillProof/pull/36)中的工作、计划、困难及提交记录已对照纳入本篇；原PR不再作为本次汇总的合并前置条件。
 
 **计划完成的工作**
 
 - 在正式题库完成复核、补齐来源并发布后，用默认题库重新验收PR #25，完成另一名成员Review后再合并。
 - 补齐PR #19仍未执行的岗位加载、空catalog和独立请求失败重试等页面动态场景；跟进最终主分支流程回归。
-- 按PR #35的合并情况整理个人文档分支和目标分支，避免重复覆盖队友记录。
+- 确认本篇汇总与本人记录一致，由组长通过当前文档分支统一提交；原个人文档PR #35、#36由成员另行关闭，避免重复合并。
 
 **工作中遇到的困难**
 
@@ -69,8 +70,9 @@
 
 - 将[#11结果页](https://github.com/SkillProof-Team/SkillProof/issues/11)对齐真实报告契约：综合分直接使用后端值，校验六维统计一致性，薄弱项沿用服务端顺序，移除对未实现岗位权重、优先级的依赖。
 - 区分401与403提示，修复390px视口长元信息溢出，补充桌面、手机和异常状态证据；在临时集成分支组合认证、测评、评分及前端，记录73项后端测试和真实HTTP、Cookie、CSRF、SQLite到浏览器结果页的验证。隔离库临时发布测试题，没有修改正式题库。
+- 个人记录另保存了分支级验证：`npm ci`、lint、build、后端依赖检查、16项后端测试和健康接口检查通过，GitHub CI通过；桌面、390px及403状态曾使用契约mock验证。该轮16项与后续临时集成73项属于不同版本和范围，不累加为同一轮测试。验证记录与移动端修复提交为`5e1466f`。
 - **11月9日最新更新：** 根据李宛霖复审，修复非法编码URL白屏、切换报告旧数据残留和四舍五入造成的排序差异，采用`correct / total`精确比例比较；同步登录路由并登记验收测试。[PR #23](https://github.com/SkillProof-Team/SkillProof/pull/23)于当日18:29合并，#11于18:30关闭。
-- 在[PR #27](https://github.com/SkillProof-Team/SkillProof/pull/27)确认评分展示规则并APPROVED，协助后端评分功能合并；提交第七周个人记录[PR #35](https://github.com/SkillProof-Team/SkillProof/pull/35)，当前仍Open。
+- 在[PR #27](https://github.com/SkillProof-Team/SkillProof/pull/27)确认评分展示规则并APPROVED，协助后端评分功能合并；提交第七周个人记录[PR #35](https://github.com/SkillProof-Team/SkillProof/pull/35)，其工作、计划、困难及签入记录已对照纳入本篇；原PR由成员另行关闭，本次汇总无需等待该PR合并。
 
 **计划完成的工作**
 
@@ -136,36 +138,31 @@ Windows默认编码与macOS不同，测试不能依赖系统默认解码；姓�
 
 随着各分支增加测试，仅有测试文件无法保证某个PR的关键用例被执行，因此增加必测清单与失败门禁。当前#33虽已有两次合并，Issue仍Open；#12也只有计划与阶段验收增量，最终报告需要覆盖最终版本，不能用局部测试数量代替项目全部完成。来源见[PR #37](https://github.com/SkillProof-Team/SkillProof/pull/37)、[PR #38](https://github.com/SkillProof-Team/SkillProof/pull/38)。
 
+个人记录汇总说明：本篇已参考常嶅阳的[PR #35](https://github.com/SkillProof-Team/SkillProof/pull/35)与李宛霖的[PR #36](https://github.com/SkillProof-Team/SkillProof/pull/36)。两份记录写于11月8日，其中“#19、#23及后端PR尚未合并”等历史状态已结合后续交付更新；原始增量保存在[个人记录归档](../week7-personal-records.json)。关闭这两个文档PR不会使本篇丢失个人材料，也不计为功能交付或Issue关闭。
+
 ## 三、每人的代码 / 文档签入记录
 
-以下列出第二周代表提交；11月9日提交明确标记为会后最新更新。Commit已签入、PR已合并和Issue已关闭分别核对。
-
-<!-- GENERATED_COMMIT_TABLE -->
-
-| 成员 | 日期（北京） | Commit | 签入内容 | 对应Issue | PR / 最新状态 |
-| --- | --- | --- | --- | --- | --- |
-| 付熙瑜 | 11/8 | [7907e7c](https://github.com/SkillProof-Team/SkillProof/commit/7907e7c48498a01f1821720ccfc6941b4979839f) | 真实会话报告查询、评分契约与测试 | [#9](https://github.com/SkillProof-Team/SkillProof/issues/9) | [#27](https://github.com/SkillProof-Team/SkillProof/pull/27)；已合并 |
-| 付熙瑜 | 11/7 | [da9860f](https://github.com/SkillProof-Team/SkillProof/commit/da9860f2401a595490bbd59c4453a4f961536f90) | 审核并合并统一工程检查（合并者贡献） | [#33](https://github.com/SkillProof-Team/SkillProof/issues/33) | [#34](https://github.com/SkillProof-Team/SkillProof/pull/34)；已合并 |
-| 付熙瑜 | 11/8 | [17e7d50](https://github.com/SkillProof-Team/SkillProof/commit/17e7d5028e9e2dee0c0e45412759f9e53baf001c) | 审核并合并测评生命周期（合并者贡献） | [#8](https://github.com/SkillProof-Team/SkillProof/issues/8) | [#28](https://github.com/SkillProof-Team/SkillProof/pull/28)；已合并 |
-| 李宛霖 | 11/8 | [fa257b7](https://github.com/SkillProof-Team/SkillProof/commit/fa257b7e61d8a758d7705bfa73d6f4e7abe26f49) | 修复注册页刷新跳转 | [#7](https://github.com/SkillProof-Team/SkillProof/issues/7) | [#19](https://github.com/SkillProof-Team/SkillProof/pull/19)；已合并 |
-| 李宛霖 | 11/8 | [e86e0e8](https://github.com/SkillProof-Team/SkillProof/commit/e86e0e896ca483018758cf19638df04236b3e33a) | 修复组合重音姓名校验 | [#7](https://github.com/SkillProof-Team/SkillProof/issues/7) | [#19](https://github.com/SkillProof-Team/SkillProof/pull/19)；已合并 |
-| 李宛霖 | 11/8 | [eb05cab](https://github.com/SkillProof-Team/SkillProof/commit/eb05cabff8082c0378159a09628e5e98c87be2eb) | 整合答题流程 | [#10](https://github.com/SkillProof-Team/SkillProof/issues/10) | [#25](https://github.com/SkillProof-Team/SkillProof/pull/25)；Draft，未合并 |
-| 李宛霖 | 11/9（会后最新） | [a00ba96](https://github.com/SkillProof-Team/SkillProof/commit/a00ba96b8b47f07a647ff6c5d95f31daa2d0e38b) | 同步main并接入真实结果页 | [#10](https://github.com/SkillProof-Team/SkillProof/issues/10) | [#25](https://github.com/SkillProof-Team/SkillProof/pull/25)；Draft，未合并 |
-| 常嶅阳 | 11/7 | [1951993](https://github.com/SkillProof-Team/SkillProof/commit/19519935c108bea6f850c284d5ce824bf72b6fd1) | 对齐真实报告契约 | [#11](https://github.com/SkillProof-Team/SkillProof/issues/11) | [#23](https://github.com/SkillProof-Team/SkillProof/pull/23)；已合并 |
-| 常嶅阳 | 11/8 | [98b4adf](https://github.com/SkillProof-Team/SkillProof/commit/98b4adf0ec677c3e770af59f498703963f837fc3) | 记录真实报告流程验证 | [#11](https://github.com/SkillProof-Team/SkillProof/issues/11) | [#23](https://github.com/SkillProof-Team/SkillProof/pull/23)；已合并 |
-| 常嶅阳 | 11/9（会后最新） | [e52e8e3](https://github.com/SkillProof-Team/SkillProof/commit/e52e8e3e25f3ee59f44959fe35115e75714e1b93) | 修复非法URL、旧报告与精度边界 | [#11](https://github.com/SkillProof-Team/SkillProof/issues/11) | [#23](https://github.com/SkillProof-Team/SkillProof/pull/23)；已合并 |
-| 冯皙丹 | 11/2 | [1a7fdb4](https://github.com/SkillProof-Team/SkillProof/commit/1a7fdb410f15bc1855098199ac7e8c07f022595b) | 认证与岗位查询接口 | [#6](https://github.com/SkillProof-Team/SkillProof/issues/6) | [#30](https://github.com/SkillProof-Team/SkillProof/pull/30)；已合并 |
-| 冯皙丹 | 11/7 | [8516c23](https://github.com/SkillProof-Team/SkillProof/commit/8516c2384dca1976b33f637ec0661124a6f548c3) | 不可见姓名和UTF-8读取修复 | [#6](https://github.com/SkillProof-Team/SkillProof/issues/6) | [#30](https://github.com/SkillProof-Team/SkillProof/pull/30)；已合并 |
-| 冯皙丹 | 11/8 | [f7df6d4](https://github.com/SkillProof-Team/SkillProof/commit/f7df6d4e1f510d935e11c6a9f40e18ad693e8697) | 同步main并保留测试依赖锁定 | [#6](https://github.com/SkillProof-Team/SkillProof/issues/6) | [#30](https://github.com/SkillProof-Team/SkillProof/pull/30)；已合并 |
-| 王斯语 | 11/8 | [be167be](https://github.com/SkillProof-Team/SkillProof/commit/be167bef835cf483e73d6aa3223e9dcdf5268d26) | 同步main并完成测评后端联调 | [#8](https://github.com/SkillProof-Team/SkillProof/issues/8) | [#28](https://github.com/SkillProof-Team/SkillProof/pull/28)；已合并 |
-| 王斯语 | 11/8 | [9095c72](https://github.com/SkillProof-Team/SkillProof/commit/9095c72cd2bef563089738a3b9cb9b9ed7b00ed0) | 同步已确认18题抽题规则 | [#8](https://github.com/SkillProof-Team/SkillProof/issues/8) | [#28](https://github.com/SkillProof-Team/SkillProof/pull/28)；已合并 |
-| 王绥源 | 11/6 | [d2f5edd](https://github.com/SkillProof-Team/SkillProof/commit/d2f5edd468eb031e071e3ff845d64473adf9af0b) | 接入前后端CI检查 | [#33](https://github.com/SkillProof-Team/SkillProof/issues/33) | [#34](https://github.com/SkillProof-Team/SkillProof/pull/34)；已合并 |
-| 王绥源 | 11/8 | [242ce55](https://github.com/SkillProof-Team/SkillProof/commit/242ce55c3e69f129865d6bdfe80cc4849e2e4c18) | 增加PR必测登记检查 | [#33](https://github.com/SkillProof-Team/SkillProof/issues/33) | [#37](https://github.com/SkillProof-Team/SkillProof/pull/37)；已合并 |
-| 王绥源 | 11/9（会后最新） | [5906f5f](https://github.com/SkillProof-Team/SkillProof/commit/5906f5fdd85ff2227eba5704c17aa7b5d3397319) | 补充保存提交与评分验收 | [#12](https://github.com/SkillProof-Team/SkillProof/issues/12) | [#38](https://github.com/SkillProof-Team/SkillProof/pull/38)；Open，未合并 |
-
-<!-- END_COMMIT_TABLE -->
-
-第七周个人记录PR #35、#36仍Open，其中#36目标分支为#35的文档分支，不能把它当作已进入main。第一周重复测试计划PR #29关闭未合并，实际交付通过PR #31完成。
+| 成员 | Commit | 签入内容 | 对应Issue | PR / 最新状态 |
+| --- | --- | --- | --- | --- |
+| 付熙瑜 | [7907e7c](https://github.com/SkillProof-Team/SkillProof/commit/7907e7c48498a01f1821720ccfc6941b4979839f) | 真实会话报告查询、评分契约与测试 | [#9](https://github.com/SkillProof-Team/SkillProof/issues/9) | [#27](https://github.com/SkillProof-Team/SkillProof/pull/27)；已合并 |
+| 付熙瑜 | [da9860f](https://github.com/SkillProof-Team/SkillProof/commit/da9860f2401a595490bbd59c4453a4f961536f90) | 审核并合并统一工程检查（合并者贡献） | [#33](https://github.com/SkillProof-Team/SkillProof/issues/33) | [#34](https://github.com/SkillProof-Team/SkillProof/pull/34)；已合并 |
+| 付熙瑜 | [17e7d50](https://github.com/SkillProof-Team/SkillProof/commit/17e7d5028e9e2dee0c0e45412759f9e53baf001c) | 审核并合并测评生命周期（合并者贡献） | [#8](https://github.com/SkillProof-Team/SkillProof/issues/8) | [#28](https://github.com/SkillProof-Team/SkillProof/pull/28)；已合并 |
+| 李宛霖 | [fa257b7](https://github.com/SkillProof-Team/SkillProof/commit/fa257b7e61d8a758d7705bfa73d6f4e7abe26f49) | 修复注册页刷新跳转 | [#7](https://github.com/SkillProof-Team/SkillProof/issues/7) | [#19](https://github.com/SkillProof-Team/SkillProof/pull/19)；已合并 |
+| 李宛霖 | [e86e0e8](https://github.com/SkillProof-Team/SkillProof/commit/e86e0e896ca483018758cf19638df04236b3e33a) | 修复组合重音姓名校验 | [#7](https://github.com/SkillProof-Team/SkillProof/issues/7) | [#19](https://github.com/SkillProof-Team/SkillProof/pull/19)；已合并 |
+| 李宛霖 | [eb05cab](https://github.com/SkillProof-Team/SkillProof/commit/eb05cabff8082c0378159a09628e5e98c87be2eb) | 整合答题流程 | [#10](https://github.com/SkillProof-Team/SkillProof/issues/10) | [#25](https://github.com/SkillProof-Team/SkillProof/pull/25)；待评审，未合并 |
+| 李宛霖 | [a00ba96](https://github.com/SkillProof-Team/SkillProof/commit/a00ba96b8b47f07a647ff6c5d95f31daa2d0e38b) | 同步main并接入真实结果页 | [#10](https://github.com/SkillProof-Team/SkillProof/issues/10) | [#25](https://github.com/SkillProof-Team/SkillProof/pull/25)；待评审，未合并 |
+| 常嶅阳 | [1951993](https://github.com/SkillProof-Team/SkillProof/commit/19519935c108bea6f850c284d5ce824bf72b6fd1) | 对齐真实报告契约 | [#11](https://github.com/SkillProof-Team/SkillProof/issues/11) | [#23](https://github.com/SkillProof-Team/SkillProof/pull/23)；已合并 |
+| 常嶅阳 | [5e1466f](https://github.com/SkillProof-Team/SkillProof/commit/5e1466f7d2a17679e8b7870cb135b6cb6bafe6b5) | 刷新契约验证说明与移动端修复 | [#11](https://github.com/SkillProof-Team/SkillProof/issues/11) | [#23](https://github.com/SkillProof-Team/SkillProof/pull/23)；已合并 |
+| 常嶅阳 | [98b4adf](https://github.com/SkillProof-Team/SkillProof/commit/98b4adf0ec677c3e770af59f498703963f837fc3) | 记录真实报告流程验证 | [#11](https://github.com/SkillProof-Team/SkillProof/issues/11) | [#23](https://github.com/SkillProof-Team/SkillProof/pull/23)；已合并 |
+| 常嶅阳 | [e52e8e3](https://github.com/SkillProof-Team/SkillProof/commit/e52e8e3e25f3ee59f44959fe35115e75714e1b93) | 修复非法URL、旧报告与精度边界 | [#11](https://github.com/SkillProof-Team/SkillProof/issues/11) | [#23](https://github.com/SkillProof-Team/SkillProof/pull/23)；已合并 |
+| 冯皙丹 | [1a7fdb4](https://github.com/SkillProof-Team/SkillProof/commit/1a7fdb410f15bc1855098199ac7e8c07f022595b) | 认证与岗位查询接口 | [#6](https://github.com/SkillProof-Team/SkillProof/issues/6) | [#30](https://github.com/SkillProof-Team/SkillProof/pull/30)；已合并 |
+| 冯皙丹 | [8516c23](https://github.com/SkillProof-Team/SkillProof/commit/8516c2384dca1976b33f637ec0661124a6f548c3) | 不可见姓名和UTF-8读取修复 | [#6](https://github.com/SkillProof-Team/SkillProof/issues/6) | [#30](https://github.com/SkillProof-Team/SkillProof/pull/30)；已合并 |
+| 冯皙丹 | [f7df6d4](https://github.com/SkillProof-Team/SkillProof/commit/f7df6d4e1f510d935e11c6a9f40e18ad693e8697) | 同步main并保留测试依赖锁定 | [#6](https://github.com/SkillProof-Team/SkillProof/issues/6) | [#30](https://github.com/SkillProof-Team/SkillProof/pull/30)；已合并 |
+| 王斯语 | [be167be](https://github.com/SkillProof-Team/SkillProof/commit/be167bef835cf483e73d6aa3223e9dcdf5268d26) | 同步main并完成测评后端联调 | [#8](https://github.com/SkillProof-Team/SkillProof/issues/8) | [#28](https://github.com/SkillProof-Team/SkillProof/pull/28)；已合并 |
+| 王斯语 | [9095c72](https://github.com/SkillProof-Team/SkillProof/commit/9095c72cd2bef563089738a3b9cb9b9ed7b00ed0) | 同步已确认18题抽题规则 | [#8](https://github.com/SkillProof-Team/SkillProof/issues/8) | [#28](https://github.com/SkillProof-Team/SkillProof/pull/28)；已合并 |
+| 王绥源 | [d2f5edd](https://github.com/SkillProof-Team/SkillProof/commit/d2f5edd468eb031e071e3ff845d64473adf9af0b) | 接入前后端CI检查 | [#33](https://github.com/SkillProof-Team/SkillProof/issues/33) | [#34](https://github.com/SkillProof-Team/SkillProof/pull/34)；已合并 |
+| 王绥源 | [242ce55](https://github.com/SkillProof-Team/SkillProof/commit/242ce55c3e69f129865d6bdfe80cc4849e2e4c18) | 增加PR必测登记检查 | [#33](https://github.com/SkillProof-Team/SkillProof/issues/33) | [#37](https://github.com/SkillProof-Team/SkillProof/pull/37)；已合并 |
+| 王绥源 | [5906f5f](https://github.com/SkillProof-Team/SkillProof/commit/5906f5fdd85ff2227eba5704c17aa7b5d3397319) | 补充保存提交与评分验收 | [#12](https://github.com/SkillProof-Team/SkillProof/issues/12) | [#38](https://github.com/SkillProof-Team/SkillProof/pull/38)；Open，未合并 |
 
 ## 四、燃尽图
 
@@ -178,8 +175,6 @@ Windows默认编码与macOS不同，测试不能依赖系统默认解码；姓�
 - 首次提交PR只表示已有提交，不等于Review、合并或验收完成。#33的首个关联PR #34于11月7日创建。
 
 ### 1.按首次提交PR统计
-
-<!-- GENERATED_SUBMISSION_TABLE -->
 
 | 日期 | 当日首次提交 / 范围变化 | 原13项剩余未提交PR | 调整后P0剩余未提交PR |
 | --- | --- | ---: | ---: |
@@ -194,15 +189,11 @@ Windows默认编码与macOS不同，测试不能依赖系统默认解码；姓�
 | 11月9日快照 | 已有PR提交情况 | 1 | 0 |
 | 本次提交后（组长指定口径） | #10、#14按完成；首次提交PR统计不变 | 1 | 0 |
 
-<!-- END_SUBMISSION_TABLE -->
-
 ![两周燃尽图：剩余未提交PR任务数](assets/week7-burndown.png)
 
 第二周末，原13项中只剩#13没有关联实现PR。调整后P0范围已全部至少提交过PR，但答题、测试与文档仍有未合并或未验收工作，不能据此宣布P0已完成。
 
 ### 2.按Issue关闭统计
-
-<!-- GENERATED_CLOSED_TABLE -->
 
 | 日期 | 当日关单 / 范围变化 | 原13项剩余未关闭 | 调整后P0剩余未关闭 |
 | --- | --- | ---: | ---: |
@@ -214,10 +205,6 @@ Windows默认编码与macOS不同，测试不能依赖系统默认解码；姓�
 | 11月6日 | 新增P0 [#33](https://github.com/SkillProof-Team/SkillProof/issues/33)，未关闭 | 9 | 10 |
 | 11月7日 | 无 | 9 | 10 |
 | 11月8日 | [#6](https://github.com/SkillProof-Team/SkillProof/issues/6)关闭；[#8](https://github.com/SkillProof-Team/SkillProof/issues/8)关闭；[#9](https://github.com/SkillProof-Team/SkillProof/issues/9)关闭；[#13](https://github.com/SkillProof-Team/SkillProof/issues/13)移出P0，仍Open | 6 | 6 |
-| 11月9日20:27快照 | #7、#11已关闭 | 4 | 4 |
-| 本次提交后（组长指定口径） | PR #25对应#10、T12 #14按完成计入 | 2 | 2 |
-
-<!-- END_CLOSED_TABLE -->
 
 ![两周燃尽图：剩余未关闭任务数](assets/week7-closed-burndown.png)
 
@@ -227,13 +214,13 @@ Windows默认编码与macOS不同，测试不能依赖系统默认解码；姓�
 
 
 
-**本轮关单更新（11月9日20:39）：** 已按组长要求将[#10](https://github.com/SkillProof-Team/SkillProof/issues/10)实际关闭为completed，[关单结果](issue-10-close-result.json)已归档。T12（#14）仍留待组长提交后关闭；PR #25本身未执行合并操作。图表保留20:27原快照，并在“本次提交后”统一计入这两项完成。
+**本轮关单更新（11月9日20:39）：** 已按组长要求将[#10](https://github.com/SkillProof-Team/SkillProof/issues/10)实际关闭为completed，[关单结果](../issue-10-close-result.json)已归档。T12（#14）仍留待组长提交后关闭；PR #25本身未执行合并操作。图表保留20:27原快照，并在“本次提交后”统一计入这两项完成。
 
 ## 五、例会照片
 
 ![2026年11月7日团队例会现场](assets/week7-meeting.jpg)
 
-2026年11月7日例会照片，由团队提供。本篇没有据照片补写未提供的具体会议时刻、地点或逐人出席情况。
+2026年11月7日例会照片
 
 ## 六、下阶段安排与软工实践体会
 
@@ -244,7 +231,7 @@ Windows默认编码与macOS不同，测试不能依赖系统默认解码；姓�
 | 1 | 核实独立复核记录、补齐已核验来源并正式发布题库，使用默认题库复验18题方案 | 内容负责人付熙瑜协调，王斯语配合；#5后续发布与#8 |
 | 2 | 正式题库上复验答题、保存刷新、异常恢复和报告跳转，完成PR #25评审 | 李宛霖主责，后端与常嶅阳配合；#10 |
 | 3 | 评审PR #38，补齐最终页面联调及测试报告，核对检查门禁实际执行 | 王绥源主责、全员复测；#12、#33 |
-| 4 | 合并个人Scrum增量并核对两周材料、图表及六人确认 | 付熙瑜汇总、全员确认；#14、PR #35/#36 |
+| 4 | 以本分支统一提交Scrum汇总，核对两周材料、图表及六人确认；成员另行关闭重复个人文档PR | 付熙瑜汇总、全员确认；#14，个人材料参考PR #35/#36 |
 | 5 | 备案完成且前置阻塞消除后恢复部署、演示与Release | 付熙瑜；#13，当前P2/Open |
 | 6 | 核心流程稳定后推进建议、历史数据及结果对比 | 王斯语、常嶅阳；P1 #15—#17 |
 
@@ -253,5 +240,3 @@ Windows默认编码与macOS不同，测试不能依赖系统默认解码；姓�
 **跨平台和异常路径要有明确验证范围。** 姓名不可见字符与Windows编码问题，靠不同成员在真实环境中复现并复核才得到确认；结果页非法URL、报告切换和排序精度问题，也是在Review后补齐。接口、浏览器和隔离题库测试各有边界，应分别记录，不能只给出一个“测试通过”。
 
 **燃尽下降也可能来自范围调整。** 本周新增#33、搁置#13，说明工作量会随着协作推进变化。固定基线与调整范围同时保留，既能看到真实交付，也能解释哪些任务新增、延后或仍在等待。
-
-整理依据已归档为[GitHub快照](github-snapshot.json)、[事件与评审证据](github-evidence.json)和[补充证据](github-evidence-extra.json)。图表数据与生成脚本随本文保存，便于后续按新进度更新；本次提交后的图表按组长要求计入#10和T12 #14完成；原GitHub快照保留，T12实际关单由组长在提交后执行。

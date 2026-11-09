@@ -76,7 +76,7 @@ def main():
     plt.rcParams['font.family'] = font_manager.FontProperties(fname='C:/Windows/Fonts/msyh.ttc').get_name()
     plt.rcParams['axes.unicode_minus'] = False
     plt.rcParams['svg.fonttype'] = 'path'
-    assets = ROOT / 'assets'
+    assets = ROOT / 'scrum' / 'assets'
     assets.mkdir(exist_ok=True)
     for filename, field, adjusted, title in [
         ('week7-burndown', 'fixed_without_pr', 'adjusted_without_pr', '按首次提交PR统计'),
@@ -163,7 +163,7 @@ def main():
         stamp = parse(commits[sha]['commit']['author']['date']).astimezone(TZ)
         state = '已合并' if PRS[pr]['merged_at'] else 'Draft，未合并' if PRS[pr]['draft'] else 'Open，未合并'
         table += f'| {person} | {stamp.month}/{stamp.day}' + ('（会后最新）' if stamp.day == 9 else '') + f' | [{prefix}](https://github.com/SkillProof-Team/SkillProof/commit/{sha}) | {description} | {link(issue)} | {link(pr,"pulls")}；{state} |\n'
-    doc = ROOT / 'week7.md'
+    doc = ROOT / 'scrum' / 'week7.md'
     content = doc.read_text(encoding='utf-8')
     for key, value in [('COMMIT',table),('SUBMISSION',submission),('CLOSED',closed)]:
         content = replace_table(content, key, value)
