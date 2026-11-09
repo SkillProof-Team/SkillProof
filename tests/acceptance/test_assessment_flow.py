@@ -57,8 +57,34 @@ class AssessmentFlowTests(unittest.TestCase):
         ).fetchone()["questions_json"]
         questions = json.loads(snapshot)
         self.assertEqual(len(questions), 18)
+        single = next(q for q in questions if q["type"] == "single")
+        multiple = next(q for q in questions if q["type"] == "multiple")
+        partial = {single["id"]: [single["options"][0]["id"]],
+                   multiple["id"]: [option["id"] for option in multiple["options"][:2]]}
+        saved = client.put(f"{url}/answers", json={"answers": partial, "expectedVersion": attempt["answersVersion"]}, headers=headers)
+        self.assertEqual(saved.status_code, 200, saved.text)
+        self.assertEqual(saved.json()["answeredCount"], 2)
+        self.assertEqual(client.post(f"{url}/submit", headers=headers).status_code, 422)
+        self.assertEqual(client.get(url).json()["status"], "in_progress")
+        for choices, request_headers, status in (
+            ({single["id"]: ["invalid-option"]}, headers, 422),
+            ({single["id"]: []}, {}, 403),
+        ):
+            rejected = client.put(f"{url}/answers", json={"answers": choices, "expectedVersion": saved.json()["answersVersion"]}, headers=request_headers)
+            self.assertEqual(rejected.status_code, status, rejected.text)
+            self.assertEqual(client.get(url).json()["answers"], saved.json()["answers"])
+        with TestClient(app) as refreshed:
+            refreshed.cookies.update(client.cookies)
+            self.assertEqual(refreshed.get("/api/auth/me").status_code, 200)
+            restored = refreshed.get(url)
+            self.assertEqual(restored.status_code, 200, restored.text)
+            self.assertEqual(restored.json()["answers"], saved.json()["answers"])
+        cleared = client.put(f"{url}/answers", json={"answers": {single["id"]: []}, "expectedVersion": saved.json()["answersVersion"]}, headers=headers)
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertNotIn(single["id"], cleared.json()["answers"])
+        self.assertEqual(cleared.json()["answers"][multiple["id"]], saved.json()["answers"][multiple["id"]])
         answers = {q["id"]: q["correct"] for q in questions}
-        saved = client.put(f"{url}/answers", json={"answers": answers}, headers=headers)
+        saved = client.put(f"{url}/answers", json={"answers": answers, "expectedVersion": cleared.json()["answersVersion"]}, headers=headers)
         self.assertEqual(saved.status_code, 200, saved.text)
         self.assertEqual(client.get(url).json()["answers"], saved.json()["answers"])
 
@@ -88,11 +114,18 @@ class AssessmentFlowTests(unittest.TestCase):
         queried = client.get(report_url)
         self.assertEqual(queried.status_code, 200, queried.text)
         self.assertEqual(queried.json(), report)
-        self.assertEqual(client.put(f"{url}/answers", json={"answers": {}}, headers=headers).status_code, 409)
+        self.assertEqual(client.put(f"{url}/answers", json={"answers": {}, "expectedVersion": saved.json()["answersVersion"]}, headers=headers).status_code, 409)
         self.assertEqual(other.get(url).status_code, 404)
-        self.assertEqual(other.put(f"{url}/answers", json={"answers": {}}, headers=other_headers).status_code, 404)
+        self.assertEqual(other.put(f"{url}/answers", json={"answers": {}, "expectedVersion": 0}, headers=other_headers).status_code, 404)
         self.assertEqual(other.post(f"{url}/submit", headers=other_headers).status_code, 404)
         self.assertEqual(other.get(report_url).status_code, 404)
+        owner_id = client.get("/api/auth/me").json()["user"]["id"]
+        connection.execute("UPDATE sessions SET expires_at=0 WHERE user_id=?", (owner_id,))
+        self.assertEqual(client.get(url).status_code, 401)
+        self.assertEqual(client.post(f"{url}/submit", headers=headers).status_code, 401)
+        self.assertEqual(client.get(report_url).status_code, 401)
+        row = connection.execute("SELECT status FROM attempts WHERE id=?", (attempt_id,)).fetchone()
+        self.assertEqual(row["status"], "submitted")
 
     def login(self, client, name):
         email = f"{name}@example.com"

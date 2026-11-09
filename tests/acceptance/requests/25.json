@@ -1,0 +1,11 @@
+{
+  "required_tests": [
+    "test_assessment_flow.AssessmentFlowTests.test_authenticated_submission_lifecycle",
+    "test_answer_save_order.AnswerSaveOrderTests.test_normal_save_rapid_changes_clear_and_refresh",
+    "test_answer_save_order.AnswerSaveOrderTests.test_timed_out_A_arrives_after_B_and_is_rejected",
+    "test_answer_save_order.AnswerSaveOrderTests.test_A_completes_first_B_conflicts_then_syncs_and_retries",
+    "test_answer_save_order.AnswerSaveOrderTests.test_lost_success_response_is_confirmed_by_get",
+    "test_answer_save_order.AnswerSaveOrderTests.test_two_clients_same_version_only_one_write_succeeds",
+    "test_answer_save_order.AnswerSaveOrderTests.test_status_errors_and_save_before_submit"
+  ]
+}

@@ -1,5 +1,6 @@
 """T02 persistence contracts; no HTTP, authentication or scoring implementation."""
 import json
+from contextlib import closing
 from pathlib import Path
 import sqlite3
 import subprocess
@@ -93,6 +94,30 @@ class DatabaseTests(unittest.TestCase):
         initialize(self.settings)
         initialize(self.settings)
         self.assertEqual(rows(), before)
+
+    def test_answers_version_migration_preserves_existing_drafts_and_reports(self):
+        uid = self.user()
+        self.attempt(uid, submitted=True)
+        self.attempt(uid)
+        settings = Settings(database_path=self.settings.database_path.parent / "legacy.db", environment="development")
+        with closing(sqlite3.connect(settings.database_path, isolation_level=None)) as legacy:
+            legacy.executescript((BACKEND / "app/migrations/001_initial.sql").read_text(encoding="utf-8"))
+            legacy.execute("CREATE TABLE schema_migrations(version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)")
+            legacy.execute("INSERT INTO schema_migrations VALUES(1,?)", (now_iso(),))
+            for table in ("users", "attempts"):
+                columns = [row[1] for row in legacy.execute(f"PRAGMA table_info({table})")]
+                names = ",".join(columns)
+                rows = self.con.execute(f"SELECT {names} FROM {table}").fetchall()
+                legacy.executemany(f"INSERT INTO {table}({names}) VALUES({','.join('?' for _ in columns)})", rows)
+            before = legacy.execute("SELECT * FROM attempts ORDER BY id").fetchall()
+        initialize(settings)
+        initialize(settings)
+        with closing(sqlite3.connect(settings.database_path)) as migrated:
+            after = migrated.execute("SELECT * FROM attempts ORDER BY id").fetchall()
+            self.assertEqual([row[:-1] for row in after], before)
+            self.assertEqual([row[-1] for row in after], [0, 0])
+            self.assertEqual(migrated.execute("SELECT version FROM schema_migrations ORDER BY version").fetchall(), [(1,), (2,)])
+            self.assertEqual(migrated.execute("PRAGMA integrity_check").fetchone()[0], "ok")
 
     def test_seed_does_not_overwrite_existing_question(self):
         row = self.con.execute("SELECT * FROM questions ORDER BY id LIMIT 1").fetchone()

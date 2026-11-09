@@ -47,6 +47,7 @@
 - PR#19记录11月8日临时集成环境的16项HTTP、22项浏览器检查，以及11月9日T05必测8/8通过；明确这些属于不同轮次和范围，未将接口检查代替全部页面验收。
 - 继续推进[#10测评答题与提交](https://github.com/SkillProof-Team/SkillProof/issues/10)：串联创建或恢复、单选多选、切题、进度、保存刷新、未答提示及离开提醒；提交前先保存，未知提交结果通过查询服务端状态恢复。
 - **11月9日最新更新：** 同步包含结果页的main，删除结果占位并接入真实`ResultPage`。PR#25记录后端75项、QA18项、独立HTTP24项及Chromium流程验证；使用隔离数据库中的草稿副本，正式题库创建仍返回503。[PR#25](https://github.com/SkillProof-Team/SkillProof/pull/25)已于11月9日21:34合并；#10已于20:39按组长要求关闭，正式题库发布后的复验继续跟进。
+- 同步最新main时补充PR#25审核修复记录：提交`f9074c6`增加答案版本迁移和事务内版本校验，拒绝过期保存覆盖新答案，超时或冲突后保留本地选择并同步版本。该修复已随PR#25进入main；原main将11月9日补充写在week6，本次按时间归入week7。原记录中的“尚未提交”属于当时状态，当前已由实际提交更新。
 - 临时集成联调时曾因Vite缺少`/api`代理，导致登录状态响应无法解析；补齐代理配置后重新完成创建、答题、保存、提交和查看结果的浏览器流程。页面当前答案与服务端已保存答案分别维护，保存失败时保留修改并提示重试。该问题与处理来自本人[PR#36记录](https://github.com/SkillProof-Team/SkillProof/pull/36)，不记为正式后端接口缺陷。
 - 参与[PR#23](https://github.com/SkillProof-Team/SkillProof/pull/23)复审，提出非法报告URL白屏、切换报告残留旧数据、薄弱项排序精度问题；修复后于11月9日批准并合并。第七周个人文档[PR#36](https://github.com/SkillProof-Team/SkillProof/pull/36)中的工作、计划、困难及提交记录已对照纳入本篇；原PR#36已关闭、未合并，不再作为本次汇总的合并前置条件。
 
@@ -147,6 +148,7 @@ Windows默认编码与macOS不同，测试不能依赖系统默认解码；姓�
 | 李宛霖 | [e86e0e8](https://github.com/SkillProof-Team/SkillProof/commit/e86e0e896ca483018758cf19638df04236b3e33a) | 修复组合重音姓名校验 | [#7](https://github.com/SkillProof-Team/SkillProof/issues/7) | [#19](https://github.com/SkillProof-Team/SkillProof/pull/19)；已合并 |
 | 李宛霖 | [eb05cab](https://github.com/SkillProof-Team/SkillProof/commit/eb05cabff8082c0378159a09628e5e98c87be2eb) | 整合答题流程 | [#10](https://github.com/SkillProof-Team/SkillProof/issues/10) | [#25](https://github.com/SkillProof-Team/SkillProof/pull/25)；已合并 |
 | 李宛霖 | [a00ba96](https://github.com/SkillProof-Team/SkillProof/commit/a00ba96b8b47f07a647ff6c5d95f31daa2d0e38b) | 同步main并接入真实结果页 | [#10](https://github.com/SkillProof-Team/SkillProof/issues/10) | [#25](https://github.com/SkillProof-Team/SkillProof/pull/25)；已合并 |
+| 李宛霖 | [f9074c6](https://github.com/SkillProof-Team/SkillProof/commit/f9074c6) | 答案版本校验、乱序保存修复及回归记录 | [#10](https://github.com/SkillProof-Team/SkillProof/issues/10) | [#25](https://github.com/SkillProof-Team/SkillProof/pull/25)；已合并 |
 | 常嶅阳 | [1951993](https://github.com/SkillProof-Team/SkillProof/commit/19519935c108bea6f850c284d5ce824bf72b6fd1) | 对齐真实报告契约 | [#11](https://github.com/SkillProof-Team/SkillProof/issues/11) | [#23](https://github.com/SkillProof-Team/SkillProof/pull/23)；已合并 |
 | 常嶅阳 | [5e1466f](https://github.com/SkillProof-Team/SkillProof/commit/5e1466f7d2a17679e8b7870cb135b6cb6bafe6b5) | 刷新契约验证说明与移动端修复 | [#11](https://github.com/SkillProof-Team/SkillProof/issues/11) | [#23](https://github.com/SkillProof-Team/SkillProof/pull/23)；已合并 |
 | 常嶅阳 | [98b4adf](https://github.com/SkillProof-Team/SkillProof/commit/98b4adf0ec677c3e770af59f498703963f837fc3) | 记录真实报告流程验证 | [#11](https://github.com/SkillProof-Team/SkillProof/issues/11) | [#23](https://github.com/SkillProof-Team/SkillProof/pull/23)；已合并 |

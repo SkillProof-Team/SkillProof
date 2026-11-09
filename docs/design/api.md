@@ -202,6 +202,7 @@ T04 岗位接口按 T03 能力树提供开放状态：仅 `backend` 的 `enabled
   "submittedAt":null,
   "questionCount":18,
   "answeredCount":0,
+  "answersVersion":0,
   "questions":[{
     "id":"example-question-01",
     "dimension":"database",
@@ -223,19 +224,29 @@ T04 岗位接口按 T03 能力树提供开放状态：仅 `backend` 的 `enabled
 
 ### PUT /api/attempts/{id}/answers
 
-必要输入 `answers`，键为本次测评题目ID，值为所选选项ID数组：
+必要输入 `expectedVersion` 和 `answers`。`expectedVersion` 是最近一次创建、获取或保存响应的 `answersVersion`，必须为非负整数；`answers` 的键为本次测评题目ID，值为所选选项ID数组：
 
 ```json
-{"answers":{"example-question-01":["A"]}}
+{"expectedVersion":0,"answers":{"example-question-01":["A"]}}
 ```
 
 成功返回200，结构同创建响应；对应字段变为：
 
 ```json
-{"answeredCount":1,"answers":{"example-question-01":["A"]}}
+{"answersVersion":1,"answeredCount":1,"answers":{"example-question-01":["A"]}}
 ```
 
 上面仅展示变化字段。T06 将本次传入答案合并到已保存答案，未传题目保留；传空数组表示清除该题答案。题目必须属于本次测评，选项必须存在，单选题最多一个选项。已提交测评不可修改。
+
+服务端在同一 `BEGIN IMMEDIATE` 事务内检查状态与答案版本、合并答案并将版本加一。每次成功保存（包括空对象或相同答案）均递增版本。版本不一致返回 409：
+
+```json
+{"detail":{"code":"answers_version_conflict","message":"答案版本已更新，请同步后重新保存"}}
+```
+
+冲突不会改动答案或版本。客户端应重新 GET 最新状态与版本，保留当前本地选择后重试；不能把冲突、超时或取消当成保存成功。保存响应丢失后，只有 GET 返回的版本已前进且答案与本地一致，才可确认该选择已保存；否则保留未确认提示并使用最新版本重新保存。前端不自动循环重试，用户可手动重试。已提交状态的 409 仍使用原字符串错误，GET 确认 submitted 后进入报告。
+
+PR #25 同步调整现有前端和验收调用方；旧调用方缺少 `expectedVersion` 返回 422，不能默认使用当前版本，否则会重新允许过期覆盖。数据库通过新增 `002_answers_version.sql` 为已有记录补初值 0，保留原答案与报告。该契约调整随本 PR 一并交由相关前后端成员 Review，不代表已获得协商批准。
 
 ## 6. 提交与结果查询
 
@@ -289,7 +300,7 @@ T04 岗位接口按 T03 能力树提供开放状态：仅 `backend` 的 `enabled
 | 401 | 未登录、会话过期或登录凭据错误 |
 | 403 | 无权限、CSRF校验失败或跨站请求被拒绝 |
 | 404 | 测评不存在或不属于当前用户，避免暴露他人对象是否存在 |
-| 409 | 重复邮箱或当前状态不允许该操作 |
+| 409 | 重复邮箱、答案版本冲突或当前状态不允许该操作 |
 | 422 | 输入字段或答案无效 |
 
 ```json
