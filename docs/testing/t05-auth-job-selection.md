@@ -1,6 +1,52 @@
 # T05 注册登录与岗位选择验收记录
 
-对应 Issue #7、PR #19。记录日期：2026-11-08（Asia/Shanghai）。
+对应 Issue #7、PR #19。历史记录日期：2026-11-08；最新补充：2026-11-09（Asia/Shanghai）。
+
+## 当前状态（2026-11-09）
+
+- PR #30 已于 2026-11-08 20:11（Asia/Shanghai）合并，合并提交 `ad65a4d`；不再是未合并依赖。
+- 本轮起始 HEAD 为 `971cdbaefd48012be8e1b6804ccf7956d408a7e7`，工作区干净，与远端分支一致；已包含最新 main `17e7d5028e9e2dee0c0e45412759f9e53baf001c`（含 #30、#37、#28），main 无遗漏提交。
+- Claire 已明确在 `e86e0e8` 复测两处前端问题并确认修复；GitHub 当前正式审核为 APPROVED。API 返回的正式批准关联提交为 `971cdba`，复测评论关联提交为 `e86e0e8`，两者分别记录。
+- 以下 11 月 8 日记录均保留为历史证据，其中“#30 尚未合并”等描述仅指当时状态；不代表最新 main 的正式浏览器验收。T08 测评入口和结果页路由仍由对应任务接入，不宣称项目整体完成。
+
+## 本轮 QA 自动化验收（2026-11-09）
+
+PR #37 要求验收目录发现的测试实际运行成功，并在 `tests/acceptance/requests/19.json` 登记完整 test ID。原有 10 项验收测试虽通过，但缺少本 PR 登记而失败。
+
+新增 `tests/acceptance/test_t05_auth_job_selection.py`，通过 unittest 标准 `load_tests` 入口复用 `backend/tests/test_auth_catalog.py` 的 8 项现有测试，保持原始 test ID；不复制断言、不改业务代码或 QA 检查器。登记的全部 8 项均与 T05 所消费的认证与岗位接口有关：
+
+| 既有测试方法 | 本轮纳入验收的场景 |
+| --- | --- |
+| `test_registration_refresh_and_hash` | 注册、密码哈希、Cookie 属性、携带真实 Cookie 的新客户端恢复会话 |
+| `test_duplicate_email_and_bad_login` | 重复邮箱、错误密码/不存在账号、正确密码登录 |
+| `test_registration_requires_a_visible_name` | 零宽/纯组合字符姓名拒绝，正常组合字符姓名注册 |
+| `test_invalid_input_is_safe_and_uniform` | 非法注册输入返回 422 且不泄漏密码 |
+| `test_anonymous_expired_session_and_logout_revocation` | 匿名拒绝、CSRF 拒绝、退出撤销、旧 Cookie 重放拒绝、登录及过期会话拒绝 |
+| `test_origin_host_and_request_limit` | 不可信 Origin/Host、跨站登录和超大请求拒绝 |
+| `test_catalog_matches_t03_and_does_not_expose_questions` | 真实岗位、开放状态、能力维度/知识点匹配题库且不泄漏试题 |
+| `test_expected_api_routes` | 认证及岗位 API 路由契约 |
+
+测试运行当前正式分支的真实 FastAPI 应用、认证逻辑和 SQLite；每例由既有 setUp 创建独立临时目录与数据库并清理，不读取或写入正式用户数据。没有 Mock、伪造业务响应或认证绕过。TestClient 为进程内 ASGI 集成测试，不是经 Vite/网络端口的 HTTP 联调，也不冒充前端浏览器操作。新增业务测试实现 0 项，新增纳入 QA 的既有 T05 测试 8 项。
+
+本地复用已安装依赖的 Python 3.11.9 虚拟环境，仅复用解释器和依赖，源码由当前工作区加载；系统默认 Python 缺少 FastAPI，依赖探测失败后切换该环境，未运行失败的业务测试。CI 按现有规范使用 Python 3.13.9。
+
+```powershell
+$env:PATH = 'W:\workplace\SkillProof-integration-19\backend\.venv\Scripts;' + $env:PATH
+$env:PYTHONPATH = 'backend'
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:SKILLPROOF_ENV = 'development'
+python -m pip check
+python scripts/check_qa.py --pr 19
+# 以下独立发现命令实际连续执行两次，验证隔离及重复运行
+python -m unittest discover -s tests/acceptance -p test_t05_auth_job_selection.py -v
+Set-Location frontend
+npm run lint
+npm run build
+Set-Location ..
+git diff --check
+```
+
+实际结果：QA 全量 18 项通过（原有 10 项 + T05 8 项），失败 0、跳过 0；登记必测 8/8 通过。独立运行两轮均为 8/8 通过，重复执行不增加不同测试数量。`pip check`、前端 lint/build、`git diff --check` 均通过。出现既有 Starlette/httpx 弃用提示，不影响结果，未因此新增依赖。未在本地重跑完整后端套件，其结果由推送后的 backend-checks 单独核对。以下历史 38 项及姓名专项测试不计入本轮自动化数量。本轮不重跑历史浏览器验收；U01–U03 三项动态场景仍未执行。
 
 ## 本次版本与范围
 
