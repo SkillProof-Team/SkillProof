@@ -9,10 +9,12 @@ type JobSelectionPageProps = {
   accountError: string
   selectedRoleId: string | null
   onSelectRole: (roleId: string) => Promise<void>
+  onStartAssessment: () => Promise<void>
+  isStarting: boolean
 }
 
 export default function JobSelectionPage({
-  user, logout, isLoggingOut, accountError, selectedRoleId, onSelectRole,
+  user, logout, isLoggingOut, accountError, selectedRoleId, onSelectRole, onStartAssessment, isStarting,
 }: JobSelectionPageProps) {
   const [catalog, setCatalog] = useState<Catalog | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -44,7 +46,7 @@ export default function JobSelectionPage({
   }
 
   async function selectRole(roleId: string) {
-    if (isSelecting || isLoggingOut) return
+    if (isSelecting || isLoggingOut || isStarting) return
     setIsSelecting(true)
     try {
       await onSelectRole(roleId)
@@ -59,7 +61,7 @@ export default function JobSelectionPage({
     <main className="jobs-page">
       <div className="jobs-content">
         <p className="jobs-user">你好，{user.name}</p>
-        <button className="jobs-back" type="button" disabled={isLoggingOut || isSelecting} onClick={logout}>
+        <button className="jobs-back" type="button" disabled={isLoggingOut || isSelecting || isStarting} onClick={logout}>
           {isLoggingOut ? '退出中…' : '退出登录'}
         </button>
         {accountError && <p role="alert">{accountError}</p>}
@@ -102,7 +104,7 @@ export default function JobSelectionPage({
                   </dl>
                   <button
                     type="button"
-                    disabled={role.enabled !== true || isLoggingOut || isSelecting}
+                    disabled={role.enabled !== true || isLoggingOut || isSelecting || isStarting}
                     aria-pressed={role.id === selectedRole?.id}
                     onClick={() => selectRole(role.id)}
                   >
@@ -116,8 +118,11 @@ export default function JobSelectionPage({
               {selectedRole && (
                 <article className="job-card" aria-label="已选岗位">
                   <p role="status">已选择：{selectedRole.name}</p>
-                  <p id="assessment-note">测评入口尚未接入，当前可以选择岗位，暂时无法开始测评。</p>
-                  <button type="button" disabled aria-describedby="assessment-note">开始测评（待开放）</button>
+                  <p id="assessment-note">开始新测评；如有该岗位的进行中测评，将恢复已保存的答案。</p>
+                  <button type="button" disabled={isStarting || isSelecting || isLoggingOut}
+                    onClick={onStartAssessment} aria-describedby="assessment-note">
+                    {isStarting ? '正在创建或恢复测评…' : '开始 / 继续测评'}
+                  </button>
                 </article>
               )}
             </>

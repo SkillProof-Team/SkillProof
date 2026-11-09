@@ -90,6 +90,7 @@ class AttemptInput(InputModel):
 
 
 class AnswersInput(InputModel):
+    expectedVersion: int = Field(ge=0, strict=True)
     answers: dict[str, list[Literal["A", "B", "C", "D"]]] = Field(max_length=18)
 
     @field_validator("answers")

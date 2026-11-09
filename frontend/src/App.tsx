@@ -1,13 +1,18 @@
-import { useCallback, useEffect, useState } from 'react'
-import { ApiError, getCurrentUser, logoutUser, setCsrfToken, type AuthResponse, type User } from './api'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { ApiError, createAttempt, getCurrentUser, logoutUser, setCsrfToken, type AuthResponse, type User } from './api'
 import AuthLayout from './components/auth/AuthLayout'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import JobSelectionPage from './pages/jobs/JobSelectionPage'
+import Assessment from './pages/assessment/Assessment'
 import { ResultPage } from './pages/reports/ResultPage'
 
-/** 结果页路由：/reports/{测评ID}。整体路由方案由 Issue #7 统一收敛，此处只处理结果页入口。 */
+const ATTEMPT_PATH = /^\/attempts\/([^/]+)\/?$/
 const REPORT_PATH = /^\/reports\/([^/]+)\/?$/
+
+function authenticatedPath(path: string) {
+  return ATTEMPT_PATH.test(path) || REPORT_PATH.test(path) ? path : '/jobs'
+}
 
 function decodeReportId(value: string): string | null {
   try {
@@ -28,8 +33,16 @@ function App() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [accountError, setAccountError] = useState('')
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null)
+  const [isStarting, setIsStarting] = useState(false)
+  const creationRequest = useRef<AbortController | null>(null)
+  const navigationGuard = useRef<(() => boolean) | null>(null)
+  const historyIndex = useRef<number>(window.history.state?.skillproofIndex ?? 0)
+  const restoringHistory = useRef(false)
 
   const clearSession = useCallback((notice: string) => {
+    creationRequest.current?.abort()
+    creationRequest.current = null
+    setIsStarting(false)
     setCsrfToken(null)
     setUser(null)
     setSelectedRoleId(null)
@@ -39,18 +52,37 @@ function App() {
   }, [])
 
   useEffect(() => {
+    window.history.replaceState({ ...window.history.state, skillproofIndex: historyIndex.current }, '')
     function updatePath() {
+      if (restoringHistory.current) {
+        restoringHistory.current = false
+        return
+      }
+      const nextIndex = window.history.state?.skillproofIndex
+      if (navigationGuard.current && !navigationGuard.current()) {
+        if (typeof nextIndex === 'number' && nextIndex !== historyIndex.current) {
+          restoringHistory.current = true
+          window.history.go(historyIndex.current - nextIndex)
+        } else {
+          window.history.replaceState({ skillproofIndex: historyIndex.current }, '', path)
+        }
+        return
+      }
+      historyIndex.current = typeof nextIndex === 'number' ? nextIndex : historyIndex.current
+      creationRequest.current?.abort()
+      creationRequest.current = null
+      setIsStarting(false)
       let nextPath = window.location.pathname
       if (!isCheckingSession && !sessionError) {
-        nextPath = user ? '/jobs' : nextPath === '/register' ? '/register' : '/login'
-        if (window.location.pathname !== nextPath) window.history.replaceState(null, '', nextPath)
+        nextPath = user ? authenticatedPath(nextPath) : nextPath === '/register' ? '/register' : '/login'
+        if (window.location.pathname !== nextPath) window.history.replaceState(window.history.state, '', nextPath)
       }
       setPath(nextPath)
     }
 
     window.addEventListener('popstate', updatePath)
     return () => window.removeEventListener('popstate', updatePath)
-  }, [user, isCheckingSession, sessionError])
+  }, [user, isCheckingSession, sessionError, path])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -113,18 +145,27 @@ function App() {
     }
   }, [userId])
 
-  const page = user ? '/jobs' : path === '/register' ? '/register' : '/login'
-  const reportMatch = REPORT_PATH.exec(path)
+  const page = user ? authenticatedPath(path) : path === '/register' ? '/register' : '/login'
 
   useEffect(() => {
-    if (isCheckingSession || sessionError || reportMatch) return
-    if (window.location.pathname !== page) window.history.replaceState(null, '', page)
-  }, [page, isCheckingSession, reportMatch, sessionError])
+    if (isCheckingSession || sessionError) return
+    if (window.location.pathname !== page) window.history.replaceState(window.history.state, '', page)
+  }, [page, isCheckingSession, sessionError])
 
-  function navigate(next: string) {
-    window.history.pushState(null, '', next)
+  function navigate(next: string, replace = false) {
+    if (navigationGuard.current && !navigationGuard.current()) return
+    if (replace) {
+      window.history.replaceState({ skillproofIndex: historyIndex.current }, '', next)
+    } else {
+      historyIndex.current += 1
+      window.history.pushState({ skillproofIndex: historyIndex.current }, '', next)
+    }
     setPath(next)
   }
+
+  const registerNavigationGuard = useCallback((guard: (() => boolean) | null) => {
+    navigationGuard.current = guard
+  }, [])
 
   function finishLogin(data: AuthResponse) {
     setCsrfToken(data.csrfToken)
@@ -134,6 +175,7 @@ function App() {
   }
 
   async function logout() {
+    if (navigationGuard.current && !navigationGuard.current()) return
     setIsLoggingOut(true)
     setAccountError('')
     try {
@@ -164,25 +206,35 @@ function App() {
     }
   }
 
+  async function startAssessment() {
+    if (!selectedRoleId || creationRequest.current || isLoggingOut) return
+    const controller = new AbortController()
+    creationRequest.current = controller
+    setIsStarting(true)
+    setAccountError('')
+    try {
+      const data = await getCurrentUser(controller.signal)
+      if (controller.signal.aborted) return
+      setCsrfToken(data.csrfToken)
+      setUser(data.user)
+      const attempt = await createAttempt(selectedRoleId, controller.signal)
+      if (!controller.signal.aborted) navigate(`/attempts/${encodeURIComponent(attempt.id)}`)
+    } catch (error) {
+      if (!controller.signal.aborted && !(error instanceof ApiError && error.status === 401)) {
+        setAccountError(error instanceof Error ? error.message : '创建测评失败，请重试')
+      }
+    } finally {
+      if (creationRequest.current === controller) {
+        creationRequest.current = null
+        setIsStarting(false)
+      }
+    }
+  }
+
   function retrySession() {
     setIsCheckingSession(true)
     setSessionError('')
     setSessionRetry(sessionRetry + 1)
-  }
-
-  if (reportMatch) {
-    const attemptId = decodeReportId(reportMatch[1])
-    if (!attemptId) {
-      return (
-        <main className="result-page">
-          <div className="result-state" role="alert">
-            <h1 className="result-state__title">报告链接无效</h1>
-            <p className="result-state__message">报告地址无法解析，请检查链接后重试。</p>
-          </div>
-        </main>
-      )
-    }
-    return <ResultPage attemptId={attemptId} />
   }
 
   if (isCheckingSession || sessionError) {
@@ -204,6 +256,27 @@ function App() {
   }
 
   if (user) {
+    const attemptMatch = ATTEMPT_PATH.exec(page)
+    if (attemptMatch) {
+      return <Assessment key={`${user.id}:${attemptMatch[1]}`} attemptId={attemptMatch[1]}
+        onResult={(id) => navigate(`/reports/${encodeURIComponent(id)}`, true)}
+        onBack={() => navigate('/jobs')} registerNavigationGuard={registerNavigationGuard} />
+    }
+    const reportMatch = REPORT_PATH.exec(page)
+    if (reportMatch) {
+      const attemptId = decodeReportId(reportMatch[1])
+      if (!attemptId) {
+        return (
+          <main className="result-page">
+            <div className="result-state" role="alert">
+              <h1 className="result-state__title">报告链接无效</h1>
+              <p className="result-state__message">报告地址无法解析，请检查链接后重试。</p>
+            </div>
+          </main>
+        )
+      }
+      return <ResultPage key={`${user.id}:${attemptId}`} attemptId={attemptId} />
+    }
     return (
       <JobSelectionPage
         key={user.id}
@@ -213,6 +286,8 @@ function App() {
         accountError={accountError}
         selectedRoleId={selectedRoleId}
         onSelectRole={selectRole}
+        onStartAssessment={startAssessment}
+        isStarting={isStarting}
       />
     )
   }
