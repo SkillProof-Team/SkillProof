@@ -20,6 +20,7 @@ export type Attempt = {
   answeredCount: number
   questions: Question[]
   answers: Answers
+  answersVersion: number
 }
 
 export type AssessmentResult = {

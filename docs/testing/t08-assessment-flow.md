@@ -1,6 +1,78 @@
 # T08 测评答题与提交流程验证
 
-关联 Issue #10 / PR #25。以下为合入 #23 后的复验，原有两轮记录保留在后面。
+关联 Issue #10 / PR #25。最新记录为下方乱序保存审核修复，此前验证记录按原样保留在后面。
+
+## 乱序保存审核修复（2026-11-09）
+
+### 版本、原因和修改
+
+- 执行人：李宛霖（开发者自测），不是独立 QA 或审核者批准。依据 [审核意见](https://github.com/SkillProof-Team/SkillProof/pull/25#pullrequestreview-5826128275)。
+- 开始时工作区干净，分支 `feature/10-assessment-flow`，本地与远端 HEAD 均为 `d6fb14caa9bcb6fa8da8c368f07287e57e083904`。两次 fetch 核对 main 为 `7584b082a488ea3260fb2c45c7b127f7f1fe3075`，已包含在当前分支中，没有新增合并或改写历史。
+- 根因：前端超时只中断等待，不能保证服务端停止执行；旧保存请求没有版本条件，可能在较新请求之后覆盖答案，页面仍拿较新响应当作已保存依据。
+- 新增迁移 `002_answers_version.sql`，为 attempts 增加非负 `answers_version`，初值 0。没有修改已应用的初始迁移。保存接口在原有 `BEGIN IMMEDIATE` 事务内校验 `expectedVersion`，成功后写答案并递增版本；版本冲突返回明确的 409，答案与版本均不变。
+- 创建、获取及保存返回 `answersVersion`，前端类型和调用一起更新。超时或冲突后 GET 最新状态，只更新服务端快照，不覆盖当前未保存选择；手动重试使用同步后的版本。响应丢失时，只有 GET 的版本前进且答案一致，才确认已保存。版本未前进或查询失败时保留“保存结果尚未确认”，即使改回旧快照的选择也必须重新保存。
+- 保留未传题目不修改、空数组清空、已提交禁止保存，以及提交前保存、离开提醒、刷新恢复和 401 处理。评分、报告 UI、正式题库及其发布状态无改动。API、生命周期和数据库说明同步更新，契约调整仍待相关前后端成员 Review。
+
+### 环境、命令和实际结果
+
+测试版本为 `d6fb14c` 加本轮工作区代码，尚未生成新 commit。Windows、Node.js 24.15.0、npm 11.12.1、Python 3.11.9，依赖按仓库清单安装。解释器复用 `W:/workplace/SkillProof-integration-19/backend/.venv/Scripts/python.exe`，源码加载当前工作区。与 CI 的 Node.js 24.12.0 / Python 3.13.9 不同，不能写成本轮规定版本 CI 已通过。
+
+```powershell
+$python = 'W:/workplace/SkillProof-integration-19/backend/.venv/Scripts/python.exe'
+$env:PYTHONPATH = 'backend'
+$env:PYTHONIOENCODING = 'utf-8'
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:SKILLPROOF_ENV = 'development'
+& $python -m pip install -r backend/requirements-test.txt
+& $python -m pip check
+& $python -m unittest discover -s backend/tests -p 'test_*.py' -v
+& $python -m unittest discover -s tests/acceptance -p test_answer_save_order.py -v
+& $python scripts/check_qa.py --pr 25
+Set-Location frontend
+npm ci
+npm run lint
+npm run build
+Set-Location ..
+git diff --check
+git diff --cached --check
+```
+
+| 检查 | 本轮实际结果 |
+| --- | --- |
+| 前端 | `npm ci`、lint、build 全部通过，包含 TypeScript 检查 |
+| 后端 | `pip check` 通过；完整后端 77 项通过，新增旧版本拒绝及旧库升级测试 |
+| 旧库迁移 | 从未改动的 001 建立旧库，放入草稿与已提交报告，初始化两次；原字段完全保留，版本为 0，迁移 1/2 各一条，完整性检查为 ok |
+| 乱序 HTTP 回归 | 新增 6 项全部通过；启动真实 uvicorn、随机回环端口、真实注册/Cookie/CSRF 和临时 SQLite，没有替换业务响应或评分 |
+| QA | 全量 24 项通过，0 失败、0 跳过；PR #25 必测 7/7，包含原生命周期和新增 6 项 HTTP 测试；登记在 `tests/acceptance/requests/25.json` |
+| 健康 | 新增 HTTP 用例每次核对真实 `/api/health` 为 200 / `{"Status":"ok"}` |
+| Git 格式与范围 | 工作区及暂存区差异检查通过；正式题库、评分、报告组件相对 main 无本轮差异，原历史保留 |
+
+HTTP 回归逐例使用独立 SQLite；门控仅延迟实际请求或真实响应。A 请求在客户端 0.2 秒超时后仍继续执行，B 先成功时 A 实际返回 409；反过来 A 先成功，B 旧版本收到 409，GET 后用新版本重试保存 B。每例通过接口和 SQL 同时核对最终答案与版本。另覆盖正常 A→B、快速修改、合并与清空、新客户端恢复、响应丢失后查询确认、双客户端同旧版本并发只有一个 200 / 另一个 409、提交前保存、提交后禁止修改及重复提交快照。401、403、404、409、422 均实际验证，缺少或非法版本明确为 422。
+
+### Chromium 内核浏览器复现
+
+使用 Playwright 驱动本机 Microsoft Edge（Chromium 内核，148.0.3967.70），无头模式。真实链路为 `localhost:5173` → 当前 Vite → 临时转发器 `127.0.0.1:8000` → 当前 FastAPI `127.0.0.1:8010`。转发器只等待门控或延迟真实响应，继续保留 Cookie、Origin 和 CSRF。没有缩短前端原有的 30 秒超时。
+
+| 场景 | 实际结果 |
+| --- | --- |
+| 正常 A→B | 保存 A、再保存 B，刷新恢复 B |
+| A 超时、B 先成功 | 页面保留 A 并显示未确认；改回原快照 B 仍可点击保存，成功后释放 A，A 实际 409；刷新仍为 B |
+| A 超时、A 先完成 | 释放 A 得到真实 200，再保存 B 得到 409；GET 同步版本，页面保留 B 和未保存提示，手动重试后数据库为 B |
+| 成功响应丢失 | A 已落库，但转发器保留其响应超过 30 秒；前端随后 GET 确认版本前进且选择一致，显示无未保存修改，不重复写入 |
+| 多选、清空和恢复 | 快速增删多选并保存，刷新恢复已确认集合；清空保存后刷新该题无答案 |
+| 离开、提交和报告 | 未答完提示、未保存返回岗位被阻止；完成 18 题后先保存再提交，进入同 ID 真实报告 |
+| 会话过期 | 仅过期隔离库会话，保存实际 401，页面回到登录 |
+
+以上 7 组全部通过。另用 SQL 核对浏览器答卷 `cd3e6d1f-66b3-443f-9b4f-560024840f59`：submitted、答案版本 9、18 题答案与真实 GET 完全一致、报告六维齐全。浏览器库单独放在系统临时目录 `skillproof-pr25-save-review-20261109/browser.sqlite3`，保留 42 道原始 draft，另插入带 `browser-fixture-` 前缀和明确测试来源的 42 道副本；没有发布正式题库。临时脚本、截图和结果 JSON 留在同目录，不进入提交。
+
+### 失败过程和交付限制
+
+- 首条新增回归在旧实现上失败，原因为 `expectedVersion` 未被接口接受（422）；修复后通过。旧库测试首次因 SQLite 上下文未关闭连接，在 Windows 清理时报文件占用，改为显式关闭后通过。
+- HTTP 测试门控初版把只属于乱序场景的断言放进通用清理，导致 6 项清理失败；移回对应测试并完整复跑通过。浏览器首轮固定等待 500ms 后过早断言延迟状态，改为等待真实响应后 7 组完整通过。独立 SQL 核对命令曾有 PowerShell 引号错误，改为临时脚本后断言通过。失败轮次不计入上表通过数量。
+- 后端仍出现既有 Starlette/httpx 弃用提示，存储故障用例按预期记录 OperationalError，最终套件通过；未为此调整依赖或其他模块。
+- 本轮 `git commit` 被自动审批系统拒绝，返回 `approval required by policy, but AskForApproval is set to Never`，未提供更具体原因。因此没有新 commit SHA，也没有执行 push，远端 PR head 仍为 `d6fb14c`；本地修改与暂存内容保留，未改 author/committer、未绕过限制或改写历史。
+- PR 正文已更新为“本轮仅本地、尚未提交或推送”，保留此前远端版本的历史验证并区分本轮结果。GitHub 插件因集成写权限返回 403 后，使用当前已配置且具备仓库管理权限的 `gh pr edit --body-file` 成功更新；再次读取确认 PR 仍 Open、base main、head d6fb14c、未合并。本轮临时 API、转发器、Vite 和浏览器均已停止，隔离数据与证据保留。
+- 本地修复尚未进入 PR diff，不能按已推送修复请求重新审核。本轮未触发新版本 CI；需要正常提交、推送后由 CI 验证规定运行时，再由其他成员复核契约和修复。正式题库尚未发布，正式内容全流程仍待题库负责人交付；原生关闭确认框和其他布局检查未在本轮重跑。没有 Approve、合并、关闭 PR 或代替审核者解决意见。
 
 ## 接入真实结果页后的复验（2026-11-09）
 

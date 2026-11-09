@@ -131,6 +131,7 @@ function checkAttempt(data: Attempt, id?: string) {
   if (!data || !hasText(data.id) || (id !== undefined && data.id !== id)
     || !hasText(data.roleId) || !hasText(data.roleName)
     || !['in_progress', 'submitted'].includes(data.status)
+    || !Number.isSafeInteger(data.answersVersion) || data.answersVersion < 0
     || !Array.isArray(data.questions) || !data.answers
     || typeof data.answers !== 'object' || Array.isArray(data.answers)) {
     throw new ApiError(200, message)
@@ -184,11 +185,11 @@ export async function getAttempt(id: string, signal?: AbortSignal) {
   }), id)
 }
 
-export async function saveAnswers(id: string, answers: Answers, signal?: AbortSignal) {
+export async function saveAnswers(id: string, answers: Answers, expectedVersion: number, signal?: AbortSignal) {
   return checkAttempt(await apiRequest<Attempt>(`/attempts/${encodeURIComponent(id)}/answers`, {
     method: 'PUT',
     authenticated: true,
-    body: JSON.stringify({ answers }),
+    body: JSON.stringify({ answers, expectedVersion }),
     signal,
   }), id)
 }

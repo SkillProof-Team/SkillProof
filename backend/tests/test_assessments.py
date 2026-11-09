@@ -83,10 +83,28 @@ class AssessmentTests(unittest.TestCase):
         return response.json()
 
     def save(self, attempt, answers):
-        return self.client.put(f"/api/attempts/{attempt['id']}/answers", json={"answers": answers}, headers=self.headers)
+        response = self.client.put(f"/api/attempts/{attempt['id']}/answers",
+                                   json={"answers": answers, "expectedVersion": attempt["answersVersion"]}, headers=self.headers)
+        if response.status_code == 200:
+            attempt["answersVersion"] = response.json()["answersVersion"]
+        return response
 
     def submit(self, attempt):
         return self.client.post(f"/api/attempts/{attempt['id']}/submit", headers=self.headers)
+
+    def test_delayed_old_save_cannot_overwrite_new_answers(self):
+        attempt = self.create()
+        qid = attempt["questions"][0]["id"]
+        url = f"/api/attempts/{attempt['id']}/answers"
+        newer = self.client.put(url, json={"expectedVersion": 0, "answers": {qid: ["B"]}}, headers=self.headers)
+        self.assertEqual(newer.status_code, 200, newer.text)
+        older = self.client.put(url, json={"expectedVersion": 0, "answers": {qid: ["A"]}}, headers=self.headers)
+        self.assertEqual(older.status_code, 409, older.text)
+        self.assertEqual(older.json()["detail"]["code"], "answers_version_conflict")
+        restored = self.client.get(f"/api/attempts/{attempt['id']}").json()
+        self.assertEqual(restored["answers"], {qid: ["B"]})
+        self.assertEqual(restored["answersVersion"], 1)
+        self.assertEqual(json.loads(self.row(attempt)["answers_json"]), {qid: ["B"]})
 
     def complete(self, attempt):
         answers = {q["id"]: q["correct"] for q in json.loads(self.row(attempt)["questions_json"])}

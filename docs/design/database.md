@@ -112,6 +112,7 @@ T01 采用 HttpOnly Cookie 携带服务端会话凭据，因此需要此表。
 | role_json | TEXT | 本次岗位配置快照，包括六维权重 |
 | resources_json | TEXT | 当前迁移保留的后续资源快照字段；Alpha 可显式写入 `[]`，无默认值 |
 | answers_json | TEXT | 用户选择，默认 `{}` |
+| answers_version | INTEGER | `002_answers_version.sql` 新增，非空、默认 0、CHECK 大于等于 0；已有记录保留答案并补 0，成功保存答案时在同一事务中递增 |
 | report_json | TEXT，可空 | 已提交结果快照 |
 | reused_question_count | INTEGER | 默认 0，后续抽题业务使用；T02 不实现其计算 |
 

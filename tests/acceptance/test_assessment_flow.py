@@ -61,7 +61,7 @@ class AssessmentFlowTests(unittest.TestCase):
         multiple = next(q for q in questions if q["type"] == "multiple")
         partial = {single["id"]: [single["options"][0]["id"]],
                    multiple["id"]: [option["id"] for option in multiple["options"][:2]]}
-        saved = client.put(f"{url}/answers", json={"answers": partial}, headers=headers)
+        saved = client.put(f"{url}/answers", json={"answers": partial, "expectedVersion": attempt["answersVersion"]}, headers=headers)
         self.assertEqual(saved.status_code, 200, saved.text)
         self.assertEqual(saved.json()["answeredCount"], 2)
         self.assertEqual(client.post(f"{url}/submit", headers=headers).status_code, 422)
@@ -70,7 +70,7 @@ class AssessmentFlowTests(unittest.TestCase):
             ({single["id"]: ["invalid-option"]}, headers, 422),
             ({single["id"]: []}, {}, 403),
         ):
-            rejected = client.put(f"{url}/answers", json={"answers": choices}, headers=request_headers)
+            rejected = client.put(f"{url}/answers", json={"answers": choices, "expectedVersion": saved.json()["answersVersion"]}, headers=request_headers)
             self.assertEqual(rejected.status_code, status, rejected.text)
             self.assertEqual(client.get(url).json()["answers"], saved.json()["answers"])
         with TestClient(app) as refreshed:
@@ -79,12 +79,12 @@ class AssessmentFlowTests(unittest.TestCase):
             restored = refreshed.get(url)
             self.assertEqual(restored.status_code, 200, restored.text)
             self.assertEqual(restored.json()["answers"], saved.json()["answers"])
-        cleared = client.put(f"{url}/answers", json={"answers": {single["id"]: []}}, headers=headers)
+        cleared = client.put(f"{url}/answers", json={"answers": {single["id"]: []}, "expectedVersion": saved.json()["answersVersion"]}, headers=headers)
         self.assertEqual(cleared.status_code, 200, cleared.text)
         self.assertNotIn(single["id"], cleared.json()["answers"])
         self.assertEqual(cleared.json()["answers"][multiple["id"]], saved.json()["answers"][multiple["id"]])
         answers = {q["id"]: q["correct"] for q in questions}
-        saved = client.put(f"{url}/answers", json={"answers": answers}, headers=headers)
+        saved = client.put(f"{url}/answers", json={"answers": answers, "expectedVersion": cleared.json()["answersVersion"]}, headers=headers)
         self.assertEqual(saved.status_code, 200, saved.text)
         self.assertEqual(client.get(url).json()["answers"], saved.json()["answers"])
 
@@ -114,9 +114,9 @@ class AssessmentFlowTests(unittest.TestCase):
         queried = client.get(report_url)
         self.assertEqual(queried.status_code, 200, queried.text)
         self.assertEqual(queried.json(), report)
-        self.assertEqual(client.put(f"{url}/answers", json={"answers": {}}, headers=headers).status_code, 409)
+        self.assertEqual(client.put(f"{url}/answers", json={"answers": {}, "expectedVersion": saved.json()["answersVersion"]}, headers=headers).status_code, 409)
         self.assertEqual(other.get(url).status_code, 404)
-        self.assertEqual(other.put(f"{url}/answers", json={"answers": {}}, headers=other_headers).status_code, 404)
+        self.assertEqual(other.put(f"{url}/answers", json={"answers": {}, "expectedVersion": 0}, headers=other_headers).status_code, 404)
         self.assertEqual(other.post(f"{url}/submit", headers=other_headers).status_code, 404)
         self.assertEqual(other.get(report_url).status_code, 404)
         owner_id = client.get("/api/auth/me").json()["user"]["id"]

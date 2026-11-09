@@ -39,7 +39,7 @@ def attempt_view(row) -> dict:
         "id": row["id"], "roleId": row["role_id"], "roleName": row["role_name"],
         "status": row["status"], "createdAt": row["created_at"], "submittedAt": row["submitted_at"],
         "questionCount": len(questions), "answeredCount": sum(bool(value) for value in answers.values()),
-        "questions": questions, "answers": answers,
+        "questions": questions, "answers": answers, "answersVersion": row["answers_version"],
     }
 
 
@@ -118,6 +118,10 @@ def save_answers(
         row = owned_attempt(con, attempt_id, user_id)
         if row["status"] != "in_progress":
             raise HTTPException(409, "已提交的测评不可修改")
+        if payload.expectedVersion != row["answers_version"]:
+            raise HTTPException(409, {
+                "code": "answers_version_conflict", "message": "答案版本已更新，请同步后重新保存",
+            })
         questions = {q["id"]: q for q in json.loads(row["questions_json"])}
         answers = json.loads(row["answers_json"])
         for question_id, selected in payload.answers.items():
@@ -134,7 +138,10 @@ def save_answers(
                 answers[question_id] = sorted(selected)
             else:
                 answers.pop(question_id, None)
-        con.execute("UPDATE attempts SET answers_json=? WHERE id=? AND user_id=?", (dump(answers), attempt_id, user_id))
+        con.execute(
+            "UPDATE attempts SET answers_json=?,answers_version=answers_version+1 WHERE id=? AND user_id=?",
+            (dump(answers), attempt_id, user_id),
+        )
         return attempt_view(owned_attempt(con, attempt_id, user_id))
 
 

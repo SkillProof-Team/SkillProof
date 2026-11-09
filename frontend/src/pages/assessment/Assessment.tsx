@@ -29,6 +29,7 @@ function AssessmentContent({ attemptId, onResult, onBack, registerNavigationGuar
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [saveUnconfirmed, setSaveUnconfirmed] = useState(false)
   const [error, setError] = useState('')
   const [retry, setRetry] = useState(0)
   const pending = useRef(false)
@@ -42,7 +43,7 @@ function AssessmentContent({ attemptId, onResult, onBack, registerNavigationGuar
   const answered = questions.filter((item) => (answers[item.id]?.length ?? 0) > 0).length
   const progress = total > 0 ? Math.round((answered / total) * 100) : 0
   const saved = questions.filter((item) => (attempt?.answers[item.id]?.length ?? 0) > 0).length
-  const changed = attempt ? !sameAnswers(questions, answers, attempt.answers) : false
+  const changed = saveUnconfirmed || (attempt ? !sameAnswers(questions, answers, attempt.answers) : false)
   const submitted = attempt?.status === 'submitted'
   const busy = saving || submitting
 
@@ -124,7 +125,28 @@ function AssessmentContent({ attemptId, onResult, onBack, registerNavigationGuar
     if (!attempt) return null
     // 空数组也要发送，服务器才会清除该题原来保存的答案。
     const choices = Object.fromEntries(questions.map((item) => [item.id, answers[item.id] ?? []]))
-    const data = await saveAnswers(attempt.id, choices, signal)
+    setSaveUnconfirmed(true)
+    let data: Attempt
+    try {
+      data = await saveAnswers(attempt.id, choices, attempt.answersVersion, signal)
+    } catch (error) {
+      if (signal?.aborted || (error instanceof ApiError && error.status === 401)) throw error
+      const latest = await getAttempt(attempt.id, signal).catch(() => null)
+      if (signal?.aborted) return null
+      if (latest) {
+        setAttempt(latest)
+        // 版本前进后，仍在执行的旧请求不能再覆盖这份状态。
+        setSaveUnconfirmed(latest.answersVersion <= attempt.answersVersion)
+        if (latest.status === 'submitted') {
+          setAnswers(latest.answers)
+          return null
+        }
+        if (latest.answersVersion > attempt.answersVersion && sameAnswers(questions, choices, latest.answers)) {
+          return latest
+        }
+      }
+      throw error
+    }
     if (signal?.aborted) return null
     if (data.roleId !== attempt.roleId || data.questions.length !== total
       || data.questions.some((item) => !questions.some((question) => question.id === item.id))) {
@@ -135,6 +157,7 @@ function AssessmentContent({ attemptId, onResult, onBack, registerNavigationGuar
       throw new Error('服务器尚未确认全部答案，请重新保存')
     }
     setAttempt(data)
+    setSaveUnconfirmed(false)
     return data
   }
 
@@ -148,15 +171,6 @@ function AssessmentContent({ attemptId, onResult, onBack, registerNavigationGuar
       await storeAnswers(signal)
     } catch (error) {
       if (signal?.aborted || (error instanceof ApiError && error.status === 401)) return
-      if (error instanceof ApiError && error.status === 409) {
-        const latest = await getAttempt(attempt.id, signal).catch(() => null)
-        if (signal?.aborted) return
-        if (latest?.status === 'submitted') {
-          setAttempt(latest)
-          setAnswers(latest.answers)
-          return
-        }
-      }
       setError(error instanceof Error ? error.message : '保存答案失败，请重试')
     } finally {
       pending.current = false
@@ -225,7 +239,7 @@ function AssessmentContent({ attemptId, onResult, onBack, registerNavigationGuar
               <span>{progress}%</span>
             </div>
             <progress aria-label="已作答题数" value={answered} max={total} />
-            <p>服务器已保存 {saved} / {total} 题；{changed ? '当前有未保存的修改，离开前请保存。' : '当前没有未保存的修改。'}</p>
+            <p>{saveUnconfirmed ? '保存结果尚未确认，请重新保存。' : `服务器已保存 ${saved} / ${total} 题；`}{changed ? '当前有未保存的修改，离开前请保存。' : '当前没有未保存的修改。'}</p>
           </section>
 
           <div className="assessment-layout">

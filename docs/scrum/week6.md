@@ -43,6 +43,8 @@
 
   #### 之前已完成的工作
 
+  - 2026-11-09 补充（PR #25 审核修复）：本地增加答案版本迁移与事务内校验，超时或冲突后保留本地选择并同步版本。前端 lint/build、后端 77 项、QA 24 项（必测 7/7）及 Chromium 内核浏览器 7 组通过；详细方法、失败过程和限制见 `docs/testing/t08-assessment-flow.md`。这是开发者自测，尚未推送，不代表独立 QA 或任务合并完成。
+
   - 完成登录、注册及岗位选择页面的初步开发，拆分页面与公共组件，并调整页面布局和样式。
   - 添加登录、注册表单的必填项及邮箱格式校验，实现页面互相跳转，并处理浏览器前进、后退及刷新。
   - 移除岗位选择页面中的示例数据，在功能接入前暂时禁用测评入口。
@@ -55,6 +57,8 @@
 
   #### 计划完成的工作
 
+  - 2026-11-09 补充：提交被自动审批策略拒绝，当前没有新 commit 或 push。保留本地修复，待可以正常提交推送后检查 CI，并由其他成员复核 PR #25；正式题库验收仍待发布。
+
   - 接入注册、登录及岗位查询接口，完成退出登录、会话恢复和登录状态检查。
   - 完善请求中的加载状态、错误提示及防重复提交，完成岗位选择与测评入口的衔接。
   - 继续推进测评答题页面，实现题目展示、单选多选、切题和答案提交等基本交互。
@@ -64,6 +68,8 @@
 
   #### 工作中遇到的困难
 
+  - 2026-11-09 补充：旧保存超时后仍可能在服务端执行，已用版本条件拒绝过期写入。交付时 `git commit` 返回 `approval required by policy, but AskForApproval is set to Never`，没有绕过限制或更换提交身份。
+
   - 使用浏览器历史记录进行页面跳转时，需要处理前进、后退操作与当前页面状态的同步。
   - 处理情况：在 `App.tsx` 中监听 `popstate` 事件，并在导航时同步更新页面状态，检查了页面跳转和刷新行为。
 
@@ -71,6 +77,7 @@
 
   | Commit | 签入内容 | 对应 Issue |
   | ------ | -------- | ---------- |
+  | 待提交（本地基线 `d6fb14c`，自动审批阻止提交） | PR #25 乱序保存修复、回归测试和验证记录，尚未签入或推送 | [#10](https://github.com/SkillProof-Team/SkillProof/issues/10) |
   | [bc4756d](https://github.com/daybreakju9/SkillProof/commit/bc4756d7665e22a5052c5123cf8418cf4d125f3e) | 新增登录页面，调整基础布局 | [#7](https://github.com/daybreakju9/SkillProof/issues/7) |
   | [90bcb7a](https://github.com/daybreakju9/SkillProof/commit/90bcb7ab6fcb593376d3fb727e0530b4967f54aa) | 调整页面尺寸和显示效果 | [#7](https://github.com/daybreakju9/SkillProof/issues/7) |
   | [d4893ed](https://github.com/daybreakju9/SkillProof/commit/d4893eda638cdb80a04bfa707a57f0a7bac5db12) | 拆分页面和组件，调整样式，新增注册及岗位选择页面 | [#7](https://github.com/daybreakju9/SkillProof/issues/7) |
