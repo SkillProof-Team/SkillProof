@@ -135,7 +135,7 @@ Windows默认编码与macOS不同，测试不能依赖系统默认解码；姓�
 
 随着各分支增加测试，仅有测试文件无法保证某个PR的关键用例被执行，因此增加必测清单与失败门禁。#33已于11月9日21:00关闭；#12仍Open，当前只有计划与阶段验收增量，最终报告需要覆盖最终版本，不能用局部测试数量代替项目全部完成。来源见[PR#37](https://github.com/SkillProof-Team/SkillProof/pull/37)、[PR#38](https://github.com/SkillProof-Team/SkillProof/pull/38)。
 
-个人记录汇总说明：本篇已参考常嶅阳的[PR#35](https://github.com/SkillProof-Team/SkillProof/pull/35)与李宛霖的[PR#36](https://github.com/SkillProof-Team/SkillProof/pull/36)。两份记录写于11月8日，其中“#19、#23及后端PR尚未合并”等历史状态已结合后续交付更新；原始增量保存在[个人记录归档](../week7-personal-records.json)。这两个文档PR现均已关闭、未合并；个人材料已保留在本篇与归档中，其关闭不计为功能交付或Issue关闭。
+个人记录汇总说明：本篇已参考常嶅阳的[PR#35](https://github.com/SkillProof-Team/SkillProof/pull/35)与李宛霖的[PR#36](https://github.com/SkillProof-Team/SkillProof/pull/36)。两份记录写于11月8日，其中“#19、#23及后端PR尚未合并”等历史状态已结合后续交付更新。这两个文档PR现均已关闭、未合并；个人材料已汇总到本篇，其关闭不计为功能交付或Issue关闭。
 
 ## 三、每人的代码 / 文档签入记录
 
@@ -212,7 +212,7 @@ Windows默认编码与macOS不同，测试不能依赖系统默认解码；姓�
 
 按组长此前要求，图表11月9日统计点将T12（#14）计为完成：固定基线剩#12、#13共2项，调整后P0只剩#12共1项。T12实际仍Open，待组长提交并确认后关闭；#13继续为P2搁置任务。图表没有将PR#35、#36关闭当成功能完成，也没有提前计入仍Open的PR#38或Issue#12。
 
-本轮核对状态保存在仓库根目录docs下的[最新状态记录](../week7-latest-status.json)。历史图表数据仍按原快照重建，11月9日使用实际核对值，11月9日按约定的完成口径绘制。
+11月9日按上述约定的完成口径绘制。
 
 ## 五、例会照片
 
