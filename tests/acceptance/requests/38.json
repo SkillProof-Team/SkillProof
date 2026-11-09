@@ -13,6 +13,7 @@
     "test_scoring_acceptance.ScoringAcceptanceTests.test_each_question_can_be_the_only_wrong_answer",
     "test_scoring_acceptance.ScoringAcceptanceTests.test_equal_correct_counts_with_different_difficulties",
     "test_scoring_acceptance.ScoringAcceptanceTests.test_dimension_score_uses_its_own_question_count",
-    "test_scoring_acceptance.ScoringAcceptanceTests.test_unanswered_question_cannot_produce_report"
+    "test_scoring_acceptance.ScoringAcceptanceTests.test_unanswered_question_cannot_produce_report",
+    "test_assessment_acceptance.AssessmentAcceptanceTests.test_saved_draft_survives_rejected_submission_and_completes_with_correct_report"
   ]
 }
