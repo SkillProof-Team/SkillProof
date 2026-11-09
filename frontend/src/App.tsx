@@ -4,6 +4,19 @@ import AuthLayout from './components/auth/AuthLayout'
 import LoginPage from './pages/auth/LoginPage'
 import RegisterPage from './pages/auth/RegisterPage'
 import JobSelectionPage from './pages/jobs/JobSelectionPage'
+import { ResultPage } from './pages/reports/ResultPage'
+
+/** 结果页路由：/reports/{测评ID}。整体路由方案由 Issue #7 统一收敛，此处只处理结果页入口。 */
+const REPORT_PATH = /^\/reports\/([^/]+)\/?$/
+
+function decodeReportId(value: string): string | null {
+  try {
+    const decoded = decodeURIComponent(value)
+    return decoded.trim() ? decoded : null
+  } catch {
+    return null
+  }
+}
 
 function App() {
   const [path, setPath] = useState(window.location.pathname)
@@ -101,11 +114,12 @@ function App() {
   }, [userId])
 
   const page = user ? '/jobs' : path === '/register' ? '/register' : '/login'
+  const reportMatch = REPORT_PATH.exec(path)
 
   useEffect(() => {
-    if (isCheckingSession || sessionError) return
+    if (isCheckingSession || sessionError || reportMatch) return
     if (window.location.pathname !== page) window.history.replaceState(null, '', page)
-  }, [page, isCheckingSession, sessionError])
+  }, [page, isCheckingSession, reportMatch, sessionError])
 
   function navigate(next: string) {
     window.history.pushState(null, '', next)
@@ -154,6 +168,21 @@ function App() {
     setIsCheckingSession(true)
     setSessionError('')
     setSessionRetry(sessionRetry + 1)
+  }
+
+  if (reportMatch) {
+    const attemptId = decodeReportId(reportMatch[1])
+    if (!attemptId) {
+      return (
+        <main className="result-page">
+          <div className="result-state" role="alert">
+            <h1 className="result-state__title">报告链接无效</h1>
+            <p className="result-state__message">报告地址无法解析，请检查链接后重试。</p>
+          </div>
+        </main>
+      )
+    }
+    return <ResultPage attemptId={attemptId} />
   }
 
   if (isCheckingSession || sessionError) {

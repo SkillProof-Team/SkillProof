@@ -1,0 +1,5 @@
+{
+  "required_tests": [
+    "test_assessment_flow.AssessmentFlowTests.test_authenticated_submission_lifecycle"
+  ]
+}
