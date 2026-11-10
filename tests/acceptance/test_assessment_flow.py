@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 import json
 from pathlib import Path
+import sys
 from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
@@ -11,9 +12,12 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from app.config import Settings
-from app.db import connect, dump, now_iso
+from app.db import connect, dump
 from app.main import create_app
 from app.scoring import build_report
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from support.question_bank import assessment_questions, write_bank
 
 
 class AssessmentFlowTests(unittest.TestCase):
@@ -21,6 +25,7 @@ class AssessmentFlowTests(unittest.TestCase):
         directory = self.enterContext(TemporaryDirectory())
         settings = Settings(
             database_path=Path(directory) / "assessment.sqlite3",
+            content_dir=write_bank(Path(directory) / "content", assessment_questions()),
             environment="development", cookie_secure=False,
             origin=None, allowed_hosts=("testserver",),
         )
@@ -28,16 +33,6 @@ class AssessmentFlowTests(unittest.TestCase):
         client = self.enterContext(TestClient(app))
         other = self.enterContext(TestClient(app))
         connection = self.enterContext(closing(connect(settings)))
-        seed = json.loads((settings.content_dir / "questions.json").read_text(encoding="utf-8"))
-        for question in seed:
-            published = {
-                **question, "status": "published",
-                "sources": [{"title": "Test fixture", "url": "https://example.com/fixture"}],
-            }
-            connection.execute(
-                "UPDATE questions SET status='published', content_json=?, updated_at=? WHERE id=?",
-                (dump(published), now_iso(), question["id"]),
-            )
 
         headers = self.login(client, "owner")
         other_headers = self.login(other, "other")
@@ -57,8 +52,34 @@ class AssessmentFlowTests(unittest.TestCase):
         ).fetchone()["questions_json"]
         questions = json.loads(snapshot)
         self.assertEqual(len(questions), 18)
+        single = next(q for q in questions if q["type"] == "single")
+        multiple = next(q for q in questions if q["type"] == "multiple")
+        partial = {single["id"]: [single["options"][0]["id"]],
+                   multiple["id"]: [option["id"] for option in multiple["options"][:2]]}
+        saved = client.put(f"{url}/answers", json={"answers": partial, "expectedVersion": attempt["answersVersion"]}, headers=headers)
+        self.assertEqual(saved.status_code, 200, saved.text)
+        self.assertEqual(saved.json()["answeredCount"], 2)
+        self.assertEqual(client.post(f"{url}/submit", headers=headers).status_code, 422)
+        self.assertEqual(client.get(url).json()["status"], "in_progress")
+        for choices, request_headers, status in (
+            ({single["id"]: ["invalid-option"]}, headers, 422),
+            ({single["id"]: []}, {}, 403),
+        ):
+            rejected = client.put(f"{url}/answers", json={"answers": choices, "expectedVersion": saved.json()["answersVersion"]}, headers=request_headers)
+            self.assertEqual(rejected.status_code, status, rejected.text)
+            self.assertEqual(client.get(url).json()["answers"], saved.json()["answers"])
+        with TestClient(app) as refreshed:
+            refreshed.cookies.update(client.cookies)
+            self.assertEqual(refreshed.get("/api/auth/me").status_code, 200)
+            restored = refreshed.get(url)
+            self.assertEqual(restored.status_code, 200, restored.text)
+            self.assertEqual(restored.json()["answers"], saved.json()["answers"])
+        cleared = client.put(f"{url}/answers", json={"answers": {single["id"]: []}, "expectedVersion": saved.json()["answersVersion"]}, headers=headers)
+        self.assertEqual(cleared.status_code, 200, cleared.text)
+        self.assertNotIn(single["id"], cleared.json()["answers"])
+        self.assertEqual(cleared.json()["answers"][multiple["id"]], saved.json()["answers"][multiple["id"]])
         answers = {q["id"]: q["correct"] for q in questions}
-        saved = client.put(f"{url}/answers", json={"answers": answers}, headers=headers)
+        saved = client.put(f"{url}/answers", json={"answers": answers, "expectedVersion": cleared.json()["answersVersion"]}, headers=headers)
         self.assertEqual(saved.status_code, 200, saved.text)
         self.assertEqual(client.get(url).json()["answers"], saved.json()["answers"])
 
@@ -88,11 +109,18 @@ class AssessmentFlowTests(unittest.TestCase):
         queried = client.get(report_url)
         self.assertEqual(queried.status_code, 200, queried.text)
         self.assertEqual(queried.json(), report)
-        self.assertEqual(client.put(f"{url}/answers", json={"answers": {}}, headers=headers).status_code, 409)
+        self.assertEqual(client.put(f"{url}/answers", json={"answers": {}, "expectedVersion": saved.json()["answersVersion"]}, headers=headers).status_code, 409)
         self.assertEqual(other.get(url).status_code, 404)
-        self.assertEqual(other.put(f"{url}/answers", json={"answers": {}}, headers=other_headers).status_code, 404)
+        self.assertEqual(other.put(f"{url}/answers", json={"answers": {}, "expectedVersion": 0}, headers=other_headers).status_code, 404)
         self.assertEqual(other.post(f"{url}/submit", headers=other_headers).status_code, 404)
         self.assertEqual(other.get(report_url).status_code, 404)
+        owner_id = client.get("/api/auth/me").json()["user"]["id"]
+        connection.execute("UPDATE sessions SET expires_at=0 WHERE user_id=?", (owner_id,))
+        self.assertEqual(client.get(url).status_code, 401)
+        self.assertEqual(client.post(f"{url}/submit", headers=headers).status_code, 401)
+        self.assertEqual(client.get(report_url).status_code, 401)
+        row = connection.execute("SELECT status FROM attempts WHERE id=?", (attempt_id,)).fetchone()
+        self.assertEqual(row["status"], "submitted")
 
     def login(self, client, name):
         email = f"{name}@example.com"

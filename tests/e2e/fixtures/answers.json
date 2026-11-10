@@ -1,0 +1,62 @@
+{
+  "programming-easy-1": [
+    "A"
+  ],
+  "programming-easy-2": [
+    "B"
+  ],
+  "programming-medium": [
+    "A",
+    "C"
+  ],
+  "algorithms-easy-1": [
+    "A"
+  ],
+  "algorithms-easy-2": [
+    "B"
+  ],
+  "algorithms-medium": [
+    "A",
+    "C"
+  ],
+  "database-easy-1": [
+    "A"
+  ],
+  "database-easy-2": [
+    "B"
+  ],
+  "database-medium": [
+    "A",
+    "C"
+  ],
+  "network-easy-1": [
+    "A"
+  ],
+  "network-easy-2": [
+    "B"
+  ],
+  "network-medium": [
+    "A",
+    "C"
+  ],
+  "os-easy-1": [
+    "A"
+  ],
+  "os-easy-2": [
+    "B"
+  ],
+  "os-medium": [
+    "A",
+    "C"
+  ],
+  "software-easy-1": [
+    "A"
+  ],
+  "software-easy-2": [
+    "B"
+  ],
+  "software-medium": [
+    "A",
+    "C"
+  ]
+}

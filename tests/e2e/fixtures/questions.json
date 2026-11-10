@@ -1,0 +1,710 @@
+[
+  {
+    "id": "programming-easy-1",
+    "dimension": "programming",
+    "topicId": "programming.queue",
+    "topic": "队列与先进先出",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "自动化流程测试题：programming-easy-1",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "programming-easy-2",
+    "dimension": "programming",
+    "topicId": "programming.queue",
+    "topic": "队列与先进先出",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "自动化流程测试题：programming-easy-2",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "programming-medium",
+    "dimension": "programming",
+    "topicId": "programming.queue",
+    "topic": "队列与先进先出",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "自动化流程测试题：programming-medium",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "A",
+      "C"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "algorithms-easy-1",
+    "dimension": "algorithms",
+    "topicId": "algorithms.binary-search",
+    "topic": "二分查找的前提",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "自动化流程测试题：algorithms-easy-1",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "algorithms-easy-2",
+    "dimension": "algorithms",
+    "topicId": "algorithms.binary-search",
+    "topic": "二分查找的前提",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "自动化流程测试题：algorithms-easy-2",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "algorithms-medium",
+    "dimension": "algorithms",
+    "topicId": "algorithms.binary-search",
+    "topic": "二分查找的前提",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "自动化流程测试题：algorithms-medium",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "A",
+      "C"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "database-easy-1",
+    "dimension": "database",
+    "topicId": "database.sql-filter",
+    "topic": "SQL 查询与过滤",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "自动化流程测试题：database-easy-1",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "database-easy-2",
+    "dimension": "database",
+    "topicId": "database.sql-filter",
+    "topic": "SQL 查询与过滤",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "自动化流程测试题：database-easy-2",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "database-medium",
+    "dimension": "database",
+    "topicId": "database.sql-filter",
+    "topic": "SQL 查询与过滤",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "自动化流程测试题：database-medium",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "A",
+      "C"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "network-easy-1",
+    "dimension": "network",
+    "topicId": "network.http-content-type",
+    "topic": "HTTP 内容类型",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "自动化流程测试题：network-easy-1",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "network-easy-2",
+    "dimension": "network",
+    "topicId": "network.http-content-type",
+    "topic": "HTTP 内容类型",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "自动化流程测试题：network-easy-2",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "network-medium",
+    "dimension": "network",
+    "topicId": "network.http-content-type",
+    "topic": "HTTP 内容类型",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "自动化流程测试题：network-medium",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "A",
+      "C"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "os-easy-1",
+    "dimension": "os",
+    "topicId": "os.process-isolation",
+    "topic": "进程地址空间",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "自动化流程测试题：os-easy-1",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "os-easy-2",
+    "dimension": "os",
+    "topicId": "os.process-isolation",
+    "topic": "进程地址空间",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "自动化流程测试题：os-easy-2",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "os-medium",
+    "dimension": "os",
+    "topicId": "os.process-isolation",
+    "topic": "进程地址空间",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "自动化流程测试题：os-medium",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "A",
+      "C"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "software-easy-1",
+    "dimension": "software",
+    "topicId": "software.unit-testing",
+    "topic": "单元测试与外部依赖",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "自动化流程测试题：software-easy-1",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "software-easy-2",
+    "dimension": "software",
+    "topicId": "software.unit-testing",
+    "topic": "单元测试与外部依赖",
+    "type": "single",
+    "difficulty": "easy",
+    "stem": "自动化流程测试题：software-easy-2",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  },
+  {
+    "id": "software-medium",
+    "dimension": "software",
+    "topicId": "software.unit-testing",
+    "topic": "单元测试与外部依赖",
+    "type": "multiple",
+    "difficulty": "medium",
+    "stem": "自动化流程测试题：software-medium",
+    "options": [
+      {
+        "id": "A",
+        "text": "选项 A"
+      },
+      {
+        "id": "B",
+        "text": "选项 B"
+      },
+      {
+        "id": "C",
+        "text": "选项 C"
+      },
+      {
+        "id": "D",
+        "text": "选项 D"
+      }
+    ],
+    "correct": [
+      "A",
+      "C"
+    ],
+    "explanation": "固定答案用于浏览器流程测试。",
+    "sources": [
+      {
+        "title": "Test fixture",
+        "url": "https://example.com/test-fixture"
+      }
+    ],
+    "version": 1,
+    "status": "published"
+  }
+]

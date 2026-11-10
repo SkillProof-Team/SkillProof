@@ -1,5 +1,6 @@
 """T02 persistence contracts; no HTTP, authentication or scoring implementation."""
 import json
+from contextlib import closing
 from pathlib import Path
 import sqlite3
 import subprocess
@@ -10,6 +11,7 @@ from uuid import uuid4
 
 BACKEND = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND))
+sys.path.insert(0, str(BACKEND.parent / "tests"))
 
 from pydantic import ValidationError
 
@@ -17,14 +19,20 @@ from app.models import QuestionInput
 from app.catalog import ROLE_MAP
 from app.config import Settings
 from app.db import connect, dump, initialize, now_iso, transaction
+from support.question_bank import make_question, write_bank
 
 
 class DatabaseTests(unittest.TestCase):
     def setUp(self):
         directory = tempfile.TemporaryDirectory(prefix="skillproof-t02-")
         self.addCleanup(directory.cleanup)
+        content = write_bank(Path(directory.name) / "content", [
+            make_question(ordinal=index, status=status)
+            for index, status in enumerate(("draft", "published", "archived"), 1)
+        ])
         self.settings = Settings(
             database_path=Path(directory.name) / "nested" / "test.db",
+            content_dir=content,
             environment="development",
         )
         initialize(self.settings)
@@ -58,7 +66,8 @@ class DatabaseTests(unittest.TestCase):
         return aid
 
     def test_empty_directory_initialization(self):
-        settings = Settings(database_path=self.settings.database_path.parent / "new" / "empty.db", environment="development")
+        settings = Settings(database_path=self.settings.database_path.parent / "new" / "empty.db",
+                            content_dir=self.settings.content_dir, environment="development")
         self.assertFalse(settings.database_path.parent.exists())
         initialize(settings)
         con = connect(settings)
@@ -71,7 +80,7 @@ class DatabaseTests(unittest.TestCase):
         finally:
             con.close()
 
-    def test_t03_drafts_preserve_internal_fields_in_both_tables(self):
+    def test_seed_preserves_status_and_content_in_both_tables(self):
         seed = json.loads((self.settings.content_dir / "questions.json").read_text(encoding="utf-8"))
         self.assertEqual(self.con.execute("SELECT COUNT(*) FROM questions").fetchone()[0], len(seed))
         for question in seed:
@@ -79,7 +88,7 @@ class DatabaseTests(unittest.TestCase):
                 current = self.con.execute("SELECT status,content_json FROM questions WHERE id=?", (question["id"],)).fetchone()
                 version = self.con.execute("SELECT content_json FROM question_versions WHERE question_id=? AND version=?",
                                            (question["id"], question["version"])).fetchone()
-                self.assertEqual(current["status"], "draft")
+                self.assertEqual(current["status"], question["status"])
                 self.assertEqual(json.loads(current["content_json"]), question)
                 self.assertEqual(json.loads(version["content_json"]), question)
 
@@ -93,6 +102,31 @@ class DatabaseTests(unittest.TestCase):
         initialize(self.settings)
         initialize(self.settings)
         self.assertEqual(rows(), before)
+
+    def test_answers_version_migration_preserves_existing_drafts_and_reports(self):
+        uid = self.user()
+        self.attempt(uid, submitted=True)
+        self.attempt(uid)
+        settings = Settings(database_path=self.settings.database_path.parent / "legacy.db",
+                            content_dir=self.settings.content_dir, environment="development")
+        with closing(sqlite3.connect(settings.database_path, isolation_level=None)) as legacy:
+            legacy.executescript((BACKEND / "app/migrations/001_initial.sql").read_text(encoding="utf-8"))
+            legacy.execute("CREATE TABLE schema_migrations(version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)")
+            legacy.execute("INSERT INTO schema_migrations VALUES(1,?)", (now_iso(),))
+            for table in ("users", "attempts"):
+                columns = [row[1] for row in legacy.execute(f"PRAGMA table_info({table})")]
+                names = ",".join(columns)
+                rows = self.con.execute(f"SELECT {names} FROM {table}").fetchall()
+                legacy.executemany(f"INSERT INTO {table}({names}) VALUES({','.join('?' for _ in columns)})", rows)
+            before = legacy.execute("SELECT * FROM attempts ORDER BY id").fetchall()
+        initialize(settings)
+        initialize(settings)
+        with closing(sqlite3.connect(settings.database_path)) as migrated:
+            after = migrated.execute("SELECT * FROM attempts ORDER BY id").fetchall()
+            self.assertEqual([row[:-1] for row in after], before)
+            self.assertEqual([row[-1] for row in after], [0, 0])
+            self.assertEqual(migrated.execute("SELECT version FROM schema_migrations ORDER BY version").fetchall(), [(1,), (2,)])
+            self.assertEqual(migrated.execute("PRAGMA integrity_check").fetchone()[0], "ok")
 
     def test_seed_does_not_overwrite_existing_question(self):
         row = self.con.execute("SELECT * FROM questions ORDER BY id LIMIT 1").fetchone()
@@ -113,9 +147,11 @@ class DatabaseTests(unittest.TestCase):
         self.con.close()
         code = (
             "from pathlib import Path; from app.config import Settings; from app.db import initialize; "
-            "import sys; initialize(Settings(database_path=Path(sys.argv[1]), environment='development'))"
+            "import sys; initialize(Settings(database_path=Path(sys.argv[1]), "
+            "content_dir=Path(sys.argv[2]), environment='development'))"
         )
-        result = subprocess.run([sys.executable, "-B", "-c", code, str(self.settings.database_path)], cwd=BACKEND, capture_output=True, text=True)
+        result = subprocess.run([sys.executable, "-B", "-c", code, str(self.settings.database_path),
+                                 str(self.settings.content_dir)], cwd=BACKEND, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         con = connect(self.settings)
         try:
@@ -185,7 +221,7 @@ class DatabaseTests(unittest.TestCase):
 
 class QuestionValidationTests(unittest.TestCase):
     def setUp(self):
-        self.question = json.loads((BACKEND / "app/content/questions.json").read_text(encoding="utf-8"))[0]
+        self.question = make_question()
 
     def test_draft_accepts_empty_sources_and_retains_topic_id(self):
         parsed = QuestionInput.model_validate(self.question)

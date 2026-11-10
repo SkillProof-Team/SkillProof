@@ -14,6 +14,7 @@ from uuid import UUID
 
 BACKEND = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND))
+sys.path.insert(0, str(BACKEND.parent / "tests"))
 
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
@@ -24,6 +25,7 @@ from app.config import Settings
 from app.db import connect, dump, initialize, now_iso
 from app.main import create_app
 from app.scoring import ScoringError
+from support.question_bank import assessment_questions, write_bank
 
 
 def report_fixture(attempt, submitted_at):
@@ -40,26 +42,14 @@ class AssessmentTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory(prefix="skillproof-t06-")
         self.addCleanup(temporary.cleanup)
-        self.settings = Settings(database_path=Path(temporary.name) / "test.db", environment="development", cookie_secure=False, origin=None, allowed_hosts=("testserver",))
+        self.questions = assessment_questions()
+        content = write_bank(Path(temporary.name) / "content", self.questions)
+        self.settings = Settings(database_path=Path(temporary.name) / "test.db", content_dir=content,
+                                 environment="development", cookie_secure=False, origin=None,
+                                 allowed_hosts=("testserver",))
         initialize(self.settings)
         self.con = connect(self.settings)
         self.addCleanup(self.con.close)
-        seed = json.loads((self.settings.content_dir / "questions.json").read_text(encoding="utf-8"))
-        self.questions = []
-        for dimension in DIMENSION_IDS:
-            for difficulty, ordinal in (("easy", 1), ("easy", 2), ("medium", 1)):
-                question = next(q.copy() for q in seed if q["dimension"] == dimension)
-                question.update(
-                    id=f"fixture-{dimension}-{difficulty}-{ordinal}", difficulty=difficulty, status="published",
-                    type="multiple" if difficulty == "medium" else "single",
-                    correct=["A", "B"] if difficulty == "medium" else ["A"],
-                    sources=[{"title": "Synthetic test fixture", "url": "https://example.com/fixture"}],
-                )
-                self.questions.append(question)
-                self.con.execute(
-                    "INSERT INTO questions VALUES(?,?,?,?,?,?)",
-                    (question["id"], dimension, "published", 1, dump(question), now_iso()),
-                )
         for user_id in ("alice", "bob"):
             self.con.execute(
                 "INSERT INTO users VALUES(?,?,?,'student',NULL,?,?)",
@@ -83,10 +73,28 @@ class AssessmentTests(unittest.TestCase):
         return response.json()
 
     def save(self, attempt, answers):
-        return self.client.put(f"/api/attempts/{attempt['id']}/answers", json={"answers": answers}, headers=self.headers)
+        response = self.client.put(f"/api/attempts/{attempt['id']}/answers",
+                                   json={"answers": answers, "expectedVersion": attempt["answersVersion"]}, headers=self.headers)
+        if response.status_code == 200:
+            attempt["answersVersion"] = response.json()["answersVersion"]
+        return response
 
     def submit(self, attempt):
         return self.client.post(f"/api/attempts/{attempt['id']}/submit", headers=self.headers)
+
+    def test_delayed_old_save_cannot_overwrite_new_answers(self):
+        attempt = self.create()
+        qid = attempt["questions"][0]["id"]
+        url = f"/api/attempts/{attempt['id']}/answers"
+        newer = self.client.put(url, json={"expectedVersion": 0, "answers": {qid: ["B"]}}, headers=self.headers)
+        self.assertEqual(newer.status_code, 200, newer.text)
+        older = self.client.put(url, json={"expectedVersion": 0, "answers": {qid: ["A"]}}, headers=self.headers)
+        self.assertEqual(older.status_code, 409, older.text)
+        self.assertEqual(older.json()["detail"]["code"], "answers_version_conflict")
+        restored = self.client.get(f"/api/attempts/{attempt['id']}").json()
+        self.assertEqual(restored["answers"], {qid: ["B"]})
+        self.assertEqual(restored["answersVersion"], 1)
+        self.assertEqual(json.loads(self.row(attempt)["answers_json"]), {qid: ["B"]})
 
     def complete(self, attempt):
         answers = {q["id"]: q["correct"] for q in json.loads(self.row(attempt)["questions_json"])}
@@ -152,21 +160,23 @@ class AssessmentTests(unittest.TestCase):
                 self.assertEqual(response.status_code, 503)
                 self.assertEqual(self.con.execute("SELECT COUNT(*) FROM attempts").fetchone()[0], 0)
 
-    def test_current_draft_bank_does_not_create_an_attempt(self):
-        self.con.execute("DELETE FROM questions WHERE id LIKE 'fixture-%'")
+    def set_bank_status(self, status):
+        for question in self.questions:
+            content = {**question, "status": status}
+            self.con.execute("UPDATE questions SET status=?,content_json=? WHERE id=?",
+                             (status, dump(content), question["id"]))
+
+    def test_draft_only_bank_does_not_create_an_attempt(self):
+        self.set_bank_status("draft")
         response = self.client.post("/api/attempts", json={"roleId": "backend"}, headers=self.headers)
         self.assertEqual(response.status_code, 503)
         self.assertEqual(self.con.execute("SELECT COUNT(*) FROM attempts").fetchone()[0], 0)
 
-    def test_current_42_question_bank_can_supply_blueprint_when_published(self):
-        self.con.execute("DELETE FROM questions WHERE id LIKE 'fixture-%'")
-        seed = json.loads((self.settings.content_dir / "questions.json").read_text(encoding="utf-8"))
-        for question in seed:
-            # Publication is simulated only inside this temporary test database.
-            question["status"] = "published"
-            question["sources"] = [{"title": "Synthetic test source", "url": "https://example.com/fixture"}]
-            self.con.execute("UPDATE questions SET status='published',content_json=? WHERE id=?",
-                             (dump(question), question["id"]))
+    def test_publishing_draft_bank_makes_blueprint_available(self):
+        self.set_bank_status("draft")
+        self.assertEqual(self.client.post("/api/attempts", json={"roleId": "backend"},
+                                         headers=self.headers).status_code, 503)
+        self.set_bank_status("published")
         attempt = self.create()
         snapshot = json.loads(self.row(attempt)["questions_json"])
         self.assertEqual(len({q["id"] for q in snapshot}), 18)
