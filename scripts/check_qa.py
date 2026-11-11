@@ -1,73 +1,72 @@
-"""Run acceptance tests and check the current PR's required tests."""
+"""Check an Issue's required tests against the results of this CI run."""
 
-import argparse
 import json
+import os
 from pathlib import Path
+import re
 import sys
-import unittest
 
 
-class QAResult(unittest.TextTestResult):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.passed = set()
-
-    def addSuccess(self, test):
-        super().addSuccess(test)
-        self.passed.add(test.id())
+ISSUE_REFERENCE = re.compile(
+    r"(?:refs|closes|fixes|resolves)[ \t]+(#[1-9][0-9]*(?:\s*[,，]\s*#[1-9][0-9]*)*)"
+    r"(?:[ \t]*[（(].*[）)])?",
+    re.IGNORECASE,
+)
 
 
-def read_required_tests(path):
-    data = json.loads(path.read_text(encoding="utf-8"))
-    required = data.get("required_tests") if isinstance(data, dict) else None
-    if not isinstance(required, list) or not required or any(
-        not isinstance(name, str) or not name.strip() for name in required
+def issue_numbers(body):
+    numbers = set()
+    for line in body.splitlines():
+        if match := ISSUE_REFERENCE.fullmatch(line.strip()):
+            numbers.update(re.findall(r"#([0-9]+)", match[1]))
+    return numbers
+
+
+def test_ids(values, source):
+    if not isinstance(values, list) or not values or any(
+        not isinstance(value, str) or not value.strip() for value in values
     ):
-        raise ValueError(f"{path}: required_tests must be a non-empty list of test IDs")
-    return set(required)
+        raise ValueError(f"{source} must contain a non-empty list of test IDs")
+    return set(values)
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--pr", type=int, required=True)
-    args = parser.parse_args()
-    if args.pr <= 0:
-        parser.error("--pr must be a positive PR number")
+    if os.environ.get("FRONTEND_RESULT") != "success" or os.environ.get("BACKEND_RESULT") != "success":
+        raise ValueError("Frontend and backend checks must both pass")
 
-    root = Path(__file__).resolve().parents[1]
-    registration = root / "tests" / "acceptance" / "requests" / f"{args.pr}.json"
-    try:
-        suite = unittest.defaultTestLoader.discover(
-            str(root / "tests" / "acceptance"), pattern="test_*.py"
-        )
-    except (ImportError, SystemExit) as error:
-        print(f"QA test discovery failed: {error}", file=sys.stderr)
-        return 1
-    if suite.countTestCases() == 0:
-        print("No acceptance tests were discovered", file=sys.stderr)
-        return 1
+    passed = test_ids(json.loads(os.environ.get("PASSED_TESTS") or "null"), "Backend test results")
+    changed = Path(os.environ["CHANGED_FILES"]).read_bytes().split(b"\0")
+    paths = [path for path in changed if path]
+    if paths and all(path.startswith(b"docs/scrum/") and path.endswith(b".md") for path in paths):
+        print("Only Scrum Markdown changed. Required test registration is not needed.")
+        return 0
 
-    try:
-        result = unittest.TextTestRunner(verbosity=2, resultclass=QAResult).run(suite)
-    except SystemExit as error:
-        print(f"Acceptance tests exited before completion: {error}", file=sys.stderr)
-        return 1
-    try:
-        required = read_required_tests(registration)
-    except (OSError, UnicodeError, ValueError) as error:
-        print(f"QA check failed: {error}", file=sys.stderr)
-        return 1
-    missing = required - result.passed
+    pr = json.loads(Path(os.environ["PR_DETAILS"]).read_text(encoding="utf-8"))
+    issues = issue_numbers(pr.get("body") or "")
+    if not issues:
+        raise ValueError("Add an Issue reference on its own line in the PR body, e.g. Refs #40")
+
+    required = set()
+    for issue in sorted(issues, key=int):
+        registration = Path("tests/acceptance/issues") / f"{issue}.json"
+        try:
+            data = json.loads(registration.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            raise ValueError(f"Issue #{issue} is missing its required test list: {registration}") from None
+        ids = data.get("required_tests") if isinstance(data, dict) else None
+        required.update(test_ids(ids, f"{registration}: required_tests"))
+
+    missing = required - passed
     if missing:
-        print(
-            "Required tests did not pass: " + ", ".join(sorted(missing)),
-            file=sys.stderr,
-        )
-    if missing or not result.wasSuccessful():
-        return 1
-    print(f"QA checks passed for PR {args.pr}: {len(required)} required tests passed")
+        raise ValueError("Required tests did not pass: " + ", ".join(sorted(missing)))
+    print(f"QA checks passed: {len(required)} required tests for Issues " + ", ".join(
+        f"#{issue}" for issue in sorted(issues, key=int)
+    ))
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        sys.exit(main())
+    except (OSError, ValueError, KeyError) as error:
+        sys.exit(f"QA check failed: {error}")

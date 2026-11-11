@@ -2,6 +2,11 @@ name: CI
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+concurrency:
+  group: ci-pr-${{ github.event.number }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -36,6 +41,8 @@ jobs:
     name: backend-checks
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    outputs:
+      passed-tests: ${{ steps.tests.outputs.passed_tests }}
     env:
       PYTHONPATH: backend
       PYTHONDONTWRITEBYTECODE: '1'
@@ -56,19 +63,10 @@ jobs:
       - name: Check backend dependencies
         run: python -m pip check
       - name: Run backend tests
+        id: tests
         env:
           SKILLPROOF_DB_PATH: ${{ runner.temp }}/skillproof-tests.sqlite3
-        run: |
-          python - <<'PY'
-          import sys
-          import unittest
-
-          suite = unittest.defaultTestLoader.discover("backend/tests", pattern="test_*.py")
-          if suite.countTestCases() == 0:
-              sys.exit("No backend tests were discovered")
-          result = unittest.TextTestRunner(verbosity=2).run(suite)
-          sys.exit(0 if result.wasSuccessful() else 1)
-          PY
+        run: python scripts/run_backend_tests.py
       - name: Start API and check health
         env:
           SKILLPROOF_DB_PATH: ${{ runner.temp }}/skillproof-health.sqlite3
@@ -95,27 +93,35 @@ jobs:
 
   qa:
     name: qa-checks
+    needs: [frontend, backend]
+    if: ${{ always() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    env:
-      PYTHONPATH: backend
-      PYTHONDONTWRITEBYTECODE: '1'
-      SKILLPROOF_ENV: development
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: Check out code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 2
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.13.9'
-          cache: pip
-          cache-dependency-path: backend/requirements*.txt
-      - name: Install test dependencies
-        run: python -m pip install -r backend/requirements-test.txt
-      - name: Run acceptance tests and check PR registration
+      - name: Read current PR description
         env:
+          GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.number }}
-          SKILLPROOF_DB_PATH: ${{ runner.temp }}/skillproof-qa.sqlite3
-        run: python scripts/check_qa.py --pr "$PR_NUMBER"
+        run: gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER" > "$RUNNER_TEMP/skillproof-pr.json"
+      - name: Check Issue registration against test results
+        env:
+          FRONTEND_RESULT: ${{ needs.frontend.result }}
+          BACKEND_RESULT: ${{ needs.backend.result }}
+          PASSED_TESTS: ${{ needs.backend.outputs.passed-tests }}
+          PR_DETAILS: ${{ runner.temp }}/skillproof-pr.json
+          CHANGED_FILES: ${{ runner.temp }}/skillproof-changed-files
+        run: |
+          git diff --name-only --no-renames -z HEAD^1 HEAD > "$CHANGED_FILES"
+          python scripts/check_qa.py
