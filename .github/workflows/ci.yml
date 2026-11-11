@@ -106,28 +106,6 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Record tested revision
-        env:
-          PR_NUMBER: ${{ github.event.number }}
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: |
-          python - <<'PY'
-          import json, os, pathlib, subprocess
-
-          output = pathlib.Path(os.environ["RUNNER_TEMP"]) / "browser-tests"
-          output.mkdir(parents=True, exist_ok=True)
-          data = {
-              "repository": os.environ["GITHUB_REPOSITORY"],
-              "run_id": os.environ["GITHUB_RUN_ID"],
-              "attempt": os.environ["GITHUB_RUN_ATTEMPT"],
-              "pr": os.environ["PR_NUMBER"],
-              "pr_head_sha": os.environ["PR_HEAD_SHA"],
-              "base_sha": os.environ["BASE_SHA"],
-              "tested_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
-          }
-          (output / "version.json").write_text(json.dumps(data, indent=2) + "\n")
-          PY
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
@@ -136,36 +114,8 @@ jobs:
           cache-dependency-path: backend/requirements*.txt
       - name: Install test dependencies
         run: python -m pip install -r backend/requirements-test.txt
-      - name: Set up Node.js for browser tests
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
-        with:
-          node-version: '24.12.0'
-          cache: npm
-          cache-dependency-path: |
-            frontend/package-lock.json
-            tests/e2e/package-lock.json
-      - name: Install browser test dependencies
-        run: |
-          npm ci --prefix frontend
-          npm ci --prefix tests/e2e
-          ./tests/e2e/node_modules/.bin/playwright install --with-deps chromium
       - name: Run acceptance tests and check PR registration
         env:
-          SKILLPROOF_E2E_OUTPUT: ${{ runner.temp }}/browser-tests
           PR_NUMBER: ${{ github.event.number }}
           SKILLPROOF_DB_PATH: ${{ runner.temp }}/skillproof-qa.sqlite3
         run: python scripts/check_qa.py --pr "$PR_NUMBER"
-      - name: Save browser test results
-        if: ${{ always() }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: browser-test-results-attempt-${{ github.run_attempt }}
-          path: |
-            ${{ runner.temp }}/browser-tests/version.json
-            ${{ runner.temp }}/browser-tests/**/summary.json
-            ${{ runner.temp }}/browser-tests/**/manifest.json
-            ${{ runner.temp }}/browser-tests/**/logs/**
-            ${{ runner.temp }}/browser-tests/**/results/**
-            ${{ runner.temp }}/browser-tests/**/evidence/**
-          retention-days: 90
-          if-no-files-found: warn

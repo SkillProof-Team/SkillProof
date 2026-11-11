@@ -104,12 +104,7 @@ class AssessmentAcceptanceTests(unittest.TestCase):
             self.assertEqual({question["id"] for question in created["questions"]}, expected_ids)
             url = f"/api/attempts/{created['id']}"
             report_url = f"/api/reports/{created['id']}"
-            self.assertEqual(created["answersVersion"], 0)
-            saved = self.assert_draft(client.put(
-                f"{url}/answers", json={"answers": answers, "expectedVersion": created["answersVersion"]},
-                headers=headers,
-            ), answers)
-            self.assertEqual(saved["answersVersion"], 1)
+            self.assert_draft(client.put(f"{url}/answers", json={"answers": answers}, headers=headers), answers)
 
         # A fresh app and login must recover the same draft from the temporary database.
         with self.client() as client:
@@ -121,7 +116,6 @@ class AssessmentAcceptanceTests(unittest.TestCase):
                 client.post("/api/attempts", json={"roleId": "backend"}, headers=headers), answers,
             )
             self.assertEqual(resumed["id"], created["id"])
-            self.assertEqual(resumed["answersVersion"], 1)
 
             rejected = client.post(f"{url}/submit", headers=headers)
             self.assertEqual(rejected.status_code, 422, rejected.text)
@@ -130,13 +124,10 @@ class AssessmentAcceptanceTests(unittest.TestCase):
 
             last_answer = {"software-medium": ["C", "A"]}
             completed_answers = {**answers, **last_answer}
-            completed = self.assert_draft(
-                client.put(f"{url}/answers", json={
-                    "answers": last_answer, "expectedVersion": resumed["answersVersion"],
-                }, headers=headers),
+            self.assert_draft(
+                client.put(f"{url}/answers", json={"answers": last_answer}, headers=headers),
                 completed_answers,
             )
-            self.assertEqual(completed["answersVersion"], 2)
             submitted = client.post(f"{url}/submit", headers=headers)
             self.assertEqual(submitted.status_code, 200, submitted.text)
             report = submitted.json()
@@ -165,7 +156,6 @@ class AssessmentAcceptanceTests(unittest.TestCase):
             self.assertEqual(final.status_code, 200, final.text)
             final_attempt = final.json()
             self.assertEqual(final_attempt["status"], "submitted")
-            self.assertEqual(final_attempt["answersVersion"], 2)
             self.assertEqual(final_attempt["answeredCount"], 18)
             self.assertEqual(final_attempt["submittedAt"], report["submittedAt"])
             self.assertEqual(

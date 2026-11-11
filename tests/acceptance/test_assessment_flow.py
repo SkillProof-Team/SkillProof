@@ -4,7 +4,6 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 import json
 from pathlib import Path
-import sys
 from tempfile import TemporaryDirectory
 import unittest
 from unittest.mock import patch
@@ -12,12 +11,9 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from app.config import Settings
-from app.db import connect, dump
+from app.db import connect, dump, now_iso
 from app.main import create_app
 from app.scoring import build_report
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from support.question_bank import assessment_questions, write_bank
 
 
 class AssessmentFlowTests(unittest.TestCase):
@@ -25,7 +21,6 @@ class AssessmentFlowTests(unittest.TestCase):
         directory = self.enterContext(TemporaryDirectory())
         settings = Settings(
             database_path=Path(directory) / "assessment.sqlite3",
-            content_dir=write_bank(Path(directory) / "content", assessment_questions()),
             environment="development", cookie_secure=False,
             origin=None, allowed_hosts=("testserver",),
         )
@@ -33,6 +28,16 @@ class AssessmentFlowTests(unittest.TestCase):
         client = self.enterContext(TestClient(app))
         other = self.enterContext(TestClient(app))
         connection = self.enterContext(closing(connect(settings)))
+        seed = json.loads((settings.content_dir / "questions.json").read_text(encoding="utf-8"))
+        for question in seed:
+            published = {
+                **question, "status": "published",
+                "sources": [{"title": "Test fixture", "url": "https://example.com/fixture"}],
+            }
+            connection.execute(
+                "UPDATE questions SET status='published', content_json=?, updated_at=? WHERE id=?",
+                (dump(published), now_iso(), question["id"]),
+            )
 
         headers = self.login(client, "owner")
         other_headers = self.login(other, "other")
