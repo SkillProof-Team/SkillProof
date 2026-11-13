@@ -1,27 +1,31 @@
 {
   "schemaVersion": "1.0",
   "bankId": "skillproof-backend-original",
-  "bankVersion": "0.1.2-draft",
+  "bankVersion": "0.1.3",
   "roleId": "backend",
   "questionFile": "questions.json",
   "abilityTreeFile": "ability-tree.json",
   "questionCount": 42,
   "authoredAt": "2026-10-31",
   "origin": "ai_original",
-  "contentNote": "AI 原创题目草稿；未导入外部题库，内容与难度尚待其他成员独立复核。",
+  "contentNote": "AI 原创题目；沿用 0.1.2-draft 的题干、选项、答案、解析与难度。依据独立复核记录补齐知识参考来源后发布，未导入外部题库。",
   "review": {
-    "status": "pending_human_review",
-    "reviewer": null,
-    "reviewedAt": null
+    "status": "approved",
+    "reviewer": "王斯语",
+    "reviewedAt": "2026-11-01",
+    "record": "docs/testing/question-bank-review.md",
+    "commit": "364def2fddad8d701a14114e965b06bcfda2b40a",
+    "reviewedBankVersion": "0.1.2-draft"
   },
-  "difficultyNote": "题库建立者初始标注：30 道 easy、12 道 medium、0 道 hard，每维 5/2/0；尚待其他成员独立复核，未经学生样本难度校准。当前缺少 hard，不能覆盖既有三难度抽题蓝图。",
+  "difficultyNote": "30 道 easy、12 道 medium、0 道 hard，每维 5/2/0；满足 alpha-18-easy12-medium6-v1 每维 2 道 easy、1 道 medium 的抽题配额。难度为产品标注，未经学生样本实测校准。",
   "files": {
-    "questions.json": "872caabe30433f3a1faa836ec52876f2f974779e1f77242350aed158e7af2ec1",
-    "ability-tree.json": "37d4d1c9734b7ffbbc25d48861fe94e579c4ee82868e77c42d5fc8fcba536835"
+    "questions.json": "7d226956ea8cb6971140c8dbcca6eabe1b0b1145060c601b9602d0c0318cbb93",
+    "ability-tree.json": "22c4e2e7186d3a4e854c07433cf6e1ed1f92ce20d7a89ae07251067b7085cb9c"
   },
   "difficultyProfile": {
     "easy": 5,
     "medium": 2,
     "hard": 0
-  }
+  },
+  "publishedAt": "2026-11-13"
 }

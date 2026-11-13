@@ -1,0 +1,10 @@
+{
+  "required_tests": [
+    "test_assessment_flow.AssessmentFlowTests.test_authenticated_submission_lifecycle",
+    "test_assessments.AssessmentTests.test_default_42_question_bank_supplies_blueprint",
+    "test_assessments.AssessmentTests.test_draft_only_bank_does_not_create_an_attempt",
+    "test_assessments.AssessmentTests.test_drafts_and_archived_never_replace_missing_published_layer",
+    "test_database.QuestionValidationTests.test_default_bank_manifest_and_published_quota",
+    "test_database.QuestionValidationTests.test_published_question_requires_sources"
+  ]
+}

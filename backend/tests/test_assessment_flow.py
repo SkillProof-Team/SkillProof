@@ -1,6 +1,7 @@
 """Exercise the assessment and reporting routes with real sessions and scoring."""
 
 from concurrent.futures import ThreadPoolExecutor
+from collections import Counter
 from contextlib import closing
 import json
 from pathlib import Path
@@ -11,7 +12,8 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from app.config import Settings
-from app.db import connect, dump, now_iso
+from app.catalog import DIMENSION_IDS
+from app.db import connect, dump
 from app.main import create_app
 from app.scoring import build_report
 
@@ -28,16 +30,6 @@ class AssessmentFlowTests(unittest.TestCase):
         client = self.enterContext(TestClient(app))
         other = self.enterContext(TestClient(app))
         connection = self.enterContext(closing(connect(settings)))
-        seed = json.loads((settings.content_dir / "questions.json").read_text(encoding="utf-8"))
-        for question in seed:
-            published = {
-                **question, "status": "published",
-                "sources": [{"title": "Test fixture", "url": "https://example.com/fixture"}],
-            }
-            connection.execute(
-                "UPDATE questions SET status='published', content_json=?, updated_at=? WHERE id=?",
-                (dump(published), now_iso(), question["id"]),
-            )
 
         headers = self.login(client, "owner")
         other_headers = self.login(other, "other")
@@ -57,6 +49,11 @@ class AssessmentFlowTests(unittest.TestCase):
         ).fetchone()["questions_json"]
         questions = json.loads(snapshot)
         self.assertEqual(len(questions), 18)
+        self.assertEqual(Counter((q["dimension"], q["difficulty"]) for q in questions),
+                         {(dim, level): count for dim in DIMENSION_IDS
+                          for level, count in (("easy", 2), ("medium", 1))})
+        for question in attempt["questions"]:
+            self.assertEqual(set(question), {"id", "dimension", "type", "stem", "options"})
         single = next(q for q in questions if q["type"] == "single")
         multiple = next(q for q in questions if q["type"] == "multiple")
         partial = {single["id"]: [single["options"][0]["id"]],

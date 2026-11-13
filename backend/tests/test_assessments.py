@@ -74,6 +74,9 @@ class AssessmentTests(unittest.TestCase):
         self.scorer = Mock(side_effect=report_fixture)
         self.app.dependency_overrides[get_report_builder] = lambda: self.scorer
         self.client = self.enterContext(TestClient(self.app))
+        # Quota/error tests use only synthetic strata, independent of seed publication.
+        self.con.execute("DELETE FROM questions WHERE id NOT LIKE 'fixture-%'")
+        self.con.execute("DELETE FROM question_versions")
         self.client.cookies.set("skillproof_session", "alice-session")
         self.headers = {"X-CSRF-Token": "alice-csrf"}
 
@@ -170,21 +173,18 @@ class AssessmentTests(unittest.TestCase):
                 self.assertEqual(response.status_code, 503)
                 self.assertEqual(self.con.execute("SELECT COUNT(*) FROM attempts").fetchone()[0], 0)
 
-    def test_current_draft_bank_does_not_create_an_attempt(self):
-        self.con.execute("DELETE FROM questions WHERE id LIKE 'fixture-%'")
+    def test_draft_only_bank_does_not_create_an_attempt(self):
+        for question in self.questions:
+            draft = {**question, "status": "draft", "sources": []}
+            self.con.execute("UPDATE questions SET status='draft',content_json=? WHERE id=?",
+                             (dump(draft), question["id"]))
         response = self.client.post("/api/attempts", json={"roleId": "backend"}, headers=self.headers)
         self.assertEqual(response.status_code, 503)
         self.assertEqual(self.con.execute("SELECT COUNT(*) FROM attempts").fetchone()[0], 0)
 
-    def test_current_42_question_bank_can_supply_blueprint_when_published(self):
+    def test_default_42_question_bank_supplies_blueprint(self):
         self.con.execute("DELETE FROM questions WHERE id LIKE 'fixture-%'")
-        seed = json.loads((self.settings.content_dir / "questions.json").read_text(encoding="utf-8"))
-        for question in seed:
-            # Publication is simulated only inside this temporary test database.
-            question["status"] = "published"
-            question["sources"] = [{"title": "Synthetic test source", "url": "https://example.com/fixture"}]
-            self.con.execute("UPDATE questions SET status='published',content_json=? WHERE id=?",
-                             (dump(question), question["id"]))
+        initialize(self.settings)
         attempt = self.create()
         snapshot = json.loads(self.row(attempt)["questions_json"])
         self.assertEqual(len({q["id"] for q in snapshot}), 18)
