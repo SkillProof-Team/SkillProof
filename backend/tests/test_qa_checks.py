@@ -74,10 +74,20 @@ class QACheckTests(unittest.TestCase):
         self.assertIn(OTHER, result.stderr)
 
     def test_required_test_must_actually_run(self):
-        self.register([EXISTING, OTHER])
-        result = self.check()
-        self.assertEqual(result.returncode, 1)
-        self.assertIn(OTHER, result.stderr)
+        self.register([EXISTING, OTHER], issue=10)
+        for pr_number, changed_file in ((38, "backend/app/main.py"), (41, "frontend/src/App.tsx")):
+            with self.subTest(pr=pr_number, file=changed_file):
+                self.pr.write_text(json.dumps({"number": pr_number, "body": "Refs #10"}))
+                self.changed.write_bytes(changed_file.encode() + b"\0")
+                self.env["PASSED_TESTS"] = json.dumps([EXISTING])
+                result = self.check()
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(f"Required tests did not pass: {OTHER}", result.stderr)
+
+                self.env["PASSED_TESTS"] = json.dumps([EXISTING, OTHER])
+                result = self.check()
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn("2 required tests for Issues #10", result.stdout)
 
     def test_missing_registration_fails(self):
         result = self.check()
