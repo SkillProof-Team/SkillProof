@@ -30,6 +30,3 @@ Thumbs.db
 
 # Scrum 图片与图表仅保存在本地
 /docs/scrum/assets/
-
-# 内部代理工作计划不进入项目
-/docs/superpowers/

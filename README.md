@@ -124,7 +124,7 @@ $env:PYTHONPATH = 'backend'
 .\backend\.venv\Scripts\python.exe -m unittest discover -s backend/tests -v
 ```
 
-当前验证范围与未完成联调项见 [Issue #9 测试记录](docs/testing/issue-9-scoring-results.md)。
+测试运行方式、覆盖范围与人工验收入口见 [测试指南](docs/testing/README.md)。
 
 ## 题库更新与本地数据
 
