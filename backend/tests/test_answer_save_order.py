@@ -15,7 +15,7 @@ import httpx
 import uvicorn
 
 from app.config import Settings
-from app.db import connect, dump, initialize
+from app.db import connect, initialize
 from app.main import create_app
 
 
@@ -27,10 +27,7 @@ class AnswerSaveOrderTests(unittest.TestCase):
                                  allowed_hosts=("127.0.0.1",))
         initialize(self.settings)
         self.con = self.enterContext(closing(connect(self.settings)))
-        for row in self.con.execute("SELECT id,content_json FROM questions").fetchall():
-            question = json.loads(row["content_json"])
-            question.update(status="published", sources=[{"title": "Test fixture", "url": "https://example.com/fixture"}])
-            self.con.execute("UPDATE questions SET status='published',content_json=? WHERE id=?", (dump(question), row["id"]))
+        # The repository bank is already published; keep its versioned content intact.
         app = create_app(self.settings)
         self.blocked = threading.Event()
         self.release = threading.Event()

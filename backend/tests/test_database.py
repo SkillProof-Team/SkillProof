@@ -118,7 +118,7 @@ class DatabaseTests(unittest.TestCase):
             after = migrated.execute("SELECT * FROM attempts ORDER BY id").fetchall()
             self.assertEqual([row[:-1] for row in after], before)
             self.assertEqual([row[-1] for row in after], [0, 0])
-            self.assertEqual(migrated.execute("SELECT version FROM schema_migrations ORDER BY version").fetchall(), [(1,), (2,)])
+            self.assertEqual(migrated.execute("SELECT version FROM schema_migrations ORDER BY version").fetchall(), [(1,), (2,), (3,)])
             self.assertEqual(migrated.execute("PRAGMA integrity_check").fetchone()[0], "ok")
 
     def test_seed_does_not_overwrite_existing_question(self):
@@ -127,7 +127,8 @@ class DatabaseTests(unittest.TestCase):
         content["stem"] = "T02 test-only edited question"
         updated = dump(content)
         self.con.execute("UPDATE questions SET content_json=? WHERE id=?", (updated, row["id"]))
-        initialize(self.settings)
+        with self.assertRaisesRegex(ValueError, 'conflict'):
+            initialize(self.settings)
         self.assertEqual(self.con.execute("SELECT content_json FROM questions WHERE id=?", (row["id"],)).fetchone()[0], updated)
 
     def test_data_survives_new_process_and_reinitialization(self):

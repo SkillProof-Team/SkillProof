@@ -126,6 +126,18 @@ $env:PYTHONPATH = 'backend'
 
 当前验证范围与未完成联调项见 [Issue #9 测试记录](docs/testing/issue-9-scoring-results.md)。
 
+## 题库更新与本地数据
+
+后端启动时自动校验并按版本同步仓库题库。新增题目使用新 ID；修改内容或发布/归档状态时增加题目 `version`，同时增加 manifest 的 `bankVersion` 并更新题数和文件 SHA-256。旧草稿库会自动升级，已有账号、测评及报告保留；同版本内容冲突或版本回退会中止启动，避免静默覆盖。
+
+仅需清空本地测试数据时，先停止后端，从仓库根目录执行（自动保留旧库备份）：
+
+```powershell
+.\backend\.venv\Scripts\python.exe -X utf8 scripts/reset_local_db.py --yes
+```
+
+该命令读取 `.env` 和进程环境变量，可用 `--db-path` 明确指定目标；输出重置的绝对路径及备份位置。它会清空账号、会话和全部测评，只允许 development 环境。普通题库更新不需要重置。完整规则见 [题库同步与本地重置](docs/testing/question-bank-sync.md)。
+
 ## 协作方式
 
 先建立 Issue，再创建对应分支开发。

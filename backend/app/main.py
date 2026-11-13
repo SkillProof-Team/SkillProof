@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 
 from .api_assessments import router as assessments_router
 from .api_auth import router as auth_router
-from .api_catalog import load_catalog, router as catalog_router
+from .api_catalog import router as catalog_router
 from .config import Settings
 from .db import initialize
 from .reports import router as reports_router
@@ -23,8 +23,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        initialize(settings)
-        app.state.catalog = load_catalog(settings.content_dir)
+        app.state.catalog = initialize(settings)
         yield
 
     app = FastAPI(

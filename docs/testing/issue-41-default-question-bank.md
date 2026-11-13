@@ -27,7 +27,7 @@ $env:PYTHONPATH = 'backend'
 
 ## 部署与已有数据库
 
-本次验收针对全新数据库。启动导入使用 `INSERT OR IGNORE`，仅重启不会更新旧库中的同 ID 草稿，这是保护管理员编辑的现有行为。
+初次修复采用 `INSERT OR IGNORE`，仅新库生效。后续已补充[题库版本同步](question-bank-sync.md)：启动时会把同 ID 的更低版本草稿升级为当前题目，追加历史版本并记录题库版本，不改账号、会话、已有测评和报告。QA 应同时验收全新数据库和旧草稿数据库升级。
 
 开发环境需要干净数据时，可停止后端后，把 `SKILLPROOF_DB_PATH` 指向一个尚不存在的文件，再启动后端；旧文件保留。例如仓库根目录执行：
 
@@ -36,4 +36,4 @@ $env:SKILLPROOF_DB_PATH = Join-Path $PWD 'backend/data/skillproof-0.1.3.db'
 .\backend\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000 --env-file .env
 ```
 
-先确认目标文件尚不存在；新库需要重新注册账号。需要保留用户和历史测评的环境，应备份后另行迁移题库，在同一事务内更新题目当前版本并追加 `question_versions`；不能批量覆盖管理员改动，不能更改既有测评快照或历史报告。本次没有执行旧库迁移。
+先确认目标文件尚不存在；新库需要重新注册账号。普通题库更新现在只需更新仓库并重启后端，无须换数据库。若数据库内存在手动改题或历史版本冲突，同步会报错并回滚；应解决冲突。当前仅本地测试且不需要保留数据时，也可停止后端，执行 `backend/.venv/Scripts/python.exe -X utf8 scripts/reset_local_db.py --yes`，先自动备份再重置，详见同步说明。
