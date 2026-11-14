@@ -29,9 +29,14 @@
       "B"
     ],
     "explanation": "队列的先进先出规则直接符合到达顺序要求；栈通常后进先出。集合解决去重，映射解决按键查找，它们本身不定义题目要求的出队规则。这里不讨论带优先级的任务调度。",
-    "sources": [],
-    "version": 1,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Python 3: Using Lists as Queues",
+        "url": "https://docs.python.org/3/tutorial/datastructures.html#using-lists-as-queues"
+      }
+    ],
+    "version": 2,
+    "status": "published"
   },
   {
     "id": "SP5-PRG-002",
@@ -64,9 +69,14 @@
       "C"
     ],
     "explanation": "服务端需要自行检查类型与范围，并限制单次请求规模，因为调用者可以绕过前端。把所有非法值静默改为 0 会掩盖输入错误，也可能违反分页约束；应按接口约定拒绝或明确处理非法输入。",
-    "sources": [],
-    "version": 1,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "OWASP: Input Validation",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html"
+      }
+    ],
+    "version": 2,
+    "status": "published"
   },
   {
     "id": "SP5-PRG-003",
@@ -98,9 +108,14 @@
       "A"
     ],
     "explanation": "赋值 b = a 让两个名字引用同一个列表，没有复制列表。append 原地增加一个元素，因此 a 和 b 看到的列表长度都变为 3。若需要独立的浅层列表，必须显式复制；嵌套对象还需另行考虑。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Python 3: Shallow and deep copy operations",
+        "url": "https://docs.python.org/3/library/copy.html"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-PRG-004",
@@ -132,9 +147,14 @@
       "D"
     ],
     "explanation": "文件上下文管理器在正常离开和异常离开时都会关闭文件；不捕获或不吞掉解析异常，调用方仍能获知失败。只在成功路径释放会在异常路径泄漏资源；忽略异常则破坏了题目要求的错误传播。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Python 3: Reading and Writing Files",
+        "url": "https://docs.python.org/3/tutorial/inputoutput.html#reading-and-writing-files"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-PRG-005",
@@ -167,9 +187,14 @@
       "D"
     ],
     "explanation": "整数分将两位小数金额映射为整数运算，但仍需检查合法范围；十进制数类型可以按设定精度执行十进制运算，输入应直接来自十进制字符串等准确形式。二进制浮点并不能精确表示所有十进制小数；字符串拼接不是金额加法。",
-    "sources": [],
-    "version": 3,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Python 3: Decimal fixed-point and floating-point arithmetic",
+        "url": "https://docs.python.org/3/library/decimal.html"
+      }
+    ],
+    "version": 4,
+    "status": "published"
   },
   {
     "id": "SP5-PRG-006",
@@ -201,9 +226,14 @@
       "C"
     ],
     "explanation": "不可变用户 ID 可以维持键的哈希值和相等语义。修改参与哈希或判等的字段可能使已有条目难以找到；随机哈希同样破坏一致性。哈希碰撞是允许存在的，不能要求所有不同键都拥有不同哈希值。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Python 3: object.__hash__",
+        "url": "https://docs.python.org/3/reference/datamodel.html#object.__hash__"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-PRG-007",
@@ -236,9 +266,14 @@
       "B"
     ],
     "explanation": "深复制以及在题设可无损表示条件下的序列化重建，都会为嵌套列表建立独立对象。浅复制只复制最外层，列表仍共享；变量改名也不创建副本。题目明确排除了复制期间并发修改的问题，不应把深复制当成通用并发控制。",
-    "sources": [],
-    "version": 3,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Python 3: Shallow and deep copy operations",
+        "url": "https://docs.python.org/3/library/copy.html"
+      }
+    ],
+    "version": 4,
+    "status": "published"
   },
   {
     "id": "SP5-ALG-001",
@@ -270,9 +305,14 @@
       "C"
     ],
     "explanation": "标准二分查找依靠有序关系确定目标不可能位于哪一半区间。数组可以包含重复值，长度也无需为偶数；重复值影响查找哪个匹配位置的约定，不会取消有序这一基本前提。链表也不是题设要求的数据结构。",
-    "sources": [],
-    "version": 1,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Algorithms, 4th Edition: Binary search in a sorted array",
+        "url": "https://raw.githubusercontent.com/kevin-wayne/algs4/master/src/main/java/edu/princeton/cs/algs4/BinarySearch.java"
+      }
+    ],
+    "version": 2,
+    "status": "published"
   },
   {
     "id": "SP5-ALG-002",
@@ -305,9 +345,14 @@
       "D"
     ],
     "explanation": "顺序执行两次线性循环的总成本为 2n，仍为 O(n)；两个完整嵌套循环则为 n² 次操作。规模每轮约减半时，轮数随 log n 增长。这里分析渐近数量级，省略常数因子。",
-    "sources": [],
-    "version": 1,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "OpenDSA: Analyzing Programs",
+        "url": "https://raw.githubusercontent.com/OpenDSA/OpenDSA/master/RST/en/AlgAnal/AnalProgram.rst"
+      }
+    ],
+    "version": 2,
+    "status": "published"
   },
   {
     "id": "SP5-ALG-003",
@@ -339,9 +384,14 @@
       "B"
     ],
     "explanation": "每个 ID 最多执行常数次期望 O(1) 的集合操作，扫描 n 个元素的期望总时间为 O(n)。若所有 ID 不重复，集合会保存 n 个 ID，因此额外空间上界是 O(n)。题目已经给出了哈希操作的期望成本假设。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Algorithms, 4th Edition: Separate-chaining hash table",
+        "url": "https://raw.githubusercontent.com/kevin-wayne/algs4/master/src/main/java/edu/princeton/cs/algs4/SeparateChainingHashST.java"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-ALG-004",
@@ -373,9 +423,14 @@
       "A"
     ],
     "explanation": "BFS 按距离起点的层数逐层扩展，在等权边条件下首次发现一个顶点时即可得到最少跳数。首次入队时标记可避免重复入队。普通 DFS 的首次到达顺序不保证最短，按名称排序与路径长度没有必然关系。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Algorithms, 4th Edition: Breadth-first search and shortest paths",
+        "url": "https://raw.githubusercontent.com/kevin-wayne/algs4/master/src/main/java/edu/princeton/cs/algs4/BreadthFirstPaths.java"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-ALG-005",
@@ -408,9 +463,14 @@
       "D"
     ],
     "explanation": "双指针只从两个未处理后缀的首元素中选择较小者；每步至少前移一个指针，直到写出 n+m 个元素。遇到相同值时仍需保留双方出现次数，不能删除重复值。输入有序使得线性合并成为可能。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Algorithms, 4th Edition: Merge two sorted subarrays",
+        "url": "https://raw.githubusercontent.com/kevin-wayne/algs4/master/src/main/java/edu/princeton/cs/algs4/Merge.java"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-ALG-006",
@@ -442,9 +502,14 @@
       "D"
     ],
     "explanation": "最小堆的堆顶是当前保留的 k 个数中最小的一个。新数更大时替换堆顶并调整堆，单次调整 O(log k)，最多处理 n 次；堆最多保存 k 个元素。若最后要求有序输出，还需另计对这 k 个数排序的成本。",
-    "sources": [],
-    "version": 3,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Algorithms, 4th Edition: Top M using a minimum priority queue",
+        "url": "https://raw.githubusercontent.com/kevin-wayne/algs4/master/src/main/java/edu/princeton/cs/algs4/TopM.java"
+      }
+    ],
+    "version": 4,
+    "status": "published"
   },
   {
     "id": "SP5-ALG-007",
@@ -477,9 +542,18 @@
       "C"
     ],
     "explanation": "DFS 需要区分当前仍在递归路径上的顶点与已经处理完成的顶点；指向前者的回边构成环，指向后者未必构成环。Kahn 算法不断移除入度为零的顶点，若仍剩顶点而无法继续，则剩余部分存在有向环。出边数量本身不是判环依据。",
-    "sources": [],
-    "version": 3,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Algorithms, 4th Edition: Directed cycle detection with DFS",
+        "url": "https://raw.githubusercontent.com/kevin-wayne/algs4/master/src/main/java/edu/princeton/cs/algs4/DirectedCycle.java"
+      },
+      {
+        "title": "Algorithms, 4th Edition: Queue-based topological ordering",
+        "url": "https://raw.githubusercontent.com/kevin-wayne/algs4/master/src/main/java/edu/princeton/cs/algs4/TopologicalX.java"
+      }
+    ],
+    "version": 4,
+    "status": "published"
   },
   {
     "id": "SP5-DB-001",
@@ -511,9 +585,14 @@
       "D"
     ],
     "explanation": "SELECT 查询记录，WHERE active = 1 限定启用用户，并且只投影 id 列。DELETE 删除记录，UPDATE 修改记录，INSERT 插入记录，这些语句都不满足题目的只读查询要求。",
-    "sources": [],
-    "version": 1,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "PostgreSQL: Querying a Table",
+        "url": "https://www.postgresql.org/docs/current/tutorial-select.html"
+      }
+    ],
+    "version": 2,
+    "status": "published"
   },
   {
     "id": "SP5-DB-002",
@@ -546,9 +625,14 @@
       "C"
     ],
     "explanation": "主键提供唯一且非空的行标识；其他列不同不能抵消主键冲突。允许 NULL 的外键与普通非空外键值的参照检查是两回事。普通索引是一种访问结构，不会自动声明或替代外键约束。",
-    "sources": [],
-    "version": 1,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "PostgreSQL: Constraints",
+        "url": "https://www.postgresql.org/docs/current/ddl-constraints.html"
+      }
+    ],
+    "version": 2,
+    "status": "published"
   },
   {
     "id": "SP5-DB-003",
@@ -580,9 +664,14 @@
       "C"
     ],
     "explanation": "原子性要求事务内的操作作为一个整体提交或回滚，因此入账失败导致事务回滚时，扣款也不能留下部分成功的结果。它不等同于跨任意外部系统的自动补偿；本题明确把两步限制在同一数据库事务内。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "PostgreSQL: Transactions",
+        "url": "https://www.postgresql.org/docs/current/tutorial-transactions.html"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-DB-004",
@@ -614,9 +703,14 @@
       "B"
     ],
     "explanation": "LEFT JOIN 的 ON 条件只决定右表的匹配记录，无匹配时仍保留左表用户并以 NULL 补右侧字段。把 o.status = 'paid' 放到 WHERE 中会排除右侧为 NULL 的行，从而失去题目要求保留的用户。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "PostgreSQL: Table Expressions: Joined Tables",
+        "url": "https://www.postgresql.org/docs/current/queries-table-expressions.html"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-DB-005",
@@ -649,9 +743,22 @@
       "D"
     ],
     "explanation": "索引是读写成本之间的权衡，需要存储并随数据变动维护。优化器通常根据估计成本选择访问路径，低选择性查询等情况可能更适合表扫描。复合索引的键顺序影响可利用的访问方式，不能视为任意查询下等价。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "PostgreSQL: Introduction to Indexes",
+        "url": "https://www.postgresql.org/docs/current/indexes-intro.html"
+      },
+      {
+        "title": "PostgreSQL: Multicolumn Indexes",
+        "url": "https://www.postgresql.org/docs/current/indexes-multicolumn.html"
+      },
+      {
+        "title": "PostgreSQL: Examining Index Usage",
+        "url": "https://www.postgresql.org/docs/current/indexes-examine.html"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-DB-006",
@@ -683,9 +790,14 @@
       "A"
     ],
     "explanation": "第一个请求提交后版本变为 8，第二个请求的 version=7 条件不再匹配。受影响行数为 0 表示这次条件更新没有生效，应按冲突处理，而不是宣称成功或悄悄取消版本保护。重新读取能让调用方基于最新内容作出决定。",
-    "sources": [],
-    "version": 3,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "PostgreSQL: UPDATE: WHERE condition and affected-row count",
+        "url": "https://www.postgresql.org/docs/current/sql-update.html"
+      }
+    ],
+    "version": 4,
+    "status": "published"
   },
   {
     "id": "SP5-DB-007",
@@ -718,9 +830,14 @@
       "B"
     ],
     "explanation": "订单变更和 Outbox 记录同事务提交，使已提交业务对应的待发送事件能够被持久化发现。发布者发送成功后可能在标记完成前崩溃，恢复后会重发，所以 Outbox 不自动提供全链路恰好一次。消费者仍需可靠去重和幂等处理。",
-    "sources": [],
-    "version": 3,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "AWS Prescriptive Guidance: Transactional outbox pattern",
+        "url": "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html"
+      }
+    ],
+    "version": 4,
+    "status": "published"
   },
   {
     "id": "SP5-NET-001",
@@ -752,9 +869,14 @@
       "A"
     ],
     "explanation": "Content-Type 描述响应表示的媒体类型，例如 application/json。Host 用于标识请求目标主机，Authorization 携带认证信息，Retry-After 描述何时适合重试；它们不能替代响应体的媒体类型声明。",
-    "sources": [],
-    "version": 1,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "RFC 9110 Section 8.3: Content-Type",
+        "url": "https://www.rfc-editor.org/rfc/rfc9110.html#section-8.3"
+      }
+    ],
+    "version": 2,
+    "status": "published"
   },
   {
     "id": "SP5-NET-002",
@@ -787,9 +909,14 @@
       "D"
     ],
     "explanation": "TCP 不保留应用的 send 调用边界，接收一次可能只拿到部分消息，也可能包含多条消息的字节。应用可采用长度前缀或其他可靠分帧规则，并累计到完整消息后解析。可靠传输语义不表示连接永不失败，也不替应用设置超时。",
-    "sources": [],
-    "version": 1,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "RFC 9293 Section 3.7: Data Communication",
+        "url": "https://www.rfc-editor.org/rfc/rfc9293.html#section-3.7"
+      }
+    ],
+    "version": 2,
+    "status": "published"
   },
   {
     "id": "SP5-NET-003",
@@ -821,9 +948,14 @@
       "D"
     ],
     "explanation": "201 Created 明确表示请求已完成并产生了新资源；响应可用 Location 等信息定位资源。204 表示成功且没有响应内容，不能解释成尚未创建；409 表示冲突；304 则用于条件请求中复用已有缓存表示的情形。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "RFC 9110 Section 15.3.2: 201 Created",
+        "url": "https://www.rfc-editor.org/rfc/rfc9110.html#section-15.3.2"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-NET-004",
@@ -855,9 +987,18 @@
       "C"
     ],
     "explanation": "GET 条件请求的实体标签匹配当前表示时，304 表示客户端可以继续使用已缓存的表示，响应不再发送新的表示体。ETag 是验证器，不是登录凭据，也不表示发生了服务器异常或新资源创建。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "RFC 9110 Section 13.1.2: If-None-Match",
+        "url": "https://www.rfc-editor.org/rfc/rfc9110.html#section-13.1.2"
+      },
+      {
+        "title": "RFC 9110 Section 15.4.5: 304 Not Modified",
+        "url": "https://www.rfc-editor.org/rfc/rfc9110.html#section-15.4.5"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-NET-005",
@@ -890,9 +1031,14 @@
       "D"
     ],
     "explanation": "超时只表示客户端没有在期限内拿到结果，不能证明服务端未执行。幂等键必须由服务端可靠保存并与业务效果关联，才能抑制重复效果。即使允许重试，也应限制次数或总时长并退避；无限等待或无条件重试都不能解决结果未知问题。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "AWS Builders Library: Making retries safe with idempotent APIs",
+        "url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-NET-006",
@@ -924,9 +1070,14 @@
       "B"
     ],
     "explanation": "转发头本身不是可信身份凭据，直接接受客户端提交的值会让攻击者伪造限流依据。需要先建立受信代理边界，确保外部请求不能任意影响应用采用的客户端地址。具体地址选择还取决于代理链配置，不能只靠头名判断可信性。",
-    "sources": [],
-    "version": 3,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "NGINX: ngx_http_realip_module",
+        "url": "https://nginx.org/en/docs/http/ngx_http_realip_module.html"
+      }
+    ],
+    "version": 4,
+    "status": "published"
   },
   {
     "id": "SP5-NET-007",
@@ -959,9 +1110,18 @@
       "C"
     ],
     "explanation": "CSRF 防护面向浏览器自动携带 Cookie 所带来的伪造请求风险，Token 与来源检查是相应的服务端措施。对象所属关系检查解决的是越权访问，两者不能互相替代。HttpOnly 限制脚本读取 Cookie；CORS 控制跨源脚本访问，都不能据此取消这些检查。",
-    "sources": [],
-    "version": 3,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "OWASP: Cross-Site Request Forgery Prevention",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html"
+      },
+      {
+        "title": "OWASP: Authorization",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html"
+      }
+    ],
+    "version": 4,
+    "status": "published"
   },
   {
     "id": "SP5-OS-001",
@@ -993,9 +1153,14 @@
       "B"
     ],
     "explanation": "普通指针只在所属进程的地址空间内具有对应含义，相同的虚拟地址数值不代表两个进程访问同一对象。跨进程传递数据需要 IPC、显式共享内存等机制。相同用户身份也不会自动共享堆和调用栈。",
-    "sources": [],
-    "version": 1,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Linux man-pages: fork(2)",
+        "url": "https://man7.org/linux/man-pages/man2/fork.2.html"
+      }
+    ],
+    "version": 2,
+    "status": "published"
   },
   {
     "id": "SP5-OS-002",
@@ -1028,9 +1193,14 @@
       "C"
     ],
     "explanation": "线程共享进程地址空间，堆和普通全局数据并非自动隔离；并发修改共享状态时可能需要同步。调用栈和寄存器等执行上下文则属于各线程自身。线程局部存储是额外机制，不能把所有全局变量都当成线程私有。",
-    "sources": [],
-    "version": 1,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Linux man-pages: pthreads(7)",
+        "url": "https://man7.org/linux/man-pages/man7/pthreads.7.html"
+      }
+    ],
+    "version": 2,
+    "status": "published"
   },
   {
     "id": "SP5-OS-003",
@@ -1062,9 +1232,14 @@
       "A"
     ],
     "explanation": "读、改、写必须作为受保护的完整操作，否则两个线程可能都读到 0，随后分别写回 1，造成丢失更新。同一互斥锁能让遵守该锁的复合操作串行完成。只保护读取不足以保护整个更新过程，等待也不构成同步保证。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Python 3: Lock Objects",
+        "url": "https://docs.python.org/3/library/threading.html#lock-objects"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-OS-004",
@@ -1096,9 +1271,14 @@
       "D"
     ],
     "explanation": "事件循环所在的线程一旦被阻塞，其他连接的调度也会延迟。真正异步 I/O 或受控执行器能让等待不占住事件循环线程。async 关键字本身不会改写内部同步阻塞函数的执行方式；工作线程还需容量和超时控制。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Python 3: Running Blocking Code",
+        "url": "https://docs.python.org/3/library/asyncio-dev.html#running-blocking-code"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-OS-005",
@@ -1131,9 +1311,14 @@
       "D"
     ],
     "explanation": "统一锁顺序能破坏这两把锁之间的循环等待条件。尝试获取失败后释放已有锁，也能避免一直持有一把锁等待另一把；这种方案仍需防范反复竞争和活锁。相反顺序获取正是典型死锁风险，线程名称不提供同步保证。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Oracle Multithreaded Programming Guide: Using Locking Hierarchies",
+        "url": "https://docs.oracle.com/cd/E19683-01/806-6867/sync-ex-3/index.html"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-OS-006",
@@ -1165,9 +1350,14 @@
       "C"
     ],
     "explanation": "条件变量的通知只表示状态可能发生变化，不等于把资源保留给特定等待者。等待返回并重新获得锁时，队列可能仍为空，必须重新检查谓词；while 正是为了把等待和条件检查关联起来。循环不能替代对共享状态的互斥保护。",
-    "sources": [],
-    "version": 3,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Python 3: Condition Objects",
+        "url": "https://docs.python.org/3/library/threading.html#condition-objects"
+      }
+    ],
+    "version": 4,
+    "status": "published"
   },
   {
     "id": "SP5-OS-007",
@@ -1200,9 +1390,14 @@
       "B"
     ],
     "explanation": "empty 表示可用槽位，full 表示已放入的元素数量；生产者和消费者先获得对应配额，再短暂持锁改变队列，最后释放对方配额。若生产者持队列锁等待空位，消费者可能无法获得锁来释放空位。题目排除了异常路径；实际实现还需处理取消后的配额恢复。",
-    "sources": [],
-    "version": 3,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Operating Systems: Three Easy Pieces, Chapter 31: Semaphores",
+        "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/threads-sema.pdf"
+      }
+    ],
+    "version": 4,
+    "status": "published"
   },
   {
     "id": "SP5-SWE-001",
@@ -1234,9 +1429,14 @@
       "C"
     ],
     "explanation": "依赖注入使测试能提供确定的会员等级，从而专注验证折扣规则并避免网络波动。真实集成行为应另做集成测试；重复运行直到成功会掩盖不稳定性，忽略断言没有验证作用，生产凭据也不应进入测试源码。",
-    "sources": [],
-    "version": 1,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "pytest: Monkeypatching returned objects and preventing remote operations",
+        "url": "https://docs.pytest.org/en/stable/how-to/monkeypatch.html"
+      }
+    ],
+    "version": 2,
+    "status": "published"
   },
   {
     "id": "SP5-SWE-002",
@@ -1269,9 +1469,14 @@
       "D"
     ],
     "explanation": "关联 ID 和错误类别有助于定位失败，同时应遵守最小必要记录原则，不把密码、令牌和会话凭据写入日志。脱敏和访问限制降低敏感信息暴露风险。将失败伪装成成功会破坏可观测性，无法帮助故障排查。",
-    "sources": [],
-    "version": 1,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "OWASP: Logging",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html"
+      }
+    ],
+    "version": 2,
+    "status": "published"
   },
   {
     "id": "SP5-SWE-003",
@@ -1303,9 +1508,14 @@
       "B"
     ],
     "explanation": "验收需要同时检查返回对象一致性和持久化业务效果：只返回同一状态码或合法 JSON 不能证明没有重复创建或重复扣库存。使用不同键也无法直接覆盖题目规定的同键重放行为；并发重放等情况可另补测试。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "AWS Builders Library: Making retries safe with idempotent APIs",
+        "url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-SWE-004",
@@ -1337,9 +1547,14 @@
       "A"
     ],
     "explanation": "文本冲突解决不代表语义正确，需要理解两个修改的意图并对照接口约定组合结果，再验证相关行为。机械选择一方或删掉函数可能丢失必要逻辑。检查最终差异还能发现意外删除或残留冲突标记。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Git: How to resolve conflicts",
+        "url": "https://git-scm.com/docs/git-merge#_how_to_resolve_conflicts"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-SWE-005",
@@ -1372,9 +1587,18 @@
       "D"
     ],
     "explanation": "锁定依赖有助于重复构建，测试和静态检查提供可核对的质量信号；部署阶段应以这些检查成功为前提。随机依赖版本不能提供稳定基线，把失败改成成功会让门禁失效。依赖升级可以另走受控验证流程。",
-    "sources": [],
-    "version": 2,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "GitHub Actions: Continuous integration",
+        "url": "https://docs.github.com/en/actions/get-started/continuous-integration"
+      },
+      {
+        "title": "pip: Repeatable Installs",
+        "url": "https://pip.pypa.io/en/stable/topics/repeatable-installs/"
+      }
+    ],
+    "version": 3,
+    "status": "published"
   },
   {
     "id": "SP5-SWE-006",
@@ -1406,9 +1630,14 @@
       "D"
     ],
     "explanation": "扩展—迁移—收缩让新旧实例在过渡期有兼容的数据结构可用。回填和过渡读写需按实际一致性要求设计，确认旧版本不再依赖旧字段后才能移除。先删字段会使仍运行的旧代码失败，修改备份也不能替代在线迁移。",
-    "sources": [],
-    "version": 3,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "Prisma: Expand-and-contract migrations",
+        "url": "https://www.prisma.io/docs/guides/database/data-migration"
+      }
+    ],
+    "version": 4,
+    "status": "published"
   },
   {
     "id": "SP5-SWE-007",
@@ -1441,8 +1670,17 @@
       "C"
     ],
     "explanation": "只有去重记录与业务效果可靠关联，才能防止两个消费者都通过检查后重复修改积分。先标记再修改若中间失败可能永久漏处理；各进程内存也无法覆盖重启与其他实例。重复及并发消费测试直接验证最终业务效果，而不是仅看消息处理次数。",
-    "sources": [],
-    "version": 3,
-    "status": "draft"
+    "sources": [
+      {
+        "title": "AWS Prescriptive Guidance: Transactional outbox pattern",
+        "url": "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html"
+      },
+      {
+        "title": "AWS Builders Library: Making retries safe with idempotent APIs",
+        "url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/"
+      }
+    ],
+    "version": 4,
+    "status": "published"
   }
 ]

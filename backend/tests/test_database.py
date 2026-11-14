@@ -1,5 +1,7 @@
 """T02 persistence contracts; no HTTP, authentication or scoring implementation."""
 import json
+import hashlib
+from collections import Counter
 from contextlib import closing
 from pathlib import Path
 import sqlite3
@@ -15,7 +17,7 @@ sys.path.insert(0, str(BACKEND))
 from pydantic import ValidationError
 
 from app.models import QuestionInput
-from app.catalog import ROLE_MAP
+from app.catalog import BLUEPRINT, DIMENSION_IDS, ROLE_MAP
 from app.config import Settings
 from app.db import connect, dump, initialize, now_iso, transaction
 
@@ -72,7 +74,7 @@ class DatabaseTests(unittest.TestCase):
         finally:
             con.close()
 
-    def test_t03_drafts_preserve_internal_fields_in_both_tables(self):
+    def test_t03_seed_preserves_internal_fields_in_both_tables(self):
         seed = json.loads((self.settings.content_dir / "questions.json").read_text(encoding="utf-8"))
         self.assertEqual(self.con.execute("SELECT COUNT(*) FROM questions").fetchone()[0], len(seed))
         for question in seed:
@@ -80,7 +82,7 @@ class DatabaseTests(unittest.TestCase):
                 current = self.con.execute("SELECT status,content_json FROM questions WHERE id=?", (question["id"],)).fetchone()
                 version = self.con.execute("SELECT content_json FROM question_versions WHERE question_id=? AND version=?",
                                            (question["id"], question["version"])).fetchone()
-                self.assertEqual(current["status"], "draft")
+                self.assertEqual(current["status"], question["status"])
                 self.assertEqual(json.loads(current["content_json"]), question)
                 self.assertEqual(json.loads(version["content_json"]), question)
 
@@ -116,7 +118,7 @@ class DatabaseTests(unittest.TestCase):
             after = migrated.execute("SELECT * FROM attempts ORDER BY id").fetchall()
             self.assertEqual([row[:-1] for row in after], before)
             self.assertEqual([row[-1] for row in after], [0, 0])
-            self.assertEqual(migrated.execute("SELECT version FROM schema_migrations ORDER BY version").fetchall(), [(1,), (2,)])
+            self.assertEqual(migrated.execute("SELECT version FROM schema_migrations ORDER BY version").fetchall(), [(1,), (2,), (3,)])
             self.assertEqual(migrated.execute("PRAGMA integrity_check").fetchone()[0], "ok")
 
     def test_seed_does_not_overwrite_existing_question(self):
@@ -125,7 +127,8 @@ class DatabaseTests(unittest.TestCase):
         content["stem"] = "T02 test-only edited question"
         updated = dump(content)
         self.con.execute("UPDATE questions SET content_json=? WHERE id=?", (updated, row["id"]))
-        initialize(self.settings)
+        with self.assertRaisesRegex(ValueError, 'conflict'):
+            initialize(self.settings)
         self.assertEqual(self.con.execute("SELECT content_json FROM questions WHERE id=?", (row["id"],)).fetchone()[0], updated)
 
     def test_data_survives_new_process_and_reinitialization(self):
@@ -213,6 +216,7 @@ class QuestionValidationTests(unittest.TestCase):
         self.question = json.loads((BACKEND / "app/content/questions.json").read_text(encoding="utf-8"))[0]
 
     def test_draft_accepts_empty_sources_and_retains_topic_id(self):
+        self.question.update(status="draft", sources=[])
         parsed = QuestionInput.model_validate(self.question)
         self.assertEqual(parsed.model_dump()["topicId"], self.question["topicId"])
         self.assertEqual(parsed.sources, [])
@@ -220,10 +224,25 @@ class QuestionValidationTests(unittest.TestCase):
 
     def test_published_question_requires_sources(self):
         self.question["status"] = "published"
+        self.question["sources"] = []
         with self.assertRaises(ValidationError):
             QuestionInput.model_validate(self.question)
         self.question["sources"] = [{"title": "Test fixture source", "url": "https://example.com/reference"}]
         self.assertEqual(QuestionInput.model_validate(self.question).status, "published")
+
+    def test_default_bank_manifest_and_published_quota(self):
+        content = BACKEND / "app/content"
+        manifest = json.loads((content / "manifest.json").read_text(encoding="utf-8"))
+        questions = json.loads((content / "questions.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(questions), manifest["questionCount"])
+        self.assertEqual(len({q["id"] for q in questions}), len(questions))
+        for filename, digest in manifest["files"].items():
+            self.assertEqual(hashlib.sha256((content / filename).read_bytes()).hexdigest(), digest)
+        published = [QuestionInput.model_validate(q) for q in questions if q["status"] == "published"]
+        strata = Counter((q.dimension, q.difficulty) for q in published)
+        for dimension in DIMENSION_IDS:
+            for difficulty, total in BLUEPRINT["difficultyCounts"].items():
+                self.assertGreaterEqual(strata[(dimension, difficulty)], total // len(DIMENSION_IDS))
 
     def test_unknown_fields_and_blank_topic_id_are_rejected(self):
         for extra in ({"unexpected": True}, {"topicId": " "}):

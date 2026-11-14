@@ -1,0 +1,2 @@
+# Manifest digests must remain identical on Windows and Unix checkouts.
+*.json text eol=lf

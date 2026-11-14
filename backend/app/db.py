@@ -7,7 +7,7 @@ from pathlib import Path
 import sqlite3
 
 from .config import Settings
-from .models import QuestionInput
+from .question_bank import load_bank, sync_bank
 
 
 def now_iso() -> str:
@@ -48,8 +48,9 @@ def load_content(directory: Path, filename: str, key: str | None = None):
     return value
 
 
-def initialize(settings: Settings) -> None:
+def initialize(settings: Settings) -> dict:
     settings.validate()
+    bank = load_bank(settings.content_dir)
     settings.database_path.parent.mkdir(parents=True, exist_ok=True)
     con = connect(settings)
     try:
@@ -67,24 +68,9 @@ def initialize(settings: Settings) -> None:
                     if statement.strip():
                         con.execute(statement)
                 con.execute("INSERT INTO schema_migrations(version,applied_at) VALUES(?,?)", (version, now_iso()))
-        raw_questions = load_content(settings.content_dir, "questions.json", "questions")
-        questions = [QuestionInput.model_validate(q).model_dump() for q in raw_questions]
-        ids = [q["id"] for q in questions]
-        if None in ids or len(set(ids)) != len(ids):
-            raise ValueError("Seed questions must have unique, non-null IDs.")
-        # Existing administrator changes are never silently overwritten on restart.
+        # All bank checks, current rows, immutable history and release state commit together.
         with transaction(con):
-            for question in questions:
-                question["version"] = question["version"] or 1
-                created = now_iso()
-                cur = con.execute(
-                    "INSERT OR IGNORE INTO questions(id,dimension,status,version,content_json,updated_at) VALUES(?,?,?,?,?,?)",
-                    (question["id"], question["dimension"], question["status"], question["version"], dump(question), created),
-                )
-                if cur.rowcount:
-                    con.execute(
-                        "INSERT INTO question_versions(question_id,version,content_json,created_at) VALUES(?,?,?,?)",
-                        (question["id"], question["version"], dump(question), created),
-                    )
+            sync_bank(con, bank, now_iso())
     finally:
         con.close()
+    return bank.catalog

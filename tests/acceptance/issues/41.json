@@ -1,0 +1,15 @@
+{
+  "required_tests": [
+    "test_assessment_flow.AssessmentFlowTests.test_authenticated_submission_lifecycle",
+    "test_assessments.AssessmentTests.test_default_42_question_bank_supplies_blueprint",
+    "test_assessments.AssessmentTests.test_draft_only_bank_does_not_create_an_attempt",
+    "test_assessments.AssessmentTests.test_drafts_and_archived_never_replace_missing_published_layer",
+    "test_database.QuestionValidationTests.test_default_bank_manifest_and_published_quota",
+    "test_database.QuestionValidationTests.test_published_question_requires_sources",
+    "test_question_bank_sync.QuestionBankSyncTests.test_legacy_draft_bank_upgrades_and_creates_assessment",
+    "test_question_bank_sync.QuestionBankSyncTests.test_add_update_archive_and_restart_are_idempotent",
+    "test_question_bank_sync.QuestionBankSyncTests.test_same_question_version_conflict_rolls_back_other_updates",
+    "test_question_bank_sync.QuestionBankSyncTests.test_sync_preserves_users_sessions_and_attempt_snapshots",
+    "test_reset_local_db.ResetLocalDatabaseTests.test_reset_keeps_backup_and_reinitializes_current_bank"
+  ]
+}
