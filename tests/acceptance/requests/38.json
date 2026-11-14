@@ -1,0 +1,19 @@
+{
+  "required_tests": [
+    "test_account_acceptance.AccountAcceptanceTests.test_register_logout_and_login_preserve_identity",
+    "test_account_acceptance.AccountAcceptanceTests.test_duplicate_registration_and_wrong_password_leave_account_usable",
+    "test_account_acceptance.AccountAcceptanceTests.test_logout_requires_own_csrf_and_revokes_only_own_session",
+    "test_account_acceptance.AccountAcceptanceTests.test_invalid_registration_does_not_reserve_email_or_grant_role",
+    "test_account_acceptance.AccountAcceptanceTests.test_account_survives_application_recreation",
+    "test_account_acceptance.AccountAcceptanceTests.test_catalog_exposes_six_dimensions_and_only_backend_is_open",
+    "test_scoring_acceptance.ScoringAcceptanceTests.test_mixed_answers_match_hand_calculated_score_and_weak_order",
+    "test_scoring_acceptance.ScoringAcceptanceTests.test_all_correct_and_all_wrong_reach_score_boundaries",
+    "test_scoring_acceptance.ScoringAcceptanceTests.test_multiple_choice_requires_exact_set_without_order_dependency",
+    "test_scoring_acceptance.ScoringAcceptanceTests.test_each_question_can_be_the_only_correct_answer",
+    "test_scoring_acceptance.ScoringAcceptanceTests.test_each_question_can_be_the_only_wrong_answer",
+    "test_scoring_acceptance.ScoringAcceptanceTests.test_equal_correct_counts_with_different_difficulties",
+    "test_scoring_acceptance.ScoringAcceptanceTests.test_dimension_score_uses_its_own_question_count",
+    "test_scoring_acceptance.ScoringAcceptanceTests.test_unanswered_question_cannot_produce_report",
+    "test_assessment_acceptance.AssessmentAcceptanceTests.test_saved_draft_survives_rejected_submission_and_completes_with_correct_report"
+  ]
+}

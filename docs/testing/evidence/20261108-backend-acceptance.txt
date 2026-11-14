@@ -1,0 +1,270 @@
+SkillProof backend acceptance — 2026-11-08
+Business code: 03b74f7779cecc36de566bed4dbb345eea436814
+Branch: test/12-alpha-acceptance
+Platform: macOS 26.4.1 arm64; Python 3.13.9; SQLite 3.50.4
+Dependencies: backend/requirements-test.txt; uv pip check passed (26 packages)
+Test source SHA-256:
+tests/acceptance/test_account_acceptance.py: 80116df4a0a2a7c9df93f8903fc1b180fd13f92c6c6232a8d99f819b21843539
+tests/acceptance/test_scoring_acceptance.py: 08fa417d31ab7ebfb5a2b6279e149e17c75c935f8bde47c754f5370bae83ed0e
+Absolute virtual environment path is replaced with <test-environment>.
+Started: 2026-11-08T22:40:29+08:00
+Command: python -m unittest discover -s backend/tests -v
+<test-environment>/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_anonymous_expired_session_and_logout_revocation (test_auth_catalog.AuthCatalogTests.test_anonymous_expired_session_and_logout_revocation) ... ok
+test_catalog_matches_t03_and_does_not_expose_questions (test_auth_catalog.AuthCatalogTests.test_catalog_matches_t03_and_does_not_expose_questions) ... ok
+test_duplicate_email_and_bad_login (test_auth_catalog.AuthCatalogTests.test_duplicate_email_and_bad_login) ... ok
+test_expected_api_routes (test_auth_catalog.AuthCatalogTests.test_expected_api_routes) ... ok
+test_invalid_input_is_safe_and_uniform (test_auth_catalog.AuthCatalogTests.test_invalid_input_is_safe_and_uniform) ... ok
+test_origin_host_and_request_limit (test_auth_catalog.AuthCatalogTests.test_origin_host_and_request_limit) ... ok
+test_registration_refresh_and_hash (test_auth_catalog.AuthCatalogTests.test_registration_refresh_and_hash) ... ok
+test_registration_requires_a_visible_name (test_auth_catalog.AuthCatalogTests.test_registration_requires_a_visible_name) ... ok
+test_data_survives_new_process_and_reinitialization (test_database.DatabaseTests.test_data_survives_new_process_and_reinitialization) ... ok
+test_duplicate_email_rejected (test_database.DatabaseTests.test_duplicate_email_rejected) ... ok
+test_empty_directory_initialization (test_database.DatabaseTests.test_empty_directory_initialization) ... ok
+test_foreign_keys_reject_missing_owner (test_database.DatabaseTests.test_foreign_keys_reject_missing_owner) ... ok
+test_multiple_submissions_and_new_active_attempt_allowed (test_database.DatabaseTests.test_multiple_submissions_and_new_active_attempt_allowed) ... ok
+test_one_active_attempt_per_user_matches_current_contract (test_database.DatabaseTests.test_one_active_attempt_per_user_matches_current_contract) ... ok
+test_owner_scoped_query_and_cascade_preserve_other_user (test_database.DatabaseTests.test_owner_scoped_query_and_cascade_preserve_other_user) ... ok
+test_question_edit_does_not_change_stored_snapshots (test_database.DatabaseTests.test_question_edit_does_not_change_stored_snapshots) ... ok
+test_seed_and_migrations_are_idempotent (test_database.DatabaseTests.test_seed_and_migrations_are_idempotent) ... ok
+test_seed_does_not_overwrite_existing_question (test_database.DatabaseTests.test_seed_does_not_overwrite_existing_question) ... ok
+test_status_report_timestamp_consistency (test_database.DatabaseTests.test_status_report_timestamp_consistency) ... ok
+test_t03_drafts_preserve_internal_fields_in_both_tables (test_database.DatabaseTests.test_t03_drafts_preserve_internal_fields_in_both_tables) ... ok
+test_transaction_rolls_back_partial_write (test_database.DatabaseTests.test_transaction_rolls_back_partial_write) ... ok
+test_draft_accepts_empty_sources_and_retains_topic_id (test_database.QuestionValidationTests.test_draft_accepts_empty_sources_and_retains_topic_id) ... ok
+test_published_question_requires_sources (test_database.QuestionValidationTests.test_published_question_requires_sources) ... ok
+test_unknown_fields_and_blank_topic_id_are_rejected (test_database.QuestionValidationTests.test_unknown_fields_and_blank_topic_id_are_rejected) ... ok
+test_anonymous_and_forged_cookie_cannot_read (test_reports.ReportTests.test_anonymous_and_forged_cookie_cannot_read) ... ok
+test_corrupt_snapshot_fails_without_leaking_content (test_reports.ReportTests.test_corrupt_snapshot_fails_without_leaking_content) ... ok
+test_expired_session_cannot_read (test_reports.ReportTests.test_expired_session_cannot_read) ... ok
+test_health_still_works (test_reports.ReportTests.test_health_still_works) ... ok
+test_logout_revokes_report_access_even_if_cookie_is_replayed (test_reports.ReportTests.test_logout_revokes_report_access_even_if_cookie_is_replayed) ... ok
+test_missing_and_sql_injection_are_404 (test_reports.ReportTests.test_missing_and_sql_injection_are_404) ... ok
+test_other_user_cannot_read_even_with_forged_owner_identity (test_reports.ReportTests.test_other_user_cannot_read_even_with_forged_owner_identity) ... ok
+test_owner_gets_saved_report_with_no_cache_or_private_fields (test_reports.ReportTests.test_owner_gets_saved_report_with_no_cache_or_private_fields) ... ok
+test_saved_report_survives_app_restart_and_real_login (test_reports.ReportTests.test_saved_report_survives_app_restart_and_real_login) ... ok
+test_snapshot_survives_question_and_attempt_source_changes (test_reports.ReportTests.test_snapshot_survives_question_and_attempt_source_changes) ... ok
+test_unavailable_storage_returns_safe_503 (test_reports.ReportTests.test_unavailable_storage_returns_safe_503) ... Database operation failed: OperationalError
+ok
+test_unsubmitted_is_409 (test_reports.ReportTests.test_unsubmitted_is_409) ... ok
+test_30_questions_five_correct_in_one_dimension_is_100 (test_scoring.ScoringTests.test_30_questions_five_correct_in_one_dimension_is_100) ... ok
+test_all_correct_and_no_mutation_or_internal_fields (test_scoring.ScoringTests.test_all_correct_and_no_mutation_or_internal_fields) ... ok
+test_all_wrong_and_stable_tie_order (test_scoring.ScoringTests.test_all_wrong_and_stable_tie_order) ... ok
+test_bad_snapshot_or_answers_fail (test_scoring.ScoringTests.test_bad_snapshot_or_answers_fail) ... ok
+test_difficulty_weights_normalized_to_100 (test_scoring.ScoringTests.test_difficulty_weights_normalized_to_100) ... ok
+test_each_dimension_fraction_against_exact_oracle (test_scoring.ScoringTests.test_each_dimension_fraction_against_exact_oracle) ... ok
+test_hard_multiple_choice_has_no_partial_weight_credit (test_scoring.ScoringTests.test_hard_multiple_choice_has_no_partial_weight_credit) ... ok
+test_missing_dimension_and_empty_paper_fail (test_scoring.ScoringTests.test_missing_dimension_and_empty_paper_fail) ... ok
+test_mixed_difficulty_extremes_and_dimensions_remain_count_based (test_scoring.ScoringTests.test_mixed_difficulty_extremes_and_dimensions_remain_count_based) ... ok
+test_multiple_exact_set (test_scoring.ScoringTests.test_multiple_exact_set) ... ok
+test_precision_and_weak_order (test_scoring.ScoringTests.test_precision_and_weak_order) ... ok
+test_same_difficulty_items_with_unequal_dimension_sizes (test_scoring.ScoringTests.test_same_difficulty_items_with_unequal_dimension_sizes) ... ok
+test_weak_order_uses_unrounded_values (test_scoring.ScoringTests.test_weak_order_uses_unrounded_values) ... ok
+
+----------------------------------------------------------------------
+Ran 49 tests in 2.290s
+
+OK
+Exit code: 0
+
+
+Started: 2026-11-08T22:40:34+08:00
+Command: python -m unittest discover -s tests/acceptance -v
+<test-environment>/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_account_survives_application_recreation (test_account_acceptance.AccountAcceptanceTests.test_account_survives_application_recreation) ... ok
+test_catalog_exposes_six_dimensions_and_only_backend_is_open (test_account_acceptance.AccountAcceptanceTests.test_catalog_exposes_six_dimensions_and_only_backend_is_open) ... ok
+test_duplicate_registration_and_wrong_password_leave_account_usable (test_account_acceptance.AccountAcceptanceTests.test_duplicate_registration_and_wrong_password_leave_account_usable) ... ok
+test_invalid_registration_does_not_reserve_email_or_grant_role (test_account_acceptance.AccountAcceptanceTests.test_invalid_registration_does_not_reserve_email_or_grant_role) ... ok
+test_logout_requires_own_csrf_and_revokes_only_own_session (test_account_acceptance.AccountAcceptanceTests.test_logout_requires_own_csrf_and_revokes_only_own_session) ... ok
+test_register_logout_and_login_preserve_identity (test_account_acceptance.AccountAcceptanceTests.test_register_logout_and_login_preserve_identity) ... ok
+test_empty_or_interrupted_discovery_fails (test_qa_checks.QACheckTests.test_empty_or_interrupted_discovery_fails) ... ok
+test_exit_during_setup_or_cleanup_fails (test_qa_checks.QACheckTests.test_exit_during_setup_or_cleanup_fails) ... ok
+test_failure_outside_required_list_still_blocks (test_qa_checks.QACheckTests.test_failure_outside_required_list_still_blocks) ... ok
+test_invalid_pr_number_fails (test_qa_checks.QACheckTests.test_invalid_pr_number_fails) ... ok
+test_invalid_registration_fails (test_qa_checks.QACheckTests.test_invalid_registration_fails) ... ok
+test_missing_registration_fails (test_qa_checks.QACheckTests.test_missing_registration_fails) ... ok
+test_registered_test_passes_when_it_runs_successfully (test_qa_checks.QACheckTests.test_registered_test_passes_when_it_runs_successfully) ... ok
+test_required_failure_skip_or_expected_failure_blocks (test_qa_checks.QACheckTests.test_required_failure_skip_or_expected_failure_blocks) ... ok
+test_required_test_must_actually_run (test_qa_checks.QACheckTests.test_required_test_must_actually_run) ... ok
+test_all_correct_and_all_wrong_reach_score_boundaries (test_scoring_acceptance.ScoringAcceptanceTests.test_all_correct_and_all_wrong_reach_score_boundaries) ... ok
+test_dimension_score_uses_its_own_question_count (test_scoring_acceptance.ScoringAcceptanceTests.test_dimension_score_uses_its_own_question_count) ... ok
+test_mixed_answers_match_hand_calculated_score_and_weak_order (test_scoring_acceptance.ScoringAcceptanceTests.test_mixed_answers_match_hand_calculated_score_and_weak_order) ... ok
+test_multiple_choice_requires_exact_set_without_order_dependency (test_scoring_acceptance.ScoringAcceptanceTests.test_multiple_choice_requires_exact_set_without_order_dependency) ... ok
+test_unanswered_question_cannot_produce_report (test_scoring_acceptance.ScoringAcceptanceTests.test_unanswered_question_cannot_produce_report) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 1.947s
+
+OK
+Exit code: 0
+
+Scoring combinations regression
+Started: 2026-11-08T23:30:48+08:00
+Business code: 03b74f7779cecc36de566bed4dbb345eea436814
+Command: python -m unittest discover -s tests/acceptance -v
+Test source SHA-256:
+tests/acceptance/test_account_acceptance.py: 80116df4a0a2a7c9df93f8903fc1b180fd13f92c6c6232a8d99f819b21843539
+tests/acceptance/test_scoring_acceptance.py: 0d906d615449a123f07d9b60df6d7ff88061509c878972e0a5caef7b7416ad66
+
+<test-environment>/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_account_survives_application_recreation (test_account_acceptance.AccountAcceptanceTests.test_account_survives_application_recreation) ... ok
+test_catalog_exposes_six_dimensions_and_only_backend_is_open (test_account_acceptance.AccountAcceptanceTests.test_catalog_exposes_six_dimensions_and_only_backend_is_open) ... ok
+test_duplicate_registration_and_wrong_password_leave_account_usable (test_account_acceptance.AccountAcceptanceTests.test_duplicate_registration_and_wrong_password_leave_account_usable) ... ok
+test_invalid_registration_does_not_reserve_email_or_grant_role (test_account_acceptance.AccountAcceptanceTests.test_invalid_registration_does_not_reserve_email_or_grant_role) ... ok
+test_logout_requires_own_csrf_and_revokes_only_own_session (test_account_acceptance.AccountAcceptanceTests.test_logout_requires_own_csrf_and_revokes_only_own_session) ... ok
+test_register_logout_and_login_preserve_identity (test_account_acceptance.AccountAcceptanceTests.test_register_logout_and_login_preserve_identity) ... ok
+test_empty_or_interrupted_discovery_fails (test_qa_checks.QACheckTests.test_empty_or_interrupted_discovery_fails) ... ok
+test_exit_during_setup_or_cleanup_fails (test_qa_checks.QACheckTests.test_exit_during_setup_or_cleanup_fails) ... ok
+test_failure_outside_required_list_still_blocks (test_qa_checks.QACheckTests.test_failure_outside_required_list_still_blocks) ... ok
+test_invalid_pr_number_fails (test_qa_checks.QACheckTests.test_invalid_pr_number_fails) ... ok
+test_invalid_registration_fails (test_qa_checks.QACheckTests.test_invalid_registration_fails) ... ok
+test_missing_registration_fails (test_qa_checks.QACheckTests.test_missing_registration_fails) ... ok
+test_registered_test_passes_when_it_runs_successfully (test_qa_checks.QACheckTests.test_registered_test_passes_when_it_runs_successfully) ... ok
+test_required_failure_skip_or_expected_failure_blocks (test_qa_checks.QACheckTests.test_required_failure_skip_or_expected_failure_blocks) ... ok
+test_required_test_must_actually_run (test_qa_checks.QACheckTests.test_required_test_must_actually_run) ... ok
+test_all_correct_and_all_wrong_reach_score_boundaries (test_scoring_acceptance.ScoringAcceptanceTests.test_all_correct_and_all_wrong_reach_score_boundaries) ... ok
+test_dimension_score_uses_its_own_question_count (test_scoring_acceptance.ScoringAcceptanceTests.test_dimension_score_uses_its_own_question_count) ... ok
+test_each_question_can_be_the_only_correct_answer (test_scoring_acceptance.ScoringAcceptanceTests.test_each_question_can_be_the_only_correct_answer) ... ok
+test_each_question_can_be_the_only_wrong_answer (test_scoring_acceptance.ScoringAcceptanceTests.test_each_question_can_be_the_only_wrong_answer) ... ok
+test_equal_correct_counts_with_different_difficulties (test_scoring_acceptance.ScoringAcceptanceTests.test_equal_correct_counts_with_different_difficulties) ... ok
+test_mixed_answers_match_hand_calculated_score_and_weak_order (test_scoring_acceptance.ScoringAcceptanceTests.test_mixed_answers_match_hand_calculated_score_and_weak_order) ... ok
+test_multiple_choice_requires_exact_set_without_order_dependency (test_scoring_acceptance.ScoringAcceptanceTests.test_multiple_choice_requires_exact_set_without_order_dependency) ... ok
+test_unanswered_question_cannot_produce_report (test_scoring_acceptance.ScoringAcceptanceTests.test_unanswered_question_cannot_produce_report) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 4.082s
+
+OK
+
+Exit code: 0
+
+Regression after integrating the merged assessment PR
+Started: 2026-11-08T23:58:27+08:00
+Business code: 17e7d5028e9e2dee0c0e45412759f9e53baf001c
+Test source SHA-256:
+tests/acceptance/test_account_acceptance.py: 80116df4a0a2a7c9df93f8903fc1b180fd13f92c6c6232a8d99f819b21843539
+tests/acceptance/test_scoring_acceptance.py: 0d906d615449a123f07d9b60df6d7ff88061509c878972e0a5caef7b7416ad66
+tests/acceptance/test_assessment_flow.py: 857d1820c045ae902aa553d971ea835d3a51bd8f4c593798fc069e66b3572584
+
+Command: python -m unittest discover -s backend/tests -v
+<test-environment>/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_authentication_csrf_and_cross_site_rejection (test_assessments.AssessmentTests.test_authentication_csrf_and_cross_site_rejection) ... ok
+test_complete_submit_persists_report_time_and_model_together (test_assessments.AssessmentTests.test_complete_submit_persists_report_time_and_model_together) ... ok
+test_concurrent_create_returns_one_attempt (test_assessments.AssessmentTests.test_concurrent_create_returns_one_attempt) ... ok
+test_concurrent_submit_scores_once (test_assessments.AssessmentTests.test_concurrent_submit_scores_once) ... ok
+test_create_uuid_blueprint_and_private_projection (test_assessments.AssessmentTests.test_create_uuid_blueprint_and_private_projection) ... ok
+test_current_42_question_bank_can_supply_blueprint_when_published (test_assessments.AssessmentTests.test_current_42_question_bank_can_supply_blueprint_when_published) ... ok
+test_current_draft_bank_does_not_create_an_attempt (test_assessments.AssessmentTests.test_current_draft_bank_does_not_create_an_attempt) ... ok
+test_different_open_role_conflicts_with_active_attempt (test_assessments.AssessmentTests.test_different_open_role_conflicts_with_active_attempt) ... ok
+test_draft_merge_clear_and_recover_in_new_client (test_assessments.AssessmentTests.test_draft_merge_clear_and_recover_in_new_client) ... ok
+test_drafts_and_archived_never_replace_missing_published_layer (test_assessments.AssessmentTests.test_drafts_and_archived_never_replace_missing_published_layer) ... ok
+test_duplicate_submit_and_post_submit_edit (test_assessments.AssessmentTests.test_duplicate_submit_and_post_submit_edit) ... ok
+test_existing_attempt_retains_old_blueprint_and_hard_snapshot (test_assessments.AssessmentTests.test_existing_attempt_retains_old_blueprint_and_hard_snapshot) ... ok
+test_hard_questions_are_not_selected_by_current_blueprint (test_assessments.AssessmentTests.test_hard_questions_are_not_selected_by_current_blueprint) ... ok
+test_insufficient_easy_candidates_do_not_duplicate_a_question (test_assessments.AssessmentTests.test_insufficient_easy_candidates_do_not_duplicate_a_question) ... ok
+test_invalid_answers_leave_all_saved_answers_unchanged (test_assessments.AssessmentTests.test_invalid_answers_leave_all_saved_answers_unchanged) ... ok
+test_malformed_published_question_rejected_atomically (test_assessments.AssessmentTests.test_malformed_published_question_rejected_atomically) ... ok
+test_nested_internal_metadata_never_leaks (test_assessments.AssessmentTests.test_nested_internal_metadata_never_leaks) ... ok
+test_new_attempt_after_submit_preserves_old_report_and_tracks_reuse (test_assessments.AssessmentTests.test_new_attempt_after_submit_preserves_old_report_and_tracks_reuse) ... ok
+test_other_user_cannot_read_save_or_submit (test_assessments.AssessmentTests.test_other_user_cannot_read_save_or_submit) ... ok
+test_same_role_resumes_existing_attempt (test_assessments.AssessmentTests.test_same_role_resumes_existing_attempt) ... ok
+test_saved_snapshot_survives_current_bank_edits (test_assessments.AssessmentTests.test_saved_snapshot_survives_current_bank_edits) ... ok
+test_scoring_failure_rolls_back_and_keeps_saved_answers (test_assessments.AssessmentTests.test_scoring_failure_rolls_back_and_keeps_saved_answers) ... ok
+test_t07_scoring_error_returns_422_and_preserves_draft (test_assessments.AssessmentTests.test_t07_scoring_error_returns_422_and_preserves_draft) ... ok
+test_unfinished_submit_preserves_draft_and_never_scores (test_assessments.AssessmentTests.test_unfinished_submit_preserves_draft_and_never_scores) ... ok
+test_unknown_closed_and_client_owned_fields_rejected (test_assessments.AssessmentTests.test_unknown_closed_and_client_owned_fields_rejected) ... ok
+test_unseen_candidates_are_preferred (test_assessments.AssessmentTests.test_unseen_candidates_are_preferred) ... ok
+test_anonymous_expired_session_and_logout_revocation (test_auth_catalog.AuthCatalogTests.test_anonymous_expired_session_and_logout_revocation) ... ok
+test_catalog_matches_t03_and_does_not_expose_questions (test_auth_catalog.AuthCatalogTests.test_catalog_matches_t03_and_does_not_expose_questions) ... ok
+test_duplicate_email_and_bad_login (test_auth_catalog.AuthCatalogTests.test_duplicate_email_and_bad_login) ... ok
+test_expected_api_routes (test_auth_catalog.AuthCatalogTests.test_expected_api_routes) ... ok
+test_invalid_input_is_safe_and_uniform (test_auth_catalog.AuthCatalogTests.test_invalid_input_is_safe_and_uniform) ... ok
+test_origin_host_and_request_limit (test_auth_catalog.AuthCatalogTests.test_origin_host_and_request_limit) ... ok
+test_registration_refresh_and_hash (test_auth_catalog.AuthCatalogTests.test_registration_refresh_and_hash) ... ok
+test_registration_requires_a_visible_name (test_auth_catalog.AuthCatalogTests.test_registration_requires_a_visible_name) ... ok
+test_data_survives_new_process_and_reinitialization (test_database.DatabaseTests.test_data_survives_new_process_and_reinitialization) ... ok
+test_duplicate_email_rejected (test_database.DatabaseTests.test_duplicate_email_rejected) ... ok
+test_empty_directory_initialization (test_database.DatabaseTests.test_empty_directory_initialization) ... ok
+test_foreign_keys_reject_missing_owner (test_database.DatabaseTests.test_foreign_keys_reject_missing_owner) ... ok
+test_multiple_submissions_and_new_active_attempt_allowed (test_database.DatabaseTests.test_multiple_submissions_and_new_active_attempt_allowed) ... ok
+test_one_active_attempt_per_user_matches_current_contract (test_database.DatabaseTests.test_one_active_attempt_per_user_matches_current_contract) ... ok
+test_owner_scoped_query_and_cascade_preserve_other_user (test_database.DatabaseTests.test_owner_scoped_query_and_cascade_preserve_other_user) ... ok
+test_question_edit_does_not_change_stored_snapshots (test_database.DatabaseTests.test_question_edit_does_not_change_stored_snapshots) ... ok
+test_seed_and_migrations_are_idempotent (test_database.DatabaseTests.test_seed_and_migrations_are_idempotent) ... ok
+test_seed_does_not_overwrite_existing_question (test_database.DatabaseTests.test_seed_does_not_overwrite_existing_question) ... ok
+test_status_report_timestamp_consistency (test_database.DatabaseTests.test_status_report_timestamp_consistency) ... ok
+test_t03_drafts_preserve_internal_fields_in_both_tables (test_database.DatabaseTests.test_t03_drafts_preserve_internal_fields_in_both_tables) ... ok
+test_transaction_rolls_back_partial_write (test_database.DatabaseTests.test_transaction_rolls_back_partial_write) ... ok
+test_draft_accepts_empty_sources_and_retains_topic_id (test_database.QuestionValidationTests.test_draft_accepts_empty_sources_and_retains_topic_id) ... ok
+test_published_question_requires_sources (test_database.QuestionValidationTests.test_published_question_requires_sources) ... ok
+test_unknown_fields_and_blank_topic_id_are_rejected (test_database.QuestionValidationTests.test_unknown_fields_and_blank_topic_id_are_rejected) ... ok
+test_anonymous_and_forged_cookie_cannot_read (test_reports.ReportTests.test_anonymous_and_forged_cookie_cannot_read) ... ok
+test_corrupt_snapshot_fails_without_leaking_content (test_reports.ReportTests.test_corrupt_snapshot_fails_without_leaking_content) ... ok
+test_expired_session_cannot_read (test_reports.ReportTests.test_expired_session_cannot_read) ... ok
+test_health_still_works (test_reports.ReportTests.test_health_still_works) ... ok
+test_logout_revokes_report_access_even_if_cookie_is_replayed (test_reports.ReportTests.test_logout_revokes_report_access_even_if_cookie_is_replayed) ... ok
+test_missing_and_sql_injection_are_404 (test_reports.ReportTests.test_missing_and_sql_injection_are_404) ... ok
+test_other_user_cannot_read_even_with_forged_owner_identity (test_reports.ReportTests.test_other_user_cannot_read_even_with_forged_owner_identity) ... ok
+test_owner_gets_saved_report_with_no_cache_or_private_fields (test_reports.ReportTests.test_owner_gets_saved_report_with_no_cache_or_private_fields) ... ok
+test_saved_report_survives_app_restart_and_real_login (test_reports.ReportTests.test_saved_report_survives_app_restart_and_real_login) ... ok
+test_snapshot_survives_question_and_attempt_source_changes (test_reports.ReportTests.test_snapshot_survives_question_and_attempt_source_changes) ... ok
+test_unavailable_storage_returns_safe_503 (test_reports.ReportTests.test_unavailable_storage_returns_safe_503) ... Database operation failed: OperationalError
+ok
+test_unsubmitted_is_409 (test_reports.ReportTests.test_unsubmitted_is_409) ... ok
+test_30_questions_five_correct_in_one_dimension_is_100 (test_scoring.ScoringTests.test_30_questions_five_correct_in_one_dimension_is_100) ... ok
+test_all_correct_and_no_mutation_or_internal_fields (test_scoring.ScoringTests.test_all_correct_and_no_mutation_or_internal_fields) ... ok
+test_all_wrong_and_stable_tie_order (test_scoring.ScoringTests.test_all_wrong_and_stable_tie_order) ... ok
+test_bad_snapshot_or_answers_fail (test_scoring.ScoringTests.test_bad_snapshot_or_answers_fail) ... ok
+test_difficulty_weights_normalized_to_100 (test_scoring.ScoringTests.test_difficulty_weights_normalized_to_100) ... ok
+test_each_dimension_fraction_against_exact_oracle (test_scoring.ScoringTests.test_each_dimension_fraction_against_exact_oracle) ... ok
+test_hard_multiple_choice_has_no_partial_weight_credit (test_scoring.ScoringTests.test_hard_multiple_choice_has_no_partial_weight_credit) ... ok
+test_missing_dimension_and_empty_paper_fail (test_scoring.ScoringTests.test_missing_dimension_and_empty_paper_fail) ... ok
+test_mixed_difficulty_extremes_and_dimensions_remain_count_based (test_scoring.ScoringTests.test_mixed_difficulty_extremes_and_dimensions_remain_count_based) ... ok
+test_multiple_exact_set (test_scoring.ScoringTests.test_multiple_exact_set) ... ok
+test_precision_and_weak_order (test_scoring.ScoringTests.test_precision_and_weak_order) ... ok
+test_same_difficulty_items_with_unequal_dimension_sizes (test_scoring.ScoringTests.test_same_difficulty_items_with_unequal_dimension_sizes) ... ok
+test_weak_order_uses_unrounded_values (test_scoring.ScoringTests.test_weak_order_uses_unrounded_values) ... ok
+
+----------------------------------------------------------------------
+Ran 75 tests in 3.763s
+
+OK
+Exit code: 0
+
+Command: python -m unittest discover -s tests/acceptance -v
+<test-environment>/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+  from starlette.testclient import TestClient as TestClient  # noqa
+test_account_survives_application_recreation (test_account_acceptance.AccountAcceptanceTests.test_account_survives_application_recreation) ... ok
+test_catalog_exposes_six_dimensions_and_only_backend_is_open (test_account_acceptance.AccountAcceptanceTests.test_catalog_exposes_six_dimensions_and_only_backend_is_open) ... ok
+test_duplicate_registration_and_wrong_password_leave_account_usable (test_account_acceptance.AccountAcceptanceTests.test_duplicate_registration_and_wrong_password_leave_account_usable) ... ok
+test_invalid_registration_does_not_reserve_email_or_grant_role (test_account_acceptance.AccountAcceptanceTests.test_invalid_registration_does_not_reserve_email_or_grant_role) ... ok
+test_logout_requires_own_csrf_and_revokes_only_own_session (test_account_acceptance.AccountAcceptanceTests.test_logout_requires_own_csrf_and_revokes_only_own_session) ... ok
+test_register_logout_and_login_preserve_identity (test_account_acceptance.AccountAcceptanceTests.test_register_logout_and_login_preserve_identity) ... ok
+test_authenticated_submission_lifecycle (test_assessment_flow.AssessmentFlowTests.test_authenticated_submission_lifecycle) ... ok
+test_empty_or_interrupted_discovery_fails (test_qa_checks.QACheckTests.test_empty_or_interrupted_discovery_fails) ... ok
+test_exit_during_setup_or_cleanup_fails (test_qa_checks.QACheckTests.test_exit_during_setup_or_cleanup_fails) ... ok
+test_failure_outside_required_list_still_blocks (test_qa_checks.QACheckTests.test_failure_outside_required_list_still_blocks) ... ok
+test_invalid_pr_number_fails (test_qa_checks.QACheckTests.test_invalid_pr_number_fails) ... ok
+test_invalid_registration_fails (test_qa_checks.QACheckTests.test_invalid_registration_fails) ... ok
+test_missing_registration_fails (test_qa_checks.QACheckTests.test_missing_registration_fails) ... ok
+test_registered_test_passes_when_it_runs_successfully (test_qa_checks.QACheckTests.test_registered_test_passes_when_it_runs_successfully) ... ok
+test_required_failure_skip_or_expected_failure_blocks (test_qa_checks.QACheckTests.test_required_failure_skip_or_expected_failure_blocks) ... ok
+test_required_test_must_actually_run (test_qa_checks.QACheckTests.test_required_test_must_actually_run) ... ok
+test_all_correct_and_all_wrong_reach_score_boundaries (test_scoring_acceptance.ScoringAcceptanceTests.test_all_correct_and_all_wrong_reach_score_boundaries) ... ok
+test_dimension_score_uses_its_own_question_count (test_scoring_acceptance.ScoringAcceptanceTests.test_dimension_score_uses_its_own_question_count) ... ok
+test_each_question_can_be_the_only_correct_answer (test_scoring_acceptance.ScoringAcceptanceTests.test_each_question_can_be_the_only_correct_answer) ... ok
+test_each_question_can_be_the_only_wrong_answer (test_scoring_acceptance.ScoringAcceptanceTests.test_each_question_can_be_the_only_wrong_answer) ... ok
+test_equal_correct_counts_with_different_difficulties (test_scoring_acceptance.ScoringAcceptanceTests.test_equal_correct_counts_with_different_difficulties) ... ok
+test_mixed_answers_match_hand_calculated_score_and_weak_order (test_scoring_acceptance.ScoringAcceptanceTests.test_mixed_answers_match_hand_calculated_score_and_weak_order) ... ok
+test_multiple_choice_requires_exact_set_without_order_dependency (test_scoring_acceptance.ScoringAcceptanceTests.test_multiple_choice_requires_exact_set_without_order_dependency) ... ok
+test_unanswered_question_cannot_produce_report (test_scoring_acceptance.ScoringAcceptanceTests.test_unanswered_question_cannot_produce_report) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 3.183s
+
+OK
+Exit code: 0
