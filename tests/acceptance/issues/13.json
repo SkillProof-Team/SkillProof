@@ -1,0 +1,13 @@
+{
+  "required_tests": [
+    "test_assessment_flow.AssessmentFlowTests.test_authenticated_submission_lifecycle",
+    "test_auth_catalog.AuthCatalogTests.test_registration_refresh_and_hash",
+    "test_auth_catalog.AuthCatalogTests.test_anonymous_expired_session_and_logout_revocation",
+    "test_database.DatabaseTests.test_data_survives_new_process_and_reinitialization",
+    "test_assessments.AssessmentTests.test_default_42_question_bank_supplies_blueprint",
+    "test_assessments.AssessmentTests.test_duplicate_submit_and_post_submit_edit",
+    "test_assessments.AssessmentTests.test_other_user_cannot_read_save_or_submit",
+    "test_reports.ReportTests.test_saved_report_survives_app_restart_and_real_login",
+    "test_question_bank_sync.QuestionBankSyncTests.test_sync_preserves_users_sessions_and_attempt_snapshots"
+  ]
+}
