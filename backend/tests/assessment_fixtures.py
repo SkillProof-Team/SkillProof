@@ -14,14 +14,11 @@ DIMENSIONS = (
 def write_assessment_bank(content: Path) -> None:
     """Create a bank that exactly fills the assessment blueprint."""
     content.mkdir()
-    tree = {
-        "role": {"id": "backend", "name": "后端开发", "description": "流程验收测试岗位"},
-        "dimensions": [
-            {"id": key, "name": name, "description": name,
-             "topics": [{"id": f"{key}.acceptance", "name": "流程验收样例"}]}
-            for key, name in DIMENSIONS
-        ],
-    }
+    tree_path = Path(__file__).resolve().parents[1] / "app" / "content" / "ability-tree.json"
+    tree = json.loads(tree_path.read_text(encoding="utf-8"))
+    tree["role"]["description"] = "流程验收测试岗位"
+    for dimension in tree["dimensions"]:
+        dimension["topics"].append({"id": f"{dimension['id']}.acceptance", "name": "流程验收样例"})
     questions = []
     for dimension, _ in DIMENSIONS:
         for suffix, difficulty, kind, correct in (

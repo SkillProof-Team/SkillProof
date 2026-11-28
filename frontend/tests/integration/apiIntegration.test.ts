@@ -104,8 +104,8 @@ function requireApiBase(): string {
   return apiBase.replace(/\/+$/, '')
 }
 
-async function completeBackendAttempt() {
-  const created = await createAttempt('backend')
+async function completeAttempt(roleId = 'backend') {
+  const created = await createAttempt(roleId)
   const reloaded = await getAttempt(created.id)
   expect(reloaded.id).toBe(created.id)
 
@@ -167,6 +167,38 @@ describe('API integration', () => {
     expect((await fetchWrongQuestions(query, new AbortController().signal)).items).toEqual([])
     await expect(fetchWrongDetail(item.id, new AbortController().signal)).rejects.toMatchObject({ status: 404 })
   })
+  it('creates and reports each open role with the released question bank', async () => {
+    installLiveBrowserFetch(requireApiBase())
+    const email = `roles-${crypto.randomUUID().slice(0, 8)}@example.invalid`
+    const registered = await registerUser(email, '多岗位集成测试', 'IntegrationPass123!')
+    setCsrfToken(registered.csrfToken)
+    const { roles } = await getCatalog()
+    const openRoles = roles.filter((role) => role.enabled)
+    expect(openRoles.map((role) => role.id)).toEqual(['backend', 'frontend', 'algorithm', 'qa'])
+
+    const reports = []
+    for (const role of openRoles) {
+      const { reloaded, submitted } = await completeAttempt(role.id)
+      expect(reloaded.questionCount).toBe(18)
+      expect(submitted.roleId).toBe(role.id)
+      expect(submitted.roleName).toBe(role.name)
+      reports.push(submitted)
+    }
+    const history = await fetchHistory()
+    expect(history.ok).toBe(true)
+    if (!history.ok) throw new Error('Assessment history is unavailable')
+    expect(history.items).toHaveLength(openRoles.length)
+    for (const submitted of reports) {
+      const result = await fetchReport(submitted.id)
+      expect(result).toEqual({ ok: true, report: submitted })
+      if (!result.ok) throw new Error('Submitted report is unavailable')
+      const { report } = result
+      expect(history.items.find((entry) => entry.id === report.id)).toMatchObject({
+        roleId: report.roleId, roleName: report.roleName, score: report.score, dimensions: report.dimensions,
+      })
+    }
+  })
+
   it('loads catalog and surfaces real 401 errors for unauthenticated requests', async () => {
     installLiveBrowserFetch(requireApiBase())
 
@@ -236,7 +268,7 @@ describe('API integration', () => {
     const auth = await registerUser(`flow-${suffix}@example.invalid`, '测评测试用户', 'IntegrationPass123!')
     setCsrfToken(auth.csrfToken)
 
-    const { submitted } = await completeBackendAttempt()
+    const { submitted } = await completeAttempt()
 
     const reportResult = await fetchReport(submitted.id)
     expect(reportResult.ok).toBe(true)
@@ -260,8 +292,8 @@ describe('API integration', () => {
     const auth = await registerUser(`history-${suffix}@example.invalid`, '复测测试用户', 'IntegrationPass123!')
     setCsrfToken(auth.csrfToken)
 
-    const first = await completeBackendAttempt()
-    const second = await completeBackendAttempt()
+    const first = await completeAttempt()
+    const second = await completeAttempt()
     expect(second.submitted.id).not.toBe(first.submitted.id)
 
     const historyResult = await fetchHistory()

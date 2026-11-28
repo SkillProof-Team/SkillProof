@@ -18,12 +18,12 @@ from fastapi.testclient import TestClient
 BACKEND = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND))
 
-from app.assessment_dependencies import get_assessment_roles, get_report_builder  # noqa: E402
-from app.catalog import BLUEPRINT, DIMENSION_IDS, ROLE_MAP  # noqa: E402
+from app.assessment_dependencies import get_report_builder  # noqa: E402
+from app.catalog import BLUEPRINT, DIMENSION_IDS  # noqa: E402
 from app.config import Settings  # noqa: E402
 from app.db import connect, dump, initialize, now_iso  # noqa: E402
 from app.main import create_app  # noqa: E402
-from app.scoring import ScoringError  # noqa: E402
+from app.scoring import MODEL_VERSION, ROLE_WEIGHTED_MODEL_VERSION, ScoringError  # noqa: E402
 
 
 def report_fixture(attempt, submitted_at):
@@ -51,9 +51,10 @@ class AssessmentTests(unittest.TestCase):
                 question = next(q.copy() for q in seed if q["dimension"] == dimension)
                 question.update(
                     id=f"fixture-{dimension}-{difficulty}-{ordinal}", difficulty=difficulty, status="published",
+                    topicId=None,
                     type="multiple" if difficulty == "medium" else "single",
                     correct=["A", "B"] if difficulty == "medium" else ["A"],
-                    sources=[{"title": "Synthetic test fixture", "url": "https://example.com/fixture"}],
+                    sources=[{"title": "测评测试样例", "url": "https://example.com/fixture"}],
                 )
                 self.questions.append(question)
                 self.con.execute(
@@ -152,8 +153,15 @@ class AssessmentTests(unittest.TestCase):
         self.assertEqual(self.con.execute("SELECT COUNT(*) FROM attempts").fetchone()[0], 1)
 
     def test_unknown_closed_and_client_owned_fields_rejected(self):
-        for payload in ({"roleId": "unknown"}, {"roleId": "frontend"},
-                        {"roleId": "backend", "userId": "bob"}, {"roleId": "backend", "score": 100}):
+        frontend = next(role for role in self.app.state.catalog["roles"] if role["id"] == "frontend")
+        frontend.update(enabled=False)
+        closed = self.client.post("/api/attempts", json={"roleId": "frontend"}, headers=self.headers)
+        self.assertEqual(closed.status_code, 422)
+        self.assertEqual(closed.json()["detail"], "该岗位暂未开放测评")
+        missing = self.client.post("/api/attempts", json={"roleId": "unknown"}, headers=self.headers)
+        self.assertEqual(missing.status_code, 422)
+        self.assertIn("未找到该岗位的测评配置", missing.json()["detail"])
+        for payload in ({"roleId": ""}, {"roleId": "backend", "userId": "bob"}, {"roleId": "backend", "score": 100}):
             with self.subTest(payload=payload):
                 response = self.client.post("/api/attempts", json=payload, headers=self.headers)
                 self.assertEqual(response.status_code, 422)
@@ -161,9 +169,90 @@ class AssessmentTests(unittest.TestCase):
 
     def test_different_open_role_conflicts_with_active_attempt(self):
         self.create()
-        self.app.dependency_overrides[get_assessment_roles] = lambda: ROLE_MAP
         response = self.client.post("/api/attempts", json={"roleId": "frontend"}, headers=self.headers)
         self.assertEqual(response.status_code, 409)
+
+    def insert_role_topic_fixtures(self):
+        tree = json.loads((self.settings.content_dir / "ability-tree.json").read_text(encoding="utf-8"))
+        for dimension in tree["dimensions"]:
+            for topic in dimension["topics"]:
+                for difficulty in ("easy", "medium"):
+                    template = next(q for q in self.questions
+                                    if q["dimension"] == dimension["id"] and q["difficulty"] == difficulty)
+                    fixture = {**template, "id": f"fixture-topic-{topic['id'].replace('.', '-')}-{difficulty}",
+                               "topicId": topic["id"], "topic": topic["name"]}
+                    self.con.execute("INSERT INTO questions VALUES(?,?,?,?,?,?)",
+                                     (fixture["id"], fixture["dimension"], fixture["status"], fixture["version"],
+                                      dump(fixture), now_iso()))
+
+    def test_new_roles_sample_only_their_topics_with_full_quotas(self):
+        self.insert_role_topic_fixtures()
+        roles = self.client.get("/api/catalog").json()["roles"]
+        for role in roles:
+            if role["id"] == "backend":
+                continue
+            with self.subTest(role=role["id"]):
+                attempt = self.create(role["id"])
+                row = self.row(attempt)
+                snapshot = json.loads(row["questions_json"])
+                self.assertEqual(attempt["roleName"], role["name"])
+                self.assertEqual(len({q["id"] for q in snapshot}), 18)
+                self.assertEqual(Counter((q["dimension"], q["difficulty"]) for q in snapshot),
+                                 {(dim, level): count for dim in DIMENSION_IDS
+                                  for level, count in (("easy", 2), ("medium", 1))})
+                self.assertTrue(all(q["status"] == "published" and q["topicId"] in role["topicIds"][q["dimension"]]
+                                    for q in snapshot))
+                self.assertEqual(json.loads(row["role_json"])["weights"], role["weights"])
+                self.complete(attempt)
+                self.assertEqual(self.submit(attempt).status_code, 200)
+
+    def test_missing_role_topic_quota_does_not_use_other_topics_or_untagged_questions(self):
+        self.insert_role_topic_fixtures()
+        frontend = next(role for role in self.app.state.catalog["roles"] if role["id"] == "frontend")
+        for topic_id in frontend["topicIds"]["network"]:
+            fixture_id = f"fixture-topic-{topic_id.replace('.', '-')}-medium"
+            self.con.execute("UPDATE questions SET status='archived' WHERE id=?", (fixture_id,))
+        response = self.client.post("/api/attempts", json={"roleId": "frontend"}, headers=self.headers)
+        self.assertEqual(response.status_code, 503)
+        self.assertIn("该岗位知识点的已发布题库中计算机网络的medium题不足1道", response.json()["detail"])
+        self.assertEqual(self.con.execute("SELECT COUNT(*) FROM attempts").fetchone()[0], 0)
+        self.create("backend")
+
+    def test_switching_roles_keeps_saved_reports(self):
+        del self.app.dependency_overrides[get_report_builder]
+        self.insert_role_topic_fixtures()
+        reports = {}
+        for role_id, expected in (("backend", 8.33), ("frontend", 12.5), ("algorithm", 10), ("qa", 7.5)):
+            with self.subTest(role=role_id):
+                attempt = self.create(role_id)
+                row = self.row(attempt)
+                snapshot = json.loads(row["questions_json"])
+                answers = {
+                    q["id"]: q["correct"] if q["dimension"] == "programming" and q["difficulty"] == "medium"
+                    else ["D"]
+                    for q in snapshot
+                }
+                self.assertEqual(self.save(attempt, answers).status_code, 200)
+
+                response = self.submit(attempt)
+                self.assertEqual(response.status_code, 200, response.text)
+                report = response.json()
+                self.assertEqual((report["roleId"], report["roleName"], report["score"]),
+                                 (role_id, attempt["roleName"], expected))
+                self.assertEqual(report["dimensions"][0]["score"], 33.33)
+                self.assertEqual(report["modelVersion"], MODEL_VERSION if role_id == "backend" else ROLE_WEIGHTED_MODEL_VERSION)
+                reports[report["id"]] = report
+
+        history = self.client.get("/api/attempts/history").json()["items"]
+        self.assertEqual({item["id"] for item in history}, set(reports))
+        for item in history:
+            report = reports[item["id"]]
+            for field in ("roleId", "roleName", "score", "dimensions", "modelVersion"):
+                self.assertEqual(item[field], report[field])
+            filtered = self.client.get("/api/attempts/history", params={"roleId": item["roleId"]}).json()["items"]
+            self.assertEqual(filtered, [item])
+            self.assertEqual(self.client.get(f"/api/reports/{item['id']}").json(), report)
+            self.assertEqual(self.submit(item).json(), report)
 
     def test_drafts_and_archived_never_replace_missing_published_layer(self):
         for status in ("draft", "archived"):

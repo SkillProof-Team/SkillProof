@@ -14,10 +14,17 @@ from .assessment_dependencies import (
     get_report_builder,
     require_assessment_user,
 )
-from .catalog import BLUEPRINT, DIMENSION_IDS, DIMENSION_NAMES, MODEL_VERSION
+from .catalog import (
+    BLUEPRINT,
+    DEFAULT_ROLE_ID,
+    DIMENSION_IDS,
+    DIMENSION_NAMES,
+    MODEL_VERSION,
+)
 from .db import dump, now_iso, transaction
 from .models import AnswersInput, AttemptInput, QuestionInput
 from .reports import parse_report_snapshot, read_report, report_score_summary
+from .scoring import ROLE_WEIGHTED_MODEL_VERSION
 from .security import get_db
 from .wrongbook import collect_wrong_questions
 
@@ -68,8 +75,8 @@ def history_item(row) -> dict:
     }
 
 
-def sample_questions(con, user_id: str) -> tuple[list[dict], int]:
-    """Apply catalog quotas evenly across dimensions, using published questions."""
+def sample_questions(con, user_id: str, topic_ids: dict[str, list[str]] | None) -> tuple[list[dict], int]:
+    role_topics = {dimension: set(ids) for dimension, ids in topic_ids.items()} if topic_ids is not None else None
     strata = defaultdict(list)
     for row in con.execute("SELECT content_json FROM questions WHERE status='published' ORDER BY id"):
         try:
@@ -78,7 +85,10 @@ def sample_questions(con, user_id: str) -> tuple[list[dict], int]:
             raise HTTPException(503, "已发布题库数据无效，暂时无法创建测评") from exc
         if question["status"] != "published":
             raise HTTPException(503, "题库发布状态不一致，暂时无法创建测评")
-        strata[(question["dimension"], question["difficulty"])].append(question)
+        dimension = question["dimension"]
+        if role_topics is not None and question.get("topicId") not in role_topics.get(dimension, set()):
+            continue
+        strata[(dimension, question["difficulty"])].append(question)
     seen = {
         question["id"]
         for row in con.execute("SELECT questions_json FROM attempts WHERE user_id=?", (user_id,))
@@ -93,7 +103,8 @@ def sample_questions(con, user_id: str) -> tuple[list[dict], int]:
                 continue
             candidates = strata[(dimension, difficulty)]
             if len(candidates) < count:
-                raise HTTPException(503, f"已发布题库中{DIMENSION_NAMES[dimension]}的{difficulty}题不足{count}道，暂时无法创建测评")
+                prefix = "已发布题库中" if role_topics is None else "该岗位知识点的已发布题库中"
+                raise HTTPException(503, f"{prefix}{DIMENSION_NAMES[dimension]}的{difficulty}题不足{count}道，暂时无法创建测评")
             unseen = [q for q in candidates if q["id"] not in seen]
             selected = rng.sample(unseen, min(count, len(unseen)))
             selected_ids = {q["id"] for q in selected}
@@ -110,6 +121,8 @@ def start_attempt(
 ):
     role = roles.get(payload.roleId)
     if role is None:
+        raise HTTPException(422, "未找到该岗位的测评配置，请重新选择岗位")
+    if not role["enabled"]:
         raise HTTPException(422, "该岗位暂未开放测评")
     with transaction(con):
         active = con.execute("SELECT * FROM attempts WHERE user_id=? AND status='in_progress'", (user_id,)).fetchone()
@@ -117,14 +130,19 @@ def start_attempt(
             if active["role_id"] != payload.roleId:
                 raise HTTPException(409, "请先完成当前测评，再切换岗位")
             return attempt_view(active)
-        questions, reused = sample_questions(con, user_id)
+        questions, reused = sample_questions(con, user_id, role["topicIds"])
+        role_snapshot = {**role, "version": MODEL_VERSION}
+        model_version = MODEL_VERSION
+        if role["id"] != DEFAULT_ROLE_ID:
+            model_version = ROLE_WEIGHTED_MODEL_VERSION
+            role_snapshot["scoringVersion"] = model_version
         attempt_id = str(uuid4())
         con.execute(
             "INSERT INTO attempts(id,user_id,role_id,role_name,status,created_at,blueprint_version,"
             "model_version,questions_json,role_json,resources_json,reused_question_count,question_bank_version) "
             "VALUES(?,?,?,?,'in_progress',?,?,?,?,?,?,?,(SELECT bank_version FROM question_bank_state WHERE id=1))",
-            (attempt_id, user_id, role["id"], role["name"], now_iso(), BLUEPRINT["version"], MODEL_VERSION,
-             dump(questions), dump(role), "[]", reused),
+            (attempt_id, user_id, role["id"], role["name"], now_iso(), BLUEPRINT["version"], model_version,
+             dump(questions), dump(role_snapshot), "[]", reused),
         )
         return attempt_view(owned_attempt(con, attempt_id, user_id))
 

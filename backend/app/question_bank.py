@@ -6,7 +6,7 @@ import sqlite3
 from dataclasses import dataclass
 from pathlib import Path
 
-from .catalog import project_catalog
+from .catalog import DEFAULT_ROLE_ID, project_catalog
 from .models import QuestionInput
 
 
@@ -40,7 +40,7 @@ def load_bank(directory: Path) -> Bank:
     manifest = json.loads((directory / 'manifest.json').read_text(encoding='utf-8'))
     if not isinstance(manifest, dict):
         raise ValueError('Question bank manifest must be an object')
-    if manifest.get('schemaVersion') != '1.0' or manifest.get('roleId') != 'backend':
+    if manifest.get('schemaVersion') != '1.0' or manifest.get('roleId') != DEFAULT_ROLE_ID:
         raise ValueError('Unsupported question bank schemaVersion or roleId')
     if (manifest.get('questionFile') != 'questions.json'
             or manifest.get('abilityTreeFile') != 'ability-tree.json'):
