@@ -1,0 +1,16 @@
+{
+  "required_tests": [
+    "test_question_bank_compatibility.QuestionBankCompatibilityTests.test_released_old_and_imported_metadata_survive_loading",
+    "test_question_bank_compatibility.QuestionBankCompatibilityTests.test_imported_single_and_multiple_are_reachable_in_each_dimension",
+    "test_question_bank_compatibility.QuestionBankCompatibilityTests.test_four_roles_real_bank_mixed_answers_and_history",
+    "test_question_bank_compatibility.QuestionBankCompatibilityTests.test_missing_role_quota_returns_error_without_partial_attempt",
+    "test_question_bank_compatibility.QuestionBankCompatibilityTests.test_invalid_published_content_returns_clear_error_without_attempt",
+    "test_question_bank_compatibility.QuestionBankCompatibilityTests.test_bank_upgrade_and_restart_preserve_active_answers_and_reports",
+    "test_assessments.AssessmentTests.test_malformed_published_question_rejected_atomically",
+    "test_assessments.AssessmentTests.test_scoring_failure_rolls_back_and_keeps_saved_answers",
+    "test_assessments.AssessmentTests.test_other_user_cannot_read_save_or_submit",
+    "test_scoring_acceptance.ScoringAcceptanceTests.test_multiple_choice_requires_exact_set_without_order_dependency",
+    "frontend/tests/integration/apiIntegration.test.ts > API integration > creates and reports each open role with the released question bank",
+    "frontend/tests/integration/apiIntegration.test.ts > API integration > runs full assessment lifecycle through report and learning recommendations"
+  ]
+}
