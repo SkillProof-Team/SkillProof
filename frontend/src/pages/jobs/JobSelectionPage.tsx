@@ -10,6 +10,7 @@ type JobSelectionPageProps = {
   selectedRoleId: string | null
   onSelectRole: (roleId: string) => Promise<void>
   onStartAssessment: () => Promise<void>
+  assessmentError: string
   isStarting: boolean
   onOpenHistory: () => void
   onOpenWrongbook?: () => void
@@ -17,7 +18,7 @@ type JobSelectionPageProps = {
 
 export default function JobSelectionPage({
   user, logout, isLoggingOut, accountError, selectedRoleId, onSelectRole, onStartAssessment, isStarting,
-  onOpenHistory, onOpenWrongbook,
+  assessmentError, onOpenHistory, onOpenWrongbook,
 }: JobSelectionPageProps) {
   const [catalog, setCatalog] = useState<Catalog | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -101,21 +102,6 @@ export default function JobSelectionPage({
                   <span className="job-label">{role.enabled === true ? '已开放' : '暂未开放'}</span>
                   <h2>{role.name}</h2>
                   <p>{role.description}</p>
-                  <h3>六维能力与知识点</h3>
-                  {catalog.dimensions.length === 0 && <p>暂无能力维度数据。</p>}
-                  <dl className="job-dimensions">
-                    {catalog.dimensions.map((dimension) => (
-                      <div key={dimension.id}>
-                        <dt>{dimension.name}</dt>
-                        <dd>{dimension.description}</dd>
-                        <dd>
-                          {role.topics?.[dimension.id]?.length
-                            ? role.topics[dimension.id].join('、')
-                            : '暂无知识点'}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
                   <button
                     type="button"
                     disabled={role.enabled !== true || isLoggingOut || isSelecting || isStarting}
@@ -132,7 +118,24 @@ export default function JobSelectionPage({
               {selectedRole && (
                 <article className="job-card" aria-label="已选岗位">
                   <p role="status">已选择：{selectedRole.name}</p>
+                  <p>{selectedRole.description}</p>
+                  <h3>六维能力与知识点</h3>
+                  {catalog.dimensions.length === 0 && <p>暂无能力维度数据。</p>}
+                  <dl className="job-dimensions">
+                    {catalog.dimensions.map((dimension) => {
+                      const weight = selectedRole.id === 'backend' ? undefined : selectedRole.weights?.[dimension.id]
+                      return (
+                        <div key={dimension.id}>
+                          <dt>{dimension.name}</dt>
+                          <dd>{dimension.description}</dd>
+                          {weight !== undefined && <dd>岗位权重 {weight}%</dd>}
+                          <dd>{selectedRole.topics?.[dimension.id]?.join('、') || '暂无知识点'}</dd>
+                        </div>
+                      )
+                    })}
+                  </dl>
                   <p id="assessment-note">开始新测评；如有该岗位的进行中测评，将恢复已保存的答案。</p>
+                  {assessmentError && <p role="alert">{assessmentError}</p>}
                   <button type="button" disabled={isStarting || isSelecting || isLoggingOut}
                     onClick={onStartAssessment} aria-describedby="assessment-note">
                     {isStarting ? '正在创建或恢复测评…' : '开始 / 继续测评'}

@@ -2,7 +2,13 @@ import unittest
 from copy import deepcopy
 from fractions import Fraction
 
-from app.scoring import DIMENSION_IDS, ScoringError, _rounded, build_report
+from app.scoring import (
+    DIMENSION_IDS,
+    ROLE_WEIGHTED_MODEL_VERSION,
+    ScoringError,
+    _rounded,
+    build_report,
+)
 
 
 def attempt_fixture(counts=(3, 3, 3, 3, 3, 3)):
@@ -102,6 +108,15 @@ class ScoringTests(unittest.TestCase):
         report = score(attempt)
         self.assertEqual(report["score"], 62.5)
         self.assertEqual([d["score"] for d in report["dimensions"]], [33.33] * 6)
+
+    def test_weighted_model_rejects_invalid_snapshot_weights_or_version(self):
+        attempt = attempt_fixture()
+        attempt["role"]["scoringVersion"] = ROLE_WEIGHTED_MODEL_VERSION
+        with self.assertRaisesRegex(ScoringError, "岗位评分权重无效"):
+            score(attempt)
+        attempt["role"]["scoringVersion"] = "unknown"
+        with self.assertRaisesRegex(ScoringError, "未知评分模型版本"):
+            score(attempt)
 
     def test_hard_multiple_choice_has_no_partial_weight_credit(self):
         for selected in (["A"], ["A", "B", "C"]):

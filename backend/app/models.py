@@ -87,7 +87,7 @@ class DeleteInput(InputModel):
 
 
 class AttemptInput(InputModel):
-    roleId: Literal["backend", "frontend", "algorithm", "qa"]
+    roleId: str = Field(min_length=1, max_length=64)
 
 
 class AnswersInput(InputModel):

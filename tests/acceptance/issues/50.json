@@ -1,6 +1,6 @@
 {
   "required_tests": [
     "test_reports.ReportTests.test_health_still_works",
-    "test_account_acceptance.AccountAcceptanceTests.test_catalog_exposes_six_dimensions_and_only_backend_is_open"
+    "test_account_acceptance.AccountAcceptanceTests.test_catalog_exposes_six_dimensions_and_all_roles_are_open"
   ]
 }

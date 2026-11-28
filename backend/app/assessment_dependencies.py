@@ -2,7 +2,6 @@
 
 from fastapi import Depends, HTTPException, Request
 
-from .catalog import ROLE_MAP
 from .scoring import ScoringError, build_report
 from .security import Principal, require_user
 
@@ -12,11 +11,7 @@ def require_assessment_user(principal: Principal = Depends(require_user)) -> str
 
 
 def get_assessment_roles(request: Request) -> dict:
-    return {
-        role["id"]: {**ROLE_MAP[role["id"]], "name": role["name"]}
-        for role in request.app.state.catalog["roles"]
-        if role["enabled"]
-    }
+    return {role["id"]: role for role in request.app.state.catalog["roles"]}
 
 
 def score_snapshot(attempt: dict, submitted_at: str) -> dict:

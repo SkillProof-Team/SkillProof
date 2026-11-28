@@ -17,6 +17,8 @@ export type Role = {
   description: string
   enabled: boolean
   topics: Record<string, string[]>
+  weights?: Record<string, number>
+  topicIds?: Record<string, string[]> | null
 }
 
 export type Catalog = {

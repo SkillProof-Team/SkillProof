@@ -132,7 +132,10 @@ export function ResultPage({ attemptId, onOpenHistory, onOpenWrongbook }: Result
         <div className="result-stat">
           <span className="result-stat__label">综合分</span>
           <strong className="result-stat__value">{scoreText(report.score)}</strong>
-          <span className="result-stat__note">题目难度加权分，0–100，不设及格线</span>
+          <span className="result-stat__note">
+            {report.modelVersion === 'role-difficulty-1-2-5-v1' ? '岗位与题目难度加权分' : '题目难度加权分'}
+            ，0–100，不设及格线
+          </span>
         </div>
         <div className="result-stat">
           <span className="result-stat__label">正确题数</span>

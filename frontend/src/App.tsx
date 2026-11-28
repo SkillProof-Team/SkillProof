@@ -36,6 +36,7 @@ function App() {
   const [message, setMessage] = useState('')
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [accountError, setAccountError] = useState('')
+  const [assessmentError, setAssessmentError] = useState('')
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null)
   const [isStarting, setIsStarting] = useState(false)
   const creationRequest = useRef<AbortController | null>(null)
@@ -50,6 +51,7 @@ function App() {
     setCsrfToken(null)
     setUser(null)
     setSelectedRoleId(null)
+    setAssessmentError('')
     setMessage(notice)
     setAccountError('')
     setPath('/login')
@@ -198,6 +200,7 @@ function App() {
 
   async function selectRole(roleId: string) {
     setAccountError('')
+    setAssessmentError('')
     try {
       const data = await getCurrentUser()
       setCsrfToken(data.csrfToken)
@@ -216,6 +219,7 @@ function App() {
     creationRequest.current = controller
     setIsStarting(true)
     setAccountError('')
+    setAssessmentError('')
     try {
       const data = await getCurrentUser(controller.signal)
       if (controller.signal.aborted) return
@@ -225,7 +229,7 @@ function App() {
       if (!controller.signal.aborted) navigate(`/attempts/${encodeURIComponent(attempt.id)}`)
     } catch (error) {
       if (!controller.signal.aborted && !(error instanceof ApiError && error.status === 401)) {
-        setAccountError(error instanceof Error ? error.message : '创建测评失败，请重试')
+        setAssessmentError(error instanceof Error ? error.message : '创建测评失败，请重试')
       }
     } finally {
       if (creationRequest.current === controller) {
@@ -334,6 +338,7 @@ function App() {
         selectedRoleId={selectedRoleId}
         onSelectRole={selectRole}
         onStartAssessment={startAssessment}
+        assessmentError={assessmentError}
         isStarting={isStarting}
         onOpenHistory={() => navigate('/history')}
         onOpenWrongbook={() => navigate('/wrongbook')}

@@ -2,6 +2,8 @@
 
 from fractions import Fraction
 
+from .catalog import valid_role_weights
+
 DIMENSIONS = (
     ("programming", "程序设计"),
     ("algorithms", "算法基础"),
@@ -12,6 +14,7 @@ DIMENSIONS = (
 )
 DIMENSION_IDS = tuple(key for key, _ in DIMENSIONS)
 MODEL_VERSION = "alpha-difficulty-1-2-5-v1"
+ROLE_WEIGHTED_MODEL_VERSION = "role-difficulty-1-2-5-v1"
 DIFFICULTY_WEIGHTS = {"easy": 1, "medium": 2, "hard": 5}
 
 
@@ -46,7 +49,8 @@ def build_report(attempt: dict, submitted_at: str) -> dict:
     """
     try:
         attempt_id = attempt["id"]
-        role_id, role_name = attempt["role"]["id"], attempt["role"]["name"]
+        role = attempt["role"]
+        role_id, role_name = role["id"], role["name"]
         created_at = attempt["createdAt"]
         questions, answers = attempt["questions"], attempt["answers"]
     except (KeyError, TypeError) as exc:
@@ -59,8 +63,8 @@ def build_report(attempt: dict, submitted_at: str) -> dict:
 
     totals = dict.fromkeys(DIMENSION_IDS, 0)
     correct_counts = dict.fromkeys(DIMENSION_IDS, 0)
-    total_weight = 0
-    earned_weight = 0
+    total_weights = dict.fromkeys(DIMENSION_IDS, 0)
+    earned_weights = dict.fromkeys(DIMENSION_IDS, 0)
     seen = set()
     for question in questions:
         try:
@@ -92,9 +96,9 @@ def build_report(attempt: dict, submitted_at: str) -> dict:
         totals[dimension] += 1
         correct_counts[dimension] += int(selected == correct)
         weight = DIFFICULTY_WEIGHTS[difficulty]
-        total_weight += weight
+        total_weights[dimension] += weight
         if selected == correct:
-            earned_weight += weight
+            earned_weights[dimension] += weight
 
     if set(answers) - seen:
         raise ScoringError("答案包含不属于本次测评的题目")
@@ -112,12 +116,21 @@ def build_report(attempt: dict, submitted_at: str) -> dict:
         (item.copy() for item in dimensions if exact[item["id"]] < 100),
         key=lambda item: (exact[item["id"]], DIMENSION_IDS.index(item["id"])),
     )
-    count = sum(correct_counts.values())
+    model_version = role.get("scoringVersion", MODEL_VERSION)
+    if model_version == MODEL_VERSION:
+        score = _percentage(sum(earned_weights.values()), sum(total_weights.values()))
+    elif model_version == ROLE_WEIGHTED_MODEL_VERSION:
+        weights = role.get("weights")
+        if not valid_role_weights(weights):
+            raise ScoringError("岗位评分权重无效")
+        score = sum(Fraction(earned_weights[key] * weights[key], total_weights[key]) for key in DIMENSION_IDS)
+    else:
+        raise ScoringError("未知评分模型版本")
     return {
         "id": attempt_id, "roleId": role_id, "roleName": role_name,
         "createdAt": created_at, "submittedAt": submitted_at,
-        "modelVersion": MODEL_VERSION,
-        "score": _rounded(_percentage(earned_weight, total_weight)),
-        "correctCount": count, "questionCount": len(questions),
+        "modelVersion": model_version,
+        "score": _rounded(score),
+        "correctCount": sum(correct_counts.values()), "questionCount": len(questions),
         "dimensions": dimensions, "weakDimensions": weak_dimensions,
     }

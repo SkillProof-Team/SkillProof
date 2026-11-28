@@ -140,9 +140,9 @@ T01 采用 HttpOnly Cookie 携带服务端会话凭据，因此需要此表。
 
 ## 4. 岗位能力与快照边界
 
-岗位和六维能力当前存放在 `app/catalog.py`，没有独立岗位表。四个岗位 ID 为 `backend`、`frontend`、`algorithm`、`qa`；六维 ID 为 `programming`、`algorithms`、`database`、`network`、`os`、`software`。名称、说明、知识点及权重从该文件读取，岗位 ID 因此没有数据库外键。
+岗位和六维能力当前存放在 `app/catalog.py`，没有独立岗位表。四个岗位 ID 为 `backend`、`frontend`、`algorithm`、`qa`；六维 ID 为 `programming`、`algorithms`、`database`、`network`、`os`、`software`。岗位 ID 无数据库外键。岗位配置按维度引用共享能力树中的知识点。创建测评时将当前岗位配置和题目写入快照，提交与历史查询使用已保存的数据。
 
-岗位 `enabled` 的实现属于 T04/T03 协作范围，本次不新增字段。岗位权重是产品假设，不代表研究验证的岗位胜任标准。
+岗位配置的 `enabled` 控制是否开放测评。岗位权重是初始产品假设。
 
 答案 JSON 的结构为题目 ID 到选项 ID 数组，例如：
 

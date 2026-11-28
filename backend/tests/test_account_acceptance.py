@@ -193,7 +193,7 @@ class AccountAcceptanceTests(unittest.TestCase):
             self.assertEqual(login.status_code, 200, login.text)
             self.assertEqual(login.json()["user"], original)
 
-    def test_catalog_exposes_six_dimensions_and_only_backend_is_open(self):
+    def test_catalog_exposes_six_dimensions_and_all_roles_are_open(self):
         with self.client() as client:
             response = client.get("/api/catalog")
             self.assertEqual(response.status_code, 200)
@@ -202,7 +202,7 @@ class AccountAcceptanceTests(unittest.TestCase):
             self.assertEqual(len(catalog["dimensions"]), 6)
             self.assertEqual({item["id"] for item in catalog["dimensions"]}, dimensions)
             self.assertEqual({role["id"] for role in catalog["roles"]}, {"backend", "frontend", "algorithm", "qa"})
-            self.assertEqual([role["id"] for role in catalog["roles"] if role["enabled"]], ["backend"])
+            self.assertTrue(all(role["enabled"] for role in catalog["roles"]))
             backend = next(role for role in catalog["roles"] if role["id"] == "backend")
             self.assertEqual(set(backend["topics"]), dimensions)
             self.assertTrue(all(backend["topics"].values()))

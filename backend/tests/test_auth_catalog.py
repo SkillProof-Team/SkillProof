@@ -4,10 +4,12 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from fastapi.testclient import TestClient
 
+from app.catalog import ROLE_MAP
 from app.config import Settings
 from app.db import connect
 from app.main import create_app
@@ -120,14 +122,39 @@ class AuthCatalogTests(unittest.TestCase):
         data = result.json()
         tree = json.loads((self.settings.content_dir / "ability-tree.json").read_text(encoding="utf-8"))
         self.assertEqual({r["id"] for r in data["roles"]}, {"backend", "frontend", "algorithm", "qa"})
-        self.assertEqual([r["id"] for r in data["roles"] if r["enabled"]], ["backend"])
+        self.assertTrue(all(r["enabled"] for r in data["roles"]))
         backend = next(r for r in data["roles"] if r["id"] == "backend")
         self.assertEqual(backend["description"], tree["role"]["description"])
         self.assertEqual(backend["topics"], {d["id"]: [t["name"] for t in d["topics"]] for d in tree["dimensions"]})
         self.assertEqual(data["dimensions"], [{k: d[k] for k in ("id", "name", "description")} for d in tree["dimensions"]])
+        topics = {d["id"]: {t["id"]: t["name"] for t in d["topics"]} for d in tree["dimensions"]}
+        for role in data["roles"]:
+            with self.subTest(role=role["id"]):
+                self.assertEqual(set(role["weights"]), set(topics))
+                self.assertEqual(sum(role["weights"].values()), 100)
+                if role["id"] != "backend":
+                    self.assertEqual(set(role["topicIds"]), set(topics))
+                    self.assertEqual(role["topics"], {
+                        dim: [topics[dim][topic_id] for topic_id in ids] for dim, ids in role["topicIds"].items()
+                    })
         self.assertNotIn('"correct"', result.text)
         self.assertNotIn('"questions"', result.text)
         self.assertEqual(result.headers["cache-control"], "no-store")
+
+    def test_startup_rejects_invalid_role_configuration(self):
+        role = ROLE_MAP["frontend"]
+        weights = role["weights"]
+        topics = role["topicIds"]
+        cases = (
+            ({"weights": {**weights, "programming": 24}}, "weights"),
+            ({"weights": {key: weight for key, weight in weights.items() if key != "os"}}, "weights"),
+            ({"topicIds": {**topics, "programming": ["programming.missing"]}}, "topicIds in programming"),
+            ({"topicIds": {key: ids for key, ids in topics.items() if key != "os"}}, "topicIds for each dimension"),
+        )
+        for updates, message in cases:
+            with self.subTest(updates=updates), patch.dict(ROLE_MAP, frontend={**role, **updates}):
+                with self.assertRaisesRegex(ValueError, f"Role frontend.*{message}"), TestClient(create_app(self.settings)):
+                    self.fail("启动时应拒绝无效岗位配置")
 
     def test_expected_api_routes(self):
         paths = {path for path in self.app.openapi()['paths'] if path.startswith("/api/auth/") or path == "/api/catalog"}
