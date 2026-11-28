@@ -119,7 +119,7 @@ class DatabaseTests(unittest.TestCase):
             self.assertEqual([row[:-2] for row in after], before)
             self.assertEqual([row[-2:] for row in after], [(0, None), (0, None)])
             versions = migrated.execute("SELECT version FROM schema_migrations ORDER BY version").fetchall()
-            self.assertEqual(versions, [(1,), (2,), (3,), (4,), (5,)])
+            self.assertEqual(versions, [(1,), (2,), (3,), (4,), (5,), (6,)])
             self.assertEqual(migrated.execute("PRAGMA integrity_check").fetchone()[0], "ok")
 
     def test_seed_does_not_overwrite_existing_question(self):

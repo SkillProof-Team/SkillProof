@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   ApiError,
+  apiRequest,
   createAttempt,
   getAttempt,
   getCatalog,
@@ -243,6 +244,11 @@ describe('API integration', () => {
     if (!reportResult.ok) return
     expect(reportResult.report.id).toBe(submitted.id)
     expect(reportResult.report.dimensions).toHaveLength(6)
+    const population = await apiRequest<{sampleCount: number; vector: Record<string, number>}>(
+      '/roles/backend/population', { authenticated: true })
+    expect(population.sampleCount).toBeGreaterThan(0)
+    expect(Object.keys(population.vector)).toHaveLength(6)
+    expect(Object.keys(population)).not.toContain('users')
 
     const recommendations = await fetchRecommendations(submitted.id, new AbortController().signal)
     expect(Array.isArray(recommendations)).toBe(true)

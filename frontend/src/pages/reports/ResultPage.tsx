@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { RadarChart } from '../../components/reports/RadarChart'
+import { PopulationComparison } from '../../components/reports/PopulationComparison'
 import { DimensionBars } from '../../components/reports/DimensionBars'
 import { LearningRecommendations } from '../../components/reports/LearningRecommendations'
 import { fetchReport } from '../../lib/reportApi'
@@ -157,7 +157,7 @@ export function ResultPage({ attemptId, onOpenHistory, onOpenWrongbook }: Result
           六维知识表现
         </h2>
         <div className="result-charts">
-          <RadarChart dimensions={dimensions} />
+          <PopulationComparison key={report.id} roleId={report.roleId} dimensions={dimensions} />
           <DimensionBars dimensions={dimensions} />
         </div>
       </section>

@@ -1,0 +1,10 @@
+{
+  "required_tests": [
+    "test_population.PopulationTests.test_weighted_math_retake_changes_deletion_and_role_isolation",
+    "test_population.PopulationTests.test_auth_validation_and_sample_only_mean",
+    "test_population.PopulationTests.test_second_user_counts_once_and_mean_is_per_user",
+    "frontend/tests/PopulationComparison.test.tsx > switches reference mode, preserves individual data, shows signed differences and sample source",
+    "frontend/tests/PopulationComparison.test.tsx > handles failure and retry without hiding the individual chart",
+    "frontend/tests/integration/apiIntegration.test.ts > API integration > runs full assessment lifecycle through report and learning recommendations"
+  ]
+}

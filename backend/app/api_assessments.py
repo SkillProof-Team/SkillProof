@@ -217,4 +217,6 @@ def submit_attempt(
             (submitted_at, dump(report), report["modelVersion"], attempt_id, user_id),
         )
         collect_wrong_questions(con, row, submitted_at)
+        from .population import refresh_population
+        refresh_population(con, row["role_id"])
         return report

@@ -18,7 +18,10 @@ from fastapi.testclient import TestClient
 BACKEND = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND))
 
-from app.assessment_dependencies import get_assessment_roles, get_report_builder  # noqa: E402
+from app.assessment_dependencies import (  # noqa: E402
+    get_assessment_roles,
+    get_report_builder,
+)
 from app.catalog import BLUEPRINT, DIMENSION_IDS, ROLE_MAP  # noqa: E402
 from app.config import Settings  # noqa: E402
 from app.db import connect, dump, initialize, now_iso  # noqa: E402
