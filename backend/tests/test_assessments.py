@@ -23,7 +23,11 @@ from app.catalog import BLUEPRINT, DIMENSION_IDS  # noqa: E402
 from app.config import Settings  # noqa: E402
 from app.db import connect, dump, initialize, now_iso  # noqa: E402
 from app.main import create_app  # noqa: E402
-from app.scoring import MODEL_VERSION, ROLE_WEIGHTED_MODEL_VERSION, ScoringError  # noqa: E402
+from app.scoring import (  # noqa: E402
+    MODEL_VERSION,
+    ROLE_WEIGHTED_MODEL_VERSION,
+    ScoringError,
+)
 
 
 def report_fixture(attempt, submitted_at):

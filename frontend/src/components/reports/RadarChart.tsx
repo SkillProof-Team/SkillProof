@@ -8,10 +8,11 @@ const GRID_SCALES = [0.25, 0.5, 0.75, 1]
 
 interface RadarChartProps {
   dimensions: ReportDimension[]
+  reference?: Record<string, number>
 }
 
 /** 六维雷达图：使用内联 SVG 绘制，不引入第三方图表库，便于按需调整与无障碍标注。 */
-export function RadarChart({ dimensions }: RadarChartProps) {
+export function RadarChart({ dimensions, reference }: RadarChartProps) {
   const count = dimensions.length
   if (count === 0) return null
 
@@ -36,7 +37,7 @@ export function RadarChart({ dimensions }: RadarChartProps) {
         className="result-radar__svg"
         viewBox="0 0 360 360"
         role="img"
-        aria-label={`六维知识表现：${label}`}
+        aria-label={`六维知识表现：${label}${reference ? '，橙色虚线为同岗位群体参考' : ''}`}
       >
         {GRID_SCALES.map((scale) => (
           <polygon
@@ -67,6 +68,8 @@ export function RadarChart({ dimensions }: RadarChartProps) {
         })}
 
         <polygon className="result-radar__area" points={toPoints(dimensions.map((item) => item.score))} />
+        {reference && <polygon fill="rgba(180,83,9,0.12)" stroke="#b45309" strokeWidth="2"
+          strokeDasharray="6 4" points={toPoints(dimensions.map((item) => reference[item.id]))} />}
 
         {dimensions.map((dimension, index) => {
           const [x, y] = pointAt(index, Math.max(0, Math.min(100, dimension.score)) / 100)
